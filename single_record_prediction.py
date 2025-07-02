@@ -87,17 +87,11 @@ def predict_single_record_with_comparison():
     print("\n[STEP 3] Executing the FHE workflow...")
     
     # === BEFORE ENCRYPTION: Stage C (Quantized Data) ===
-    quantized_input = fhe_model_client.quantize(X_single_record_processed)
-    print("\n(C) Data After Quantization (Final clear-text integer representation):")
-    print(quantized_input)
-    print(f"Shape: {quantized_input.shape}")
+    encrypted_input = fhe_model_client.quantize_encrypt_serialize(X_single_record_processed)
+    print("\n(C) Data After Encrypt: ")
+    print(encrypted_input)
+    print(f"Shape: {encrypted_input.shape}")
     print("="*61 + "\n")
-
-    # Encrypt, Predict, Decrypt steps remain the same...
-    log_time()
-    print("Encrypting data on CLIENT-SIDE...")
-    encrypted_input = fhe_model_client.encrypt(quantized_input)
-    print("Encryption complete.")
 
     log_time()
     print("Running inference on SERVER-SIDE (on encrypted data)...")
