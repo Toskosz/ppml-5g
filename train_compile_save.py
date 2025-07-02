@@ -71,7 +71,7 @@ def train_and_save_model():
     # Reduced n_estimators for faster compilation and prediction.
     # This is a key parameter to tune for performance vs. accuracy.
     fhe_classifier = ConcreteRandomForestClassifier(n_estimators=100)
-        print("Training Concrete-ML RandomForestClassifier with n_estimators=100...")
+    print("Training Concrete-ML RandomForestClassifier with n_estimators=100...")
     fhe_classifier.fit(X_train.toarray(), y_train)
 
     # --- FHE Compilation ---
