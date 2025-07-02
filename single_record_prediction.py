@@ -90,15 +90,17 @@ def predict_single_record_with_comparison():
     print(f"Length: {len(encrypted_input)}")
     print("="*61 + "\n")
 
+    serialized_evaluation_keys = fhe_model_client.get_serialized_evaluation_keys()
+
+
     log_time()
     print("Running inference on SERVER-SIDE (on encrypted data)...")
-    encrypted_output = fhe_model_server.run(encrypted_input)
+    encrypted_output = fhe_model_server.run(encrypted_input, serialized_evaluation_keys)
     log_time()
     print("Inference complete.")
     
     print("Decrypting result on CLIENT-SIDE...")
-    decrypted_output = fhe_model_client.decrypt(encrypted_output)
-
+    result = fhe_model_client.deserialize_decrypt_dequantize(encrypted_result)
 
     # --- 4. Final Result After Decryption ---
     print("\n[STEP 4] Inspecting the final result after decryption...")
@@ -107,7 +109,7 @@ def predict_single_record_with_comparison():
     true_label_binary = 1 if true_label_text != 'normal' else 0
 
     print("\nFinal Decrypted Prediction:")
-    print(f"Predicted Label: {decrypted_output[0]} (0 = normal, 1 = attack)")
+    print(f"Predicted Label: {result[0]} (0 = normal, 1 = attack)")
     print(f"    True Label: {true_label_binary} (from '{true_label_text}')")
     print("="*61 + "\n")
 
