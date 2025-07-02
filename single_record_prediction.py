@@ -100,7 +100,7 @@ def predict_single_record_with_comparison():
     print("Inference complete.")
     
     print("Decrypting result on CLIENT-SIDE...")
-    result = fhe_model_client.deserialize_decrypt_dequantize(encrypted_result)
+    result = fhe_model_client.deserialize_decrypt_dequantize(encrypted_output)
 
     # --- 4. Final Result After Decryption ---
     print("\n[STEP 4] Inspecting the final result after decryption...")
