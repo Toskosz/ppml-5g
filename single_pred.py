@@ -136,6 +136,8 @@ log_time()
 print("Making FHE prediction on the single record...")
 # Run inference on the single encrypted input
 prediction_fhe = fhe_classifier.predict(X_single_record_processed, fhe="execute")
+log_time()
+print("Done predicting using FHE.")
 prediction_proba_fhe = fhe_classifier.predict_proba(X_single_record_processed, fhe="execute")
 
 
