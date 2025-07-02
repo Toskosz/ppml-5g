@@ -77,10 +77,8 @@ def predict_single_record_with_comparison():
     print("\n(B) Data After Preprocessing (Showing values for each new feature):")
 
     # Create a pandas Series for a clean, vertical display of the processed data
-    processed_series = pd.Series(X_single_record_processed[0], index=features_to_use)
-    print(processed_series.to_string())
-    print(f"\nTotal features after preprocessing: {len(processed_series)}")
-
+    print(X_single_record_processed)
+    print(X_single_record_processed[0])
 
     # --- 3. Quantize, Encrypt, Predict, and Decrypt ---
     print("\n[STEP 3] Executing the FHE workflow...")
