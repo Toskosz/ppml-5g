@@ -76,9 +76,8 @@ def predict_single_record_with_comparison():
     # === BEFORE ENCRYPTION: Stage B (Preprocessed Data) - IMPROVED VIEW ===
     print("\n(B) Data After Preprocessing (Showing values for each new feature):")
 
-    # Create a pandas Series for a clean, vertical display of the processed data
-    print(X_single_record_processed)
-    print(X_single_record_processed[0])
+    processed_series = pd.Series(X_single_record_processed[0], index=preprocessor.get_feature_names_out())
+    print(processed_series.to_string())
 
     # --- 3. Quantize, Encrypt, Predict, and Decrypt ---
     print("\n[STEP 3] Executing the FHE workflow...")
