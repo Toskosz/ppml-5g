@@ -3,7 +3,7 @@
 # This script trains the model, compiles it for FHE, and saves the
 # compiled model and the preprocessor to disk.
 # Run this script only once to prepare the necessary assets.
-
+from concrete.ml.deployment import FHEModelDev
 import pandas as pd
 from sklearn.preprocessing import OneHotEncoder, MinMaxScaler
 from sklearn.compose import ColumnTransformer
