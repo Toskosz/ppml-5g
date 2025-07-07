@@ -115,7 +115,7 @@ for n_estimators in n_estimators_list:
     print(f"Compiling FHE model with {n_estimators} estimators...")
     classifier.compile(X_train.toarray())
     log_time()
-    print("Finished compiling."
+    print("Finished compiling.")
 
     log_time()
     print(f"Making FHE prediction with {n_estimators} estimators")
