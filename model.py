@@ -130,5 +130,5 @@ for n_estimators in n_estimators_list:
     # --- Save Artifacts ---
     print("Saving compiled FHE circuit and preprocessor to disk...")
     # The compiled model (FHE circuit) is saved.
-    dev = FHEModelDev("./fhe_model/", fhe_classifier)
+    dev = FHEModelDev("./fhe_models/", classifier)
     dev.save()
