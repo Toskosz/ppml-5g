@@ -3,6 +3,7 @@
 import pandas as pd
 import pickle
 import sklearn
+from concrete.ml.deployment import FHEModelDev
 from sklearn.preprocessing import OneHotEncoder, MinMaxScaler
 from sklearn.compose import ColumnTransformer
 # from sklearn.ensemble import RandomForestClassifier
@@ -88,29 +89,46 @@ with open('preprocessor.pkl', 'wb') as f:
 y_train = train_df['binary_label']
 y_test = test_df['binary_label']
 
-# Create and train a RandomForest classifier
-classifier = RandomForestClassifier()
-classifier.fit(X_train.toarray(), y_train)
+n_estimators_list = [2, 5, 10, 25, 50, 100] # List of n_estimators values to test
 
-# Evaluate the classifier
-y_pred = classifier.predict(X_test.toarray())
-print(f"Clear Accuracy: {accuracy_score(y_test, y_pred)}")
+for n_estimators in n_estimators_list:
+    print("\n" + "="*60)
+    print(f"STARTING TEST FOR n_estimators = {n_estimators}")
+    print("="*60)
+    
+    log_time()
+    print(f"Training RandomForestClassifier with {n_estimators} estimators...")
 
-log_time()
-print("Compiling FHE model")
-# We then compile on a representative set
-classifier.compile(X_train.toarray())
+    # Create and train a RandomForest classifier
+    classifier = RandomForestClassifier(n_estimators=n_estimators)
+    classifier.fit(X_train.toarray(), y_train)
 
-log_time()
-print("making FHE prediction")
-# Finally we run the inference on encrypted inputs !
-y_pred_fhe = classifier.predict(X_test.toarray(), fhe="execute")
+    # Evaluate clear text
+    log_time()
+    print(f"Start clear with {n_estimators} estimators...")
+    y_pred = classifier.predict(X_test.toarray())
+    log_time()
+    print(f"Clear Accuracy with {n_estimators} estimators: {accuracy_score(y_test, y_pred)}")
 
-# Evaluate the FHE classifier
-print(f"FHE Accuracy: {accuracy_score(y_test, y_pred_fhe)}")
+    # Compile FHE
+    log_time()
+    print(f"Compiling FHE model with {n_estimators} estimators...")
+    classifier.compile(X_train.toarray())
+    log_time()
+    print("Finished compiling."
 
-print("In clear  :", y_pred)
-print("In FHE    :", y_pred_fhe)
-print(f"Similarity: {int((y_pred_fhe == y_pred).mean()*100)}%")
-log_time()
-print("Done.")
+    log_time()
+    print(f"Making FHE prediction with {n_estimators} estimators")
+    y_pred_fhe = classifier.predict(X_test.toarray(), fhe="simulate")
+    log_time()
+    print(f"Finished prediction with {n_estimators}")
+
+    log_time()
+    # Evaluate the FHE classifier
+    print(f"FHE Accuracy with : {accuracy_score(y_test, y_pred_fhe)}")
+
+    # --- Save Artifacts ---
+    print("Saving compiled FHE circuit and preprocessor to disk...")
+    # The compiled model (FHE circuit) is saved.
+    dev = FHEModelDev("./fhe_model/", fhe_classifier)
+    dev.save()
