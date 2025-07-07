@@ -125,10 +125,10 @@ for n_estimators in n_estimators_list:
 
     log_time()
     # Evaluate the FHE classifier
-    print(f"FHE Accuracy with : {accuracy_score(y_test, y_pred_fhe)}")
+    print(f"FHE Accuracy with {n_estimators} estimators: {accuracy_score(y_test, y_pred_fhe)}")
 
     # --- Save Artifacts ---
     print("Saving compiled FHE circuit and preprocessor to disk...")
     # The compiled model (FHE circuit) is saved.
-    dev = FHEModelDev("./fhe_models/", classifier)
+    dev = FHEModelDev(f"./fhe_model_{n_estimators}_estimators/", classifier)
     dev.save()
