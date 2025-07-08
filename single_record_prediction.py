@@ -18,7 +18,7 @@ def log_time():
     formatted_time = brasilia_now.strftime("%Y-%m-%d %H:%M:%S %Z%z")
     print(f"[LOG] Current time: {formatted_time}")
 
-def predict_single_record_with_comparison():
+def predict_single_record_with_comparison(n_estimators):
     """
     Loads a pre-compiled FHE model, predicts on a single record, and
     compares the data's state before encryption and after decryption.
@@ -29,9 +29,9 @@ def predict_single_record_with_comparison():
     # --- 1. Load Pre-compiled Model and Preprocessor ---
     print("\n[STEP 1] Loading pre-compiled FHE circuit and preprocessor...")
     try:
-        fhe_model_server = FHEModelServer("./fhe_model/")
+        fhe_model_server = FHEModelServer(f"./fhe_model_{n_estimators}_estimators/")
         fhe_model_server.load()
-        fhe_model_client = FHEModelClient("./fhe_model/")
+        fhe_model_client = FHEModelClient(f"./fhe_model_{n_estimators}_estimators/")
         with open('preprocessor.pkl', 'rb') as f:
             preprocessor = pickle.load(f)
     except FileNotFoundError as e:
@@ -114,4 +114,6 @@ def predict_single_record_with_comparison():
 
 
 if __name__ == "__main__":
-    predict_single_record_with_comparison()
+    estimators = [2, 5, 10, 25, 50, 100]
+    for n in estimators:
+        predict_single_record_with_comparison(n)
