@@ -1,0 +1,128 @@
+[LOG] Current time: 2025-07-07 12:35:01 -03-0300
+Scikit-learn version: 1.5.0
+
+============================================================
+STARTING TEST FOR n_estimators = 2
+============================================================
+[LOG] Current time: 2025-07-07 12:35:01 -03-0300
+Training RandomForestClassifier with 2 estimators...
+[LOG] Current time: 2025-07-07 12:35:02 -03-0300
+Start clear with 2 estimators...
+[LOG] Current time: 2025-07-07 12:35:02 -03-0300
+Clear Accuracy with 2 estimators: 0.8547728885734563
+[LOG] Current time: 2025-07-07 12:35:02 -03-0300
+Compiling FHE model with 2 estimators...
+[LOG] Current time: 2025-07-07 12:36:31 -03-0300
+Finished compiling.
+[LOG] Current time: 2025-07-07 12:36:31 -03-0300
+Making FHE prediction with 2 estimators
+[LOG] Current time: 2025-07-07 12:38:43 -03-0300
+Finished prediction with 2
+[LOG] Current time: 2025-07-07 12:38:43 -03-0300
+FHE Accuracy with 2 estimators: 0.8547728885734563
+Saving compiled FHE circuit and preprocessor to disk...
+
+============================================================
+STARTING TEST FOR n_estimators = 5
+============================================================
+[LOG] Current time: 2025-07-07 12:38:43 -03-0300
+Training RandomForestClassifier with 5 estimators...
+[LOG] Current time: 2025-07-07 12:38:44 -03-0300
+Start clear with 5 estimators...
+[LOG] Current time: 2025-07-07 12:38:44 -03-0300
+Clear Accuracy with 5 estimators: 0.8527324343506033
+[LOG] Current time: 2025-07-07 12:38:44 -03-0300
+Compiling FHE model with 5 estimators...
+[LOG] Current time: 2025-07-07 12:40:17 -03-0300
+Finished compiling.
+[LOG] Current time: 2025-07-07 12:40:17 -03-0300
+Making FHE prediction with 5 estimators
+[LOG] Current time: 2025-07-07 12:42:28 -03-0300
+Finished prediction with 5
+[LOG] Current time: 2025-07-07 12:42:28 -03-0300
+FHE Accuracy with 5 estimators: 0.8527324343506033
+Saving compiled FHE circuit and preprocessor to disk...
+
+============================================================
+STARTING TEST FOR n_estimators = 10
+============================================================
+[LOG] Current time: 2025-07-07 12:42:29 -03-0300
+Training RandomForestClassifier with 10 estimators...
+[LOG] Current time: 2025-07-07 12:42:30 -03-0300
+Start clear with 10 estimators...
+[LOG] Current time: 2025-07-07 12:42:30 -03-0300
+Clear Accuracy with 10 estimators: 0.8614709013484741
+[LOG] Current time: 2025-07-07 12:42:30 -03-0300
+Compiling FHE model with 10 estimators...
+[LOG] Current time: 2025-07-07 12:44:02 -03-0300
+Finished compiling.
+[LOG] Current time: 2025-07-07 12:44:02 -03-0300
+Making FHE prediction with 10 estimators
+[LOG] Current time: 2025-07-07 12:46:18 -03-0300
+Finished prediction with 10
+[LOG] Current time: 2025-07-07 12:46:18 -03-0300
+FHE Accuracy with 10 estimators: 0.8614709013484741
+Saving compiled FHE circuit and preprocessor to disk...
+
+============================================================
+STARTING TEST FOR n_estimators = 25
+============================================================
+[LOG] Current time: 2025-07-07 12:46:18 -03-0300
+Training RandomForestClassifier with 25 estimators...
+[LOG] Current time: 2025-07-07 12:46:20 -03-0300
+Start clear with 25 estimators...
+[LOG] Current time: 2025-07-07 12:46:21 -03-0300
+Clear Accuracy with 25 estimators: 0.8350780695528743
+[LOG] Current time: 2025-07-07 12:46:21 -03-0300
+Compiling FHE model with 25 estimators...
+[LOG] Current time: 2025-07-07 12:47:57 -03-0300
+Finished compiling.
+[LOG] Current time: 2025-07-07 12:47:57 -03-0300
+Making FHE prediction with 25 estimators
+[LOG] Current time: 2025-07-07 12:50:14 -03-0300
+Finished prediction with 25
+[LOG] Current time: 2025-07-07 12:50:14 -03-0300
+FHE Accuracy with 25 estimators: 0.8350780695528743
+Saving compiled FHE circuit and preprocessor to disk...
+
+============================================================
+STARTING TEST FOR n_estimators = 50
+============================================================
+[LOG] Current time: 2025-07-07 12:50:14 -03-0300
+Training RandomForestClassifier with 50 estimators...
+[LOG] Current time: 2025-07-07 12:50:17 -03-0300
+Start clear with 50 estimators...
+[LOG] Current time: 2025-07-07 12:50:18 -03-0300
+Clear Accuracy with 50 estimators: 0.8521557842441447
+[LOG] Current time: 2025-07-07 12:50:18 -03-0300
+Compiling FHE model with 50 estimators...
+[LOG] Current time: 2025-07-07 12:52:03 -03-0300
+Finished compiling.
+[LOG] Current time: 2025-07-07 12:52:03 -03-0300
+Making FHE prediction with 50 estimators
+[LOG] Current time: 2025-07-07 12:54:32 -03-0300
+Finished prediction with 50
+[LOG] Current time: 2025-07-07 12:54:32 -03-0300
+FHE Accuracy with 50 estimators: 0.8521557842441447
+Saving compiled FHE circuit and preprocessor to disk...
+
+============================================================
+STARTING TEST FOR n_estimators = 100
+============================================================
+[LOG] Current time: 2025-07-07 12:54:32 -03-0300
+Training RandomForestClassifier with 100 estimators...
+[LOG] Current time: 2025-07-07 12:54:38 -03-0300
+Start clear with 100 estimators...
+[LOG] Current time: 2025-07-07 12:54:40 -03-0300
+Clear Accuracy with 100 estimators: 0.8527324343506033
+[LOG] Current time: 2025-07-07 12:54:40 -03-0300
+Compiling FHE model with 100 estimators...
+[LOG] Current time: 2025-07-07 12:56:39 -03-0300
+Finished compiling.
+[LOG] Current time: 2025-07-07 12:56:39 -03-0300
+Making FHE prediction with 100 estimators
+[LOG] Current time: 2025-07-07 12:59:29 -03-0300
+Finished prediction with 100
+[LOG] Current time: 2025-07-07 12:59:29 -03-0300
+FHE Accuracy with 100 estimators: 0.8527324343506033
+Saving compiled FHE circuit and preprocessor to disk...
