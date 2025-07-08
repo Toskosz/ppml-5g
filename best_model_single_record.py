@@ -9,6 +9,7 @@ import pickle
 import numpy as np
 from zoneinfo import ZoneInfo
 import datetime
+import time
 
 def log_time():
     """Prints the current time in Brasília timezone."""
