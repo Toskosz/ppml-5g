@@ -72,7 +72,7 @@ def predict_single_record_with_comparison(n_estimators):
     serialized_evaluation_keys = fhe_model_client.get_serialized_evaluation_keys()
 
     for i in range(len(X_test)):
-        single_record_df = X_test.iloc[[1]]
+        single_record_df = X_test.iloc[[i]]
         
         X_single_record_processed = preprocessor.transform(single_record_df).toarray()
 
