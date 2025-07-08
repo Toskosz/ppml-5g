@@ -100,7 +100,7 @@ for n_estimators in n_estimators_list:
     print(f"Training RandomForestClassifier with {n_estimators} estimators...")
 
     # Create and train a RandomForest classifier
-    classifier = RandomForestClassifier(n_estimators=n_estimators)
+    classifier = RandomForestClassifier(n_estimators=n_estimators, n_jobs=6)
     classifier.fit(X_train.toarray(), y_train)
 
     # Evaluate clear text
