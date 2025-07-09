@@ -66,7 +66,7 @@ test_df['binary_label'] = (test_df['label'] != 'normal').astype(int)
 
 # Selecting only the necessary features
 features_to_use = ['protocol_type', 'service', 'src_bytes', 'dst_bytes']
-categorical_features = ['protocol_type', 'service'']
+categorical_features = ['protocol_type', 'service']
 numerical_features = ['src_bytes', 'dst_bytes']
 
 preprocessor = ColumnTransformer(
