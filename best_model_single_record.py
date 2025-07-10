@@ -109,4 +109,4 @@ def predict_single_record_with_comparison(n_estimators):
     print("="*61 + "\n")
 
 if __name__ == "__main__":
-    predict_single_record_with_comparison(10)
+    predict_single_record_with_comparison(2)
