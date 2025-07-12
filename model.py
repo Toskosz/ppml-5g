@@ -1,16 +1,24 @@
 # Preparation to match Scapy.
 
+from concrete.ml.deployment import FHEModelDev
+from concrete.ml.sklearn.rf import RandomForestClassifier
+import datetime
 import pandas as pd
 import pickle
 import sklearn
-from concrete.ml.deployment import FHEModelDev
 from sklearn.preprocessing import OneHotEncoder, MinMaxScaler
 from sklearn.compose import ColumnTransformer
 # from sklearn.ensemble import RandomForestClassifier
-from concrete.ml.sklearn.rf import RandomForestClassifier
 from sklearn.metrics import accuracy_score
+from sklearn.metrics import (
+    accuracy_score,
+    classification_report,
+    confusion_matrix,
+    f1_score,
+    precision_score,
+    recall_score
+)
 from zoneinfo import ZoneInfo
-import datetime
 
 def log_time(): 
 
