@@ -146,11 +146,11 @@ for n_estimators in n_estimators_list:
 
     log_time()
     print("Plain text metrics:")
-    log_model_metrics(y_pred, y_pred)
+    log_model_metrics(y_test, y_pred)
 
     log_time()
     print("FHE metrics:")
-    log_model_metrics(y_pred, y_pred_fhe)
+    log_model_metrics(y_test, y_pred_fhe)
 
     print("Saving compiled FHE circuit and preprocessor to disk...")
 
