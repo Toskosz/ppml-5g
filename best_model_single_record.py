@@ -1,7 +1,3 @@
-# predict_fhe.py
-#
-# This script loads the pre-compiled FHE model and makes a fast prediction
-# on a single record, showing the data's state before and after encryption.
 
 import pandas as pd
 from concrete.ml.deployment import FHEModelClient, FHEModelServer
@@ -27,7 +23,6 @@ def predict_single_record_with_comparison(n_estimators):
     log_time()
     print("--- FHE Prediction with Before & After Comparison ---")
 
-    # --- 1. Load Pre-compiled Model and Preprocessor ---
     print("\n[STEP 1] Loading pre-compiled FHE circuit and preprocessor...")
     try:
         fhe_model_server = FHEModelServer(f"./fhe_model_{n_estimators}_estimators/")
@@ -40,10 +35,8 @@ def predict_single_record_with_comparison(n_estimators):
         print("Please run the 'train.py' script first to generate the necessary files.")
         return
 
-    # --- 2. Prepare and Compare Data Before Encryption ---
     print("\n[STEP 2] Preparing and inspecting data on the CLIENT-SIDE before encryption...")
     
-    # Load the test data to get a sample record
     column_names = [
         "duration", "protocol_type", "service", "flag", "src_bytes", "dst_bytes", "land",
         "wrong_fragment", "urgent", "hot", "num_failed_logins", "logged_in",
@@ -94,7 +87,6 @@ def predict_single_record_with_comparison(n_estimators):
 
         print(f"Record {i+1}/{len(X_test)} | Predicted: {result[0]} | True: {true_label_binary} | Time: {duration:.4f}s")
 
-    # --- 4. Calculate and Display Results ---
     print("\n[STEP 4] Calculating final statistics...")
     log_time()
 
