@@ -121,7 +121,7 @@ for n_estimators in n_estimators_list:
     log_time()
     print(f"Training RandomForestClassifier with {n_estimators} estimators...")
 
-    max_depth = n_estimators == 100 ? None : 2
+    max_depth = 2 if n_estimators == 2 else None
     print(max_depth)
 
     classifier = RandomForestClassifier(n_estimators=n_estimators, max_depth=max_depth)
