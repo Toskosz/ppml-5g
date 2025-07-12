@@ -119,6 +119,12 @@ for n_estimators in n_estimators_list:
     classifier.fit(X_train.toarray(), y_train)
 
     log_time()
+    print(f"Start clear with {n_estimators} estimators...")
+    y_pred = classifier.predict(X_test.toarray())
+    log_time()
+    print("Finished predicting.")
+
+    log_time()
     print(f"Compiling FHE model with {n_estimators} estimators...")
     classifier.compile(X_train.toarray())
     log_time()
