@@ -124,7 +124,7 @@ for n_estimators in n_estimators_list:
     max_depth = 2 if n_estimators == 2 else None
     print(max_depth)
 
-    classifier = RandomForestClassifier(n_estimators=n_estimators, max_depth=max_depth)
+    classifier = RandomForestClassifier(n_estimators=n_estimators, max_depth=max_depth, random_state=42)
     classifier.fit(X_train.toarray(), y_train)
 
     log_time()
