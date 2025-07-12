@@ -21,10 +21,31 @@ def log_time():
 
     print(f"[LOG] Current time: {formatted_time}")
 
+def log_model_metrics(y_test, y_pred):
+    print("--- Model Evaluation ---")
+    accuracy = accuracy_score(y_test, y_pred)
+    print(f"Accuracy: {accuracy:.4f}")
+
+    precision = precision_score(y_test, y_pred)
+    print(f"Precision: {precision:.4f}")
+
+    recall = recall_score(y_test, y_pred)
+    print(f"Recall: {recall:.4f}")
+
+    f1 = f1_score(y_test, y_pred)
+    print(f"F1-Score: {f1:.4f}")
+
+    print("\n--- Confusion Matrix ---")
+    cm = confusion_matrix(y_test, y_pred)
+    print(cm)
+
+    print("\n--- Classification Report ---")
+    report = classification_report(y_test, y_pred)
+    print(report)
+
 log_time()
 print(f"Scikit-learn version: {sklearn.__version__}")
 
-# Load data with correct headers
 column_names = [
     "duration", "protocol_type", "service", "flag", "src_bytes", "dst_bytes", "land",
     "wrong_fragment", "urgent", "hot", "num_failed_logins", "logged_in",
@@ -41,7 +62,6 @@ column_names = [
 train_df = pd.read_csv('Train.txt', delimiter=',', header=None, names=column_names)
 test_df = pd.read_csv('Test.txt', delimiter=',', header=None, names=column_names)
 
-# Function to convert dataset flags to Scapy-compatible flags
 def convert_flag_to_scapy(flag):
     flag_translation = {
         'REJ': 'R',
@@ -56,15 +76,12 @@ def convert_flag_to_scapy(flag):
     }
     return ''.join([flag_translation.get(f, '') for f in flag])
 
-# Apply the flag conversion to the 'flag' column
 train_df['flag'] = train_df['flag'].apply(convert_flag_to_scapy)
 test_df['flag'] = test_df['flag'].apply(convert_flag_to_scapy)
 
-# Convert the multi-class labels into binary labels: 1 for any attack, 0 for normal
 train_df['binary_label'] = (train_df['label'] != 'normal').astype(int)
 test_df['binary_label'] = (test_df['label'] != 'normal').astype(int)
 
-# Selecting only the necessary features
 features_to_use = ['protocol_type', 'service', 'src_bytes', 'dst_bytes']
 categorical_features = ['protocol_type', 'service']
 numerical_features = ['src_bytes', 'dst_bytes']
@@ -74,43 +91,33 @@ preprocessor = ColumnTransformer(
         ('num', MinMaxScaler(), numerical_features),
         ('cat', OneHotEncoder(handle_unknown='ignore'), categorical_features)
     ],
-    remainder='drop'  # This drops the columns that are not explicitly transformed
+    remainder='drop'
 )
 
-# Apply preprocessing to both training and testing data
 X_train = preprocessor.fit_transform(train_df[features_to_use])
 X_test = preprocessor.transform(test_df[features_to_use])
 
-# Save the preprocessor
 with open('preprocessor.pkl', 'wb') as f:
     pickle.dump(preprocessor, f)
 
-# Labels for training and testing
 y_train = train_df['binary_label']
 y_test = test_df['binary_label']
 
-n_estimators_list = [2, 5, 10, 25, 50, 100] # List of n_estimators values to test
+n_estimators_list = [2, 100] # List of n_estimators values to test
 
 for n_estimators in n_estimators_list:
     print("\n" + "="*60)
     print(f"STARTING TEST FOR n_estimators = {n_estimators}")
     print("="*60)
-    
+
     log_time()
     print(f"Training RandomForestClassifier with {n_estimators} estimators...")
 
-    # Create and train a RandomForest classifier
-    classifier = RandomForestClassifier(n_estimators=n_estimators, max_depth=2)
+    max_depth = None if n_estimators == 100 else 2
+
+    classifier = RandomForestClassifier(n_estimators=n_estimators, max_depth=max_depth)
     classifier.fit(X_train.toarray(), y_train)
 
-    # Evaluate clear text
-    log_time()
-    print(f"Start clear with {n_estimators} estimators...")
-    y_pred = classifier.predict(X_test.toarray())
-    log_time()
-    print(f"Clear Accuracy with {n_estimators} estimators: {accuracy_score(y_test, y_pred)}")
-
-    # Compile FHE
     log_time()
     print(f"Compiling FHE model with {n_estimators} estimators...")
     classifier.compile(X_train.toarray())
@@ -124,11 +131,14 @@ for n_estimators in n_estimators_list:
     print(f"Finished prediction with {n_estimators}")
 
     log_time()
-    # Evaluate the FHE classifier
-    print(f"FHE Accuracy with {n_estimators} estimators: {accuracy_score(y_test, y_pred_fhe)}")
+    print("Plain text metrics:")
+    log_model_metrics(y_pred, y_pred)
 
-    # --- Save Artifacts ---
+    log_time()
+    print("FHE metrics:")
+    log_model_metrics(y_pred, y_pred_fhe)
+
     print("Saving compiled FHE circuit and preprocessor to disk...")
-    # The compiled model (FHE circuit) is saved.
+
     dev = FHEModelDev(f"./fhe_model_{n_estimators}_estimators/", classifier)
     dev.save()
