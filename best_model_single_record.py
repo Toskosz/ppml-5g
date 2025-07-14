@@ -84,7 +84,7 @@ def predict_single_record_plaintext():
     y_train = train_df['binary_label']
     y_test = test_df['binary_label']
 
-    classifier = RandomForestClassifierSklearn(n_estimators=100, random_state=42)
+    classifier = RandomForestSklearn(n_estimators=100, random_state=42)
     classifier.fit(X_train.toarray(), y_train)
 
     inference_times = []
