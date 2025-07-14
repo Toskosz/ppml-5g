@@ -183,13 +183,15 @@ def predict_single_record_with_comparison(n_estimators):
 
         result = fhe_model_client.deserialize_decrypt_dequantize(encrypted_output)
 
+        predicted_label = 1 if result[0][1] > 0.5 else 0
+
         duration = end_time - start_time
         inference_times.append(duration)
 
         true_label_text = test_df.iloc[i]['label']
         true_label_binary = 1 if true_label_text != 'normal' else 0
 
-        print(f"Record {i+1}/{len(X_test)} | Predicted: {result[0]} | True: {true_label_binary} | Time: {duration:.4f}s")
+        print(f"Record {i+1}/{len(X_test)} | Predicted: {predicted_label} | True: {true_label_binary} | Time: {duration:.4f}s")
 
     print("\n[STEP 4] Calculating final statistics...")
     log_time()
