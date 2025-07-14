@@ -89,7 +89,7 @@ def predict_single_record_plaintext():
 
     inference_times = []
 
-    for i in range(len(X_test)):
+    for i in range(X_test.shape[0]):
         single_record_df = X_test.iloc[[i]]
 
         start_time = time.time()
