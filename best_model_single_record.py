@@ -26,7 +26,7 @@ def log_time():
     formatted_time = brasilia_now.strftime("%Y-%m-%d %H:%M:%S %Z%z")
     print(f"[LOG] Current time: {formatted_time}")
 
-def predict_single_record_plaintext():
+def predict_single_record_plaintext(estimators, depth):
     column_names = [
         "duration", "protocol_type", "service", "flag", "src_bytes", "dst_bytes", "land",
         "wrong_fragment", "urgent", "hot", "num_failed_logins", "logged_in",
@@ -84,7 +84,7 @@ def predict_single_record_plaintext():
     y_train = train_df['binary_label']
     y_test = test_df['binary_label']
 
-    classifier = RandomForestSklearn(n_estimators=100, random_state=42)
+    classifier = RandomForestSklearn(n_estimators=estimators, max_depth=depth, random_state=42)
     classifier.fit(X_train.toarray(), y_train)
 
     inference_times = []
@@ -119,7 +119,7 @@ def predict_single_record_plaintext():
     print(f"Mean inference time/record: {mean_inference_time:.4f} seconds")
     print("="*61 + "\n")
 
-def predict_single_record_with_comparison(n_estimators):
+def predict_single_record_with_comparison(estimators, depth):
     """
     Loads a pre-compiled FHE model, predicts on a single record, and
     compares the data's state before encryption and after decryption.
@@ -129,9 +129,9 @@ def predict_single_record_with_comparison(n_estimators):
 
     print("\n[STEP 1] Loading pre-compiled FHE circuit and preprocessor...")
     try:
-        fhe_model_server = FHEModelServer(f"./fhe_model_{n_estimators}_estimators/")
+        fhe_model_server = FHEModelServer(f"./fhe_model_{estimators}_estimators_{depth}_depth/")
         fhe_model_server.load()
-        fhe_model_client = FHEModelClient(f"./fhe_model_{n_estimators}_estimators/")
+            fhe_model_client = FHEModelClient(f"./fhe_model_{estimators}_estimators_{depth}_depth/")
         with open('preprocessor.pkl', 'rb') as f:
             preprocessor = pickle.load(f)
     except FileNotFoundError as e:
@@ -207,6 +207,10 @@ def predict_single_record_with_comparison(n_estimators):
     print("="*61 + "\n")
 
 if __name__ == "__main__":
-    predict_single_record_plaintext()
-    predict_single_record_with_comparison(2)
-    predict_single_record_with_comparison(100)
+    predict_single_record_plaintext(2, 2)
+    ppredict_single_record_plaintext(100, None)
+    redict_single_record_plaintext(100, 4)
+
+    predict_single_record_with_comparison(2, 2)
+    ppredict_single_record_with_comparison(2, None)
+    redict_single_record_with_comparison(100, 4)

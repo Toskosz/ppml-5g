@@ -111,18 +111,16 @@ with open('preprocessor.pkl', 'wb') as f:
 y_train = train_df['binary_label']
 y_test = test_df['binary_label']
 
-n_estimators_list = [2, 100] # List of n_estimators values to test
+n_estimators_list = [2, 100, 100] # List of n_estimators values to test
+max_depth_list = [2, None, 4]
 
-for n_estimators in n_estimators_list:
+for n_estimators, max_depth in zip(n_estimators_list, max_depth_list):
     print("\n" + "="*60)
     print(f"STARTING TEST FOR n_estimators = {n_estimators}")
     print("="*60)
 
     log_time()
     print(f"Training RandomForestClassifier with {n_estimators} estimators...")
-
-    max_depth = 2 if n_estimators == 2 else None
-    print(max_depth)
 
     classifier = RandomForestClassifier(n_estimators=n_estimators, max_depth=max_depth, random_state=42)
     classifier.fit(X_train.toarray(), y_train)
@@ -155,5 +153,5 @@ for n_estimators in n_estimators_list:
 
     print("Saving compiled FHE circuit and preprocessor to disk...")
 
-    dev = FHEModelDev(f"./fhe_model_{n_estimators}_estimators/", classifier)
+    dev = FHEModelDev(f"./fhe_model_{n_estimators}_estimators_{max_depth}_depth/", classifier)
     dev.save()
