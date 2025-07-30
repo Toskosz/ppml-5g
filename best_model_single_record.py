@@ -208,9 +208,9 @@ def predict_single_record_with_comparison(estimators, depth):
 
 if __name__ == "__main__":
     predict_single_record_plaintext(2, 2)
-    ppredict_single_record_plaintext(100, None)
-    redict_single_record_plaintext(100, 4)
+    predict_single_record_plaintext(100, None)
+    predict_single_record_plaintext(100, 4)
 
     predict_single_record_with_comparison(2, 2)
-    ppredict_single_record_with_comparison(2, None)
-    redict_single_record_with_comparison(100, 4)
+    predict_single_record_with_comparison(2, None)
+    predict_single_record_with_comparison(100, 4)
