@@ -131,7 +131,7 @@ def predict_single_record_with_comparison(estimators, depth):
     try:
         fhe_model_server = FHEModelServer(f"./fhe_model_{estimators}_estimators_{depth}_depth/")
         fhe_model_server.load()
-            fhe_model_client = FHEModelClient(f"./fhe_model_{estimators}_estimators_{depth}_depth/")
+        fhe_model_client = FHEModelClient(f"./fhe_model_{estimators}_estimators_{depth}_depth/")
         with open('preprocessor.pkl', 'rb') as f:
             preprocessor = pickle.load(f)
     except FileNotFoundError as e:
