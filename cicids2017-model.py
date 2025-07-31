@@ -133,6 +133,9 @@ else:
 with open('preprocessor_cic_kdd_equivalent.pkl', 'wb') as f:
     pickle.dump(preprocessor, f)
 
+del train_df
+del test_df
+del df
 
 n_estimators_list = [2, 100]
 max_depth_list = [2, 4]
