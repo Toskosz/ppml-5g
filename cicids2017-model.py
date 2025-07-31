@@ -134,24 +134,24 @@ for n_estimators, max_depth in zip(n_estimators_list, max_depth_list):
         random_state=42,
         n_jobs=-1
     )
-    classifier.fit(X_train.toarray(), y_train)
+    classifier.fit(X_train, y_train)
 
     log_time()
     print("Start prediction in the clear...")
-    y_pred = classifier.predict(X_test.toarray())
+    y_pred = classifier.predict(X_test)
     log_time()
     print("Plain text model metrics:")
     log_model_metrics(y_test, y_pred)
 
     log_time()
     print("Compiling FHE model...")
-    fhe_classifier = classifier.compile(X_train.toarray())
+    fhe_classifier = classifier.compile(X_train)
     log_time()
     print("Finished FHE model compilation.")
 
     log_time()
     print("Making FHE simulation prediction...")
-    y_pred_fhe = fhe_classifier.predict(X_test.toarray(), fhe="simulate")
+    y_pred_fhe = fhe_classifier.predict(X_test, fhe="simulate")
     log_time()
     print("FHE model metrics (simulated):")
     log_model_metrics(y_test, y_pred_fhe)
