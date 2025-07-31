@@ -112,7 +112,7 @@ X_test = preprocessor.transform(test_df)
 y_train = train_df['binary_label']
 y_test = test_df['binary_label']
 
-sample_size = 100000
+sample_size = 80000
 if X_train.shape[0] > sample_size:
     np.random.seed(42) # for reproducibility
     indices = np.random.choice(X_train.shape[0], sample_size, replace=False)
