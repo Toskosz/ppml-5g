@@ -117,7 +117,7 @@ if X_train.shape[0] > sample_size:
     np.random.seed(42) # for reproducibility
     indices = np.random.choice(X_train.shape[0], sample_size, replace=False)
     X_train_sampled = X_train[indices]
-    y_train_sampled = y_train[indices]
+    y_train_sampled = y_train.iloc[indices]
 else:
     X_train_sampled = X_train
     y_train_sampled = y_train
@@ -143,11 +143,11 @@ for n_estimators, max_depth in zip(n_estimators_list, max_depth_list):
         random_state=42,
         n_jobs=-1
     )
-    classifier.fit(X_train_sampled.toarray(), y_train)
+    classifier.fit(X_train_sampled.toarray(), y_train_sampled)
 
     log_time()
     print("Start prediction in the clear...")
-    y_pred = classifier.predict(X_test)
+    y_pred = classifier.predict(X_test.toarray())
     log_time()
     print("Plain text model metrics:")
     log_model_metrics(y_test, y_pred)
@@ -160,7 +160,7 @@ for n_estimators, max_depth in zip(n_estimators_list, max_depth_list):
 
     log_time()
     print("Making FHE simulation prediction...")
-    y_pred_fhe = fhe_classifier.predict(X_test, fhe="simulate")
+    y_pred_fhe = fhe_classifier.predict(X_test.toarray(), fhe="simulate")
     log_time()
     print("FHE model metrics (simulated):")
     log_model_metrics(y_test, y_pred_fhe)
