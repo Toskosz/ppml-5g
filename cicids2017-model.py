@@ -133,31 +133,31 @@ del X_test_sparse
 
 # --- Row Sampling using np.random.choice (as requested) ---
 # X_train_dense_reduced and X_test_dense_reduced are the inputs for sampling
-sample_size = 80000 # <-- Your desired number of training samples after SVD
-test_sample_size = 16000 # <-- Your desired number of testing samples after SVD
+#sample_size = 80000 # <-- Your desired number of training samples after SVD
+#test_sample_size = 16000 # <-- Your desired number of testing samples after SVD
 
-print(f"\nApplying row sampling: training samples to {sample_size}, testing samples to {test_sample_size}...")
+#print(f"\nApplying row sampling: training samples to {sample_size}, testing samples to {test_sample_size}...")
 
 # Check if sampling is actually needed for training data
-if X_train_dense_reduced.shape[0] > sample_size:
-    np.random.seed(42) # for reproducibility
-    # Indices for the X_train_dense_reduced array
-    indices = np.random.choice(X_train_dense_reduced.shape[0], sample_size, replace=False)
-    X_train_final = X_train_dense_reduced[indices]
-    y_train_final = y_train_full.iloc[indices]
-else:
-    X_train_final = X_train_dense_reduced
-    y_train_final = y_train_full
+#if X_train_dense_reduced.shape[0] > sample_size:
+#    np.random.seed(42) # for reproducibility
+#    # Indices for the X_train_dense_reduced array
+#    indices = np.random.choice(X_train_dense_reduced.shape[0], sample_size, replace=False)
+#    X_train_final = X_train_dense_reduced[indices]
+#    y_train_final = y_train_full.iloc[indices]
+#else:
+X_train_final = X_train_dense_reduced
+y_train_final = y_train_full
 
 # Check if sampling is actually needed for test data
-if X_test_dense_reduced.shape[0] > test_sample_size:
-    np.random.seed(42) 
-    test_indices = np.random.choice(X_test_dense_reduced.shape[0], test_sample_size, replace=False)
-    X_test_final = X_test_dense_reduced[test_indices]
-    y_test_final = y_test_full.iloc[test_indices]
-else:
-    X_test_final = X_test_dense_reduced
-    y_test_final = y_test_full
+#if X_test_dense_reduced.shape[0] > test_sample_size:
+#    np.random.seed(42) 
+#    test_indices = np.random.choice(X_test_dense_reduced.shape[0], test_sample_size, replace=False)
+#    X_test_final = X_test_dense_reduced[test_indices]
+#    y_test_final = y_test_full.iloc[test_indices]
+#else:
+X_test_final = X_test_dense_reduced
+y_test_final = y_test_full
 
 print(f"Final training data shape: {X_train_final.shape}")
 print(f"Final testing data shape: {X_test_final.shape}")
@@ -194,19 +194,19 @@ for n_estimators, max_depth in zip(n_estimators_list, max_depth_list):
 
     log_time()
     print("Compiling FHE model...")
-    fhe_classifier = classifier.compile(X_train_final)
+    classifier.compile(X_train_final)
     log_time()
     print("Finished FHE model compilation.")
 
     log_time()
     print("Making FHE simulation prediction...")
-    y_pred_fhe = fhe_classifier.predict(X_test_final, fhe="simulate")
+    y_pred_fhe = classifier.predict(X_test_final, fhe="simulate")
     log_time()
     print("FHE model metrics (simulated):")
     log_model_metrics(y_test_final, y_pred_fhe)
 
     print("\nSaving compiled FHE circuit and client assets to disk...")
-    dev = FHEModelDev(f"./fhe_model_{n_estimators}_estimators_{max_depth}_depth_svd_{n_components_svd}_components/", fhe_classifier)
+    dev = FHEModelDev(f"./fhe_model_{n_estimators}_estimators_{max_depth}_depth_svd_{n_components_svd}_components/", classifier)
     dev.save()
     log_time()
     print("FHE assets saved.")
