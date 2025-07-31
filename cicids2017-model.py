@@ -105,17 +105,26 @@ preprocessor = ColumnTransformer(
     remainder='drop'
 )
 
-print(train_df)
-
 # Apply the preprocessing pipeline
 X_train = preprocessor.fit_transform(train_df)
 X_test = preprocessor.transform(test_df)
 
+y_train = train_df['binary_label']
+y_test = test_df['binary_label']
+
+sample_size = 100000
+if X_train.shape[0] > sample_size:
+    np.random.seed(42) # for reproducibility
+    indices = np.random.choice(X_train.shape[0], sample_size, replace=False)
+    X_train_sampled = X_train[indices]
+    y_train_sampled = y_train[indices]
+else:
+    X_train_sampled = X_train
+    y_train_sampled = y_train
+
 with open('preprocessor_cic_kdd_equivalent.pkl', 'wb') as f:
     pickle.dump(preprocessor, f)
 
-y_train = train_df['binary_label']
-y_test = test_df['binary_label']
 
 n_estimators_list = [2, 100]
 max_depth_list = [2, 4]
@@ -134,7 +143,7 @@ for n_estimators, max_depth in zip(n_estimators_list, max_depth_list):
         random_state=42,
         n_jobs=-1
     )
-    classifier.fit(X_train, y_train)
+    classifier.fit(X_train_sampled.toarray(), y_train)
 
     log_time()
     print("Start prediction in the clear...")
@@ -145,7 +154,7 @@ for n_estimators, max_depth in zip(n_estimators_list, max_depth_list):
 
     log_time()
     print("Compiling FHE model...")
-    fhe_classifier = classifier.compile(X_train)
+    fhe_classifier = classifier.compile(X_train.toarray())
     log_time()
     print("Finished FHE model compilation.")
 
