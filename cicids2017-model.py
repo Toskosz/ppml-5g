@@ -118,9 +118,16 @@ if X_train.shape[0] > sample_size:
     indices = np.random.choice(X_train.shape[0], sample_size, replace=False)
     X_train_sampled = X_train[indices]
     y_train_sampled = y_train.iloc[indices]
+
+    test_indices = np.random.choice(X_test.shape[0], sample_size, replace=False)
+    X_test_sampled = X_test[test_indices]
+    y_test_sampled = y_test.iloc[test_indices]
 else:
     X_train_sampled = X_train
     y_train_sampled = y_train
+
+    X_test_sampled = X_test
+    y_test_sampled = y_test
 
 with open('preprocessor_cic_kdd_equivalent.pkl', 'wb') as f:
     pickle.dump(preprocessor, f)
@@ -147,23 +154,23 @@ for n_estimators, max_depth in zip(n_estimators_list, max_depth_list):
 
     log_time()
     print("Start prediction in the clear...")
-    y_pred = classifier.predict(X_test.toarray())
+    y_pred = classifier.predict(X_test_sampled.toarray())
     log_time()
     print("Plain text model metrics:")
-    log_model_metrics(y_test, y_pred)
+    log_model_metrics(y_test_sampled, y_pred)
 
     log_time()
     print("Compiling FHE model...")
-    fhe_classifier = classifier.compile(X_train.toarray())
+    fhe_classifier = classifier.compile(X_train_sampled.toarray())
     log_time()
     print("Finished FHE model compilation.")
 
     log_time()
     print("Making FHE simulation prediction...")
-    y_pred_fhe = fhe_classifier.predict(X_test.toarray(), fhe="simulate")
+    y_pred_fhe = fhe_classifier.predict(X_test_sampled.toarray(), fhe="simulate")
     log_time()
     print("FHE model metrics (simulated):")
-    log_model_metrics(y_test, y_pred_fhe)
+    log_model_metrics(y_test_sampled, y_pred_fhe)
 
     print("\nSaving compiled FHE circuit and client assets to disk...")
     dev = FHEModelDev(f"./fhe_model_{n_estimators}_estimators_{max_depth}_depth_kdd_eq/", fhe_classifier)
