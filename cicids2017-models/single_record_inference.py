@@ -42,7 +42,7 @@ def predict_single_record_plaintext(estimators, depth):
         duration = end_time - start_time
         inference_times.append(duration)
 
-        true_label_text = test_df[i]['label']
+        true_label_text = test_df.iloc[i]['label']
         true_label_binary = 1 if true_label_text != 'normal' else 0
 
         print(f"Record {i+1}/{X_test_final.shape[0]} | Predicted: {output[0]} | True: {true_label_binary} | Time: {duration:.4f}s")
@@ -103,7 +103,7 @@ def predict_single_record_with_comparison(estimators, depth, svd):
         duration = end_time - start_time
         inference_times.append(duration)
 
-        true_label_text = test_df[i]['label']
+        true_label_text = test_df.iloc[i]['label']
         true_label_binary = 1 if true_label_text != 'normal' else 0
 
         print(f"Record {i+1}/{len(X_test_final) * 0.1} | Predicted: {predicted_label} | True: {true_label_binary} | Time: {duration:.4f}s")
