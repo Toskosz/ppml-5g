@@ -189,10 +189,10 @@ if __name__ == "__main__":
     if X_test_final is not X_test_dense_reduced:
         del X_test_dense_reduced
 
-    predict_single_record_plaintext(2, 2)
-    predict_single_record_plaintext(100, None)
-    predict_single_record_plaintext(100, 4)
+    predict_single_record_plaintext(2, 4)
+    predict_single_record_plaintext(5, 4)
+    predict_single_record_plaintext(10, 4)
 
-    predict_single_record_with_comparison(2, 2, 200)
-    predict_single_record_with_comparison(2, None, 200)
-    predict_single_record_with_comparison(100, 4, 200)
+    predict_single_record_with_comparison(2, 4, n_components_svd)
+    predict_single_record_with_comparison(5, 4, n_components_svd)
+    predict_single_record_with_comparison(10, 4, n_components_svd)
