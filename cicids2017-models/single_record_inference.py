@@ -43,9 +43,9 @@ def predict_single_record_plaintext(estimators, depth):
         inference_times.append(duration)
 
         true_label_text = test_df.iloc[i]['label']
-        true_label_binary = 1 if true_label_text != 'normal' else 0
+        true_label_binary = 1 if true_label_text != 'BENIGN' else 0
 
-        print(f"Record {i+1}/{X_test_final.shape[0]} | Predicted: {output[0]} | True: {true_label_binary} | Time: {duration:.4f}s")
+        print(f"Record {i+1}/1000 | Predicted: {output[0]} | True: {true_label_binary} | Time: {duration:.4f}s")
 
     log_time()
     print("\nCalculating final statistics...")
@@ -84,9 +84,8 @@ def predict_single_record_with_comparison(estimators, depth, svd):
     serialized_evaluation_keys = fhe_model_client.get_serialized_evaluation_keys()
 
     for i in range(1000):
-        single_record_df = X_test_final.iloc[[i]]
         
-        X_single_record_processed = preprocessor.transform(single_record_df).toarray()
+        X_single_record_processed = X_test_final[i]
 
         encrypted_input = fhe_model_client.quantize_encrypt_serialize(X_single_record_processed)
 
@@ -104,9 +103,9 @@ def predict_single_record_with_comparison(estimators, depth, svd):
         inference_times.append(duration)
 
         true_label_text = test_df.iloc[i]['label']
-        true_label_binary = 1 if true_label_text != 'normal' else 0
+        true_label_binary = 1 if true_label_text != 'BENIGN' else 0
 
-        print(f"Record {i+1}/{len(X_test_final) * 0.1} | Predicted: {predicted_label} | True: {true_label_binary} | Time: {duration:.4f}s")
+        print(f"Record {i+1}/1000 | Predicted: {predicted_label} | True: {true_label_binary} | Time: {duration:.4f}s")
 
     print("\n[STEP 4] Calculating final statistics...")
     log_time()
