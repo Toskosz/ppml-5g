@@ -84,10 +84,10 @@ def predict_single_record_with_comparison(estimators, depth, svd):
     serialized_evaluation_keys = fhe_model_client.get_serialized_evaluation_keys()
 
     for i in range(1000):
-        
-        X_single_record_processed = X_test_final[i]
 
-        encrypted_input = fhe_model_client.quantize_encrypt_serialize(X_single_record_processed.toarray())
+        X_single_record_processed = X_test_final[i:i+1]
+
+        encrypted_input = fhe_model_client.quantize_encrypt_serialize(X_single_record_processed)
 
         start_time = time.time()
 
