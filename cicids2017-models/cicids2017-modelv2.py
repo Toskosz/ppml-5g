@@ -168,8 +168,8 @@ if X_train_final is not X_train_dense_reduced:
 if X_test_final is not X_test_dense_reduced:
     del X_test_dense_reduced
 
-n_estimators_list = [2, 5, 10]
-max_depth_list = [4, 4, 4]
+n_estimators_list = [2]
+max_depth_list = [3]
 
 for n_estimators, max_depth in zip(n_estimators_list, max_depth_list):
     print("\n" + "="*60)
