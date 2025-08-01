@@ -31,7 +31,7 @@ def predict_single_record_plaintext(estimators, depth):
     inference_times = []
 
     for i in range(1000):
-        single_record_df = X_test_final[i:i+1].toarray()
+        single_record_df = X_test_final[i:i+1]
 
         start_time = time.time()
 
