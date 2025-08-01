@@ -66,9 +66,9 @@ def predict_single_record_with_comparison(estimators, depth, svd):
 
     print("\n[STEP 1] Loading pre-compiled FHE circuit and preprocessor...")
     try:
-        fhe_model_server = FHEModelServer(f"./fhe_model_{estimators}_estimators_{depth}_depth_svd_{svd}_components/")
+        fhe_model_server = FHEModelServer(f"./cicids2017-models/fhe_model_{estimators}_estimators_{depth}_depth_svd_{svd}_components/")
         fhe_model_server.load()
-        fhe_model_client = FHEModelClient(f"./fhe_model_{estimators}_estimators_{depth}_depth_svd_{svd}_components//")
+        fhe_model_client = FHEModelClient(f"./cicids2017-models/fhe_model_{estimators}_estimators_{depth}_depth_svd_{svd}_components/")
         with open('preprocessor.pkl', 'rb') as f:
             preprocessor = pickle.load(f)
     except FileNotFoundError as e:
