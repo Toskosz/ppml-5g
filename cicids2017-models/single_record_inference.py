@@ -87,7 +87,7 @@ def predict_single_record_with_comparison(estimators, depth, svd):
         
         X_single_record_processed = X_test_final[i]
 
-        encrypted_input = fhe_model_client.quantize_encrypt_serialize(X_single_record_processed)
+        encrypted_input = fhe_model_client.quantize_encrypt_serialize(X_single_record_processed.toarray())
 
         start_time = time.time()
 
@@ -188,9 +188,9 @@ if __name__ == "__main__":
     if X_test_final is not X_test_dense_reduced:
         del X_test_dense_reduced
 
-    predict_single_record_plaintext(2, 4)
-    predict_single_record_plaintext(5, 4)
-    predict_single_record_plaintext(10, 4)
+#    predict_single_record_plaintext(2, 4)
+#    predict_single_record_plaintext(5, 4)
+#    predict_single_record_plaintext(10, 4)
 
     predict_single_record_with_comparison(2, 4, n_components_svd)
     predict_single_record_with_comparison(5, 4, n_components_svd)
