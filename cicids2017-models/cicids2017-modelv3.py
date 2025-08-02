@@ -118,7 +118,7 @@ with open('preprocessor_cic_kdd_equivalent.pkl', 'wb') as f:
 
 
 # --- Dimensionality Reduction using TruncatedSVD ---
-n_components_svd = 100 # <-- CRITICAL: Adjust this value
+n_components_svd = 200 # <-- CRITICAL: Adjust this value
 print(f"\nApplying TruncatedSVD to reduce feature count from {X_train_sparse.shape[1]} to {n_components_svd}...")
 
 svd = TruncatedSVD(n_components=n_components_svd, random_state=42)
