@@ -1,0 +1,42 @@
+nohup: ignoring input
+[LOG] Current time: 2025-08-02 20:18:25 -03-0300
+Scikit-learn version: 1.5.0
+Found existing combined file. Loading 'CIC-IDS-2017-Combined.csv'...
+Data split into 2262300 training samples and 565576 testing samples.
+Applying preprocessing (MinMaxScaler and OneHotEncoder)...
+Shape after initial preprocessing (sparse) - X_train: (2262300, 51251), X_test: (565576, 51251)
+
+Applying TruncatedSVD to reduce feature count from 51251 to 100...
+Shape after SVD reduction (dense) - X_train: (2262300, 100), X_test: (565576, 100)
+Final training data shape: (2262300, 100)
+Final testing data shape: (565576, 100)
+
+============================================================
+STARTING TEST FOR n_estimators = 2, max_depth = 4
+============================================================
+[LOG] Current time: 2025-08-02 20:19:57 -03-0300
+Training RandomForestClassifier...
+[LOG] Current time: 2025-08-02 20:20:15 -03-0300
+Start prediction in the clear...
+[LOG] Current time: 2025-08-02 20:20:19 -03-0300
+Plain text model metrics:
+--- Model Evaluation ---
+Accuracy: 0.8460
+Precision: 0.7960
+Recall: 0.2927
+F1-Score: 0.4280
+
+--- Confusion Matrix ---
+[[445914   8351]
+ [ 78727  32584]]
+
+--- Classification Report ---
+              precision    recall  f1-score   support
+
+           0       0.85      0.98      0.91    454265
+           1       0.80      0.29      0.43    111311
+
+    accuracy                           0.85    565576
+   macro avg       0.82      0.64      0.67    565576
+weighted avg       0.84      0.85      0.82    565576
+
