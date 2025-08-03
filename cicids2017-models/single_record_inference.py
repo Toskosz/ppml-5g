@@ -1,12 +1,10 @@
 from concrete.ml.deployment import FHEModelClient, FHEModelServer
+from sklearn.compose import ColumnTransformer
 from sklearn.decomposition import TruncatedSVD # Import TruncatedSVD
 from sklearn.model_selection import train_test_split
 import datetime
 import pandas as pd
-import pickle
 from sklearn.preprocessing import OneHotEncoder, MinMaxScaler
-from sklearn.compose import ColumnTransformer
-from sklearn.ensemble import RandomForestClassifier
 from zoneinfo import ZoneInfo
 import numpy as np
 import time
@@ -19,46 +17,6 @@ def log_time():
     formatted_time = brasilia_now.strftime("%Y-%m-%d %H:%M:%S %Z%z")
     print(f"[LOG] Current time: {formatted_time}")
 
-def predict_single_record_plaintext(estimators, depth):
-
-    classifier = RandomForestClassifier(
-        n_estimators=estimators,
-        max_depth=depth,
-        random_state=42
-    )
-    classifier.fit(X_train_final, y_train_final)
-
-    inference_times = []
-
-    for i in range(1000):
-        single_record_df = X_test_final[i:i+1]
-
-        start_time = time.time()
-
-        output = classifier.predict(single_record_df)
-
-        end_time = time.time()
-
-        duration = end_time - start_time
-        inference_times.append(duration)
-
-        true_label_text = test_df.iloc[i]['label']
-        true_label_binary = 1 if true_label_text != 'BENIGN' else 0
-
-        print(f"Record {i+1}/1000 | Predicted: {output[0]} | True: {true_label_binary} | Time: {duration:.4f}s")
-
-    log_time()
-    print("\nCalculating final statistics...")
-
-    total_records = len(inference_times)
-    total_inference_time = sum(inference_times)
-    mean_inference_time = np.mean(inference_times) if total_records > 0 else 0
-
-    print("\n" + "="*20 + " INFERENCE SUMMARY " + "="*20)
-    print(f"Total records processed: {total_records}")
-    print(f"   Total inference time: {total_inference_time:.4f} seconds")
-    print(f"Mean inference time/record: {mean_inference_time:.4f} seconds")
-    print("="*61 + "\n")
 
 def predict_single_record_with_comparison(estimators, depth, svd):
     log_time()
@@ -69,8 +27,7 @@ def predict_single_record_with_comparison(estimators, depth, svd):
         fhe_model_server = FHEModelServer(f"./cicids2017-models/fhe_model_{estimators}_estimators_{depth}_depth_svd_{svd}_components/")
         fhe_model_server.load()
         fhe_model_client = FHEModelClient(f"./cicids2017-models/fhe_model_{estimators}_estimators_{depth}_depth_svd_{svd}_components/")
-        with open('preprocessor.pkl', 'rb') as f:
-            preprocessor = pickle.load(f)
+        
     except FileNotFoundError as e:
         print(f"Error loading model files: {e}")
         print("Please run the 'train.py' script first to generate the necessary files.")
@@ -156,42 +113,47 @@ if __name__ == "__main__":
     X_test_sparse = preprocessor.transform(test_df)
     print(f"Shape after initial preprocessing (sparse) - X_train: {X_train_sparse.shape}, X_test: {X_test_sparse.shape}")
 
-    y_train_full = train_df['binary_label']
-    y_test_full = test_df['binary_label']
-
     del train_df
     del df
 
-    n_components_svd = 200
-    print(f"\nApplying TruncatedSVD to reduce feature count from {X_train_sparse.shape[1]} to {n_components_svd}...")
+    models_to_test = [
+        {'estimators': 2, 'depth': 4, 'svd': 200},
+        {'estimators': 5, 'depth': 4, 'svd': 200},
+        {'estimators': 10, 'depth': 4, 'svd': 200},
+        {'estimators': 2, 'depth': 4, 'svd': 100},
+        {'estimators': 2, 'depth': 3, 'svd': 200},
+    ]
 
-    svd = TruncatedSVD(n_components=n_components_svd, random_state=42)
+    svd_cache = {}
 
-    X_train_dense_reduced = svd.fit_transform(X_train_sparse)
-    X_test_dense_reduced = svd.transform(X_test_sparse)
+    for model_params in models_to_test:
+        estimators = model_params['estimators']
+        depth = model_params['depth']
+        n_components_svd = model_params['svd']
 
-    print(f"Shape after SVD reduction (dense) - X_train: {X_train_dense_reduced.shape}, X_test: {X_test_dense_reduced.shape}")
+        print(f"\n{'='*20} TESTING MODEL: estimators={estimators}, depth={depth}, svd={n_components_svd} {'='*20}")
+
+        if n_components_svd not in svd_cache:
+            print(f"\nApplying TruncatedSVD to reduce feature count from {X_train_sparse.shape[1]} to {n_components_svd}...")
+            svd = TruncatedSVD(n_components=n_components_svd, random_state=42)
+            X_train_dense_reduced = svd.fit_transform(X_train_sparse)
+            X_test_dense_reduced = svd.transform(X_test_sparse)
+            svd_cache[n_components_svd] = (X_train_dense_reduced, X_test_dense_reduced)
+            print(f"Shape after SVD reduction (dense) - X_train: {X_train_dense_reduced.shape}, X_test: {X_test_dense_reduced.shape}")
+        else:
+            print(f"\nUsing cached SVD transformation for {n_components_svd} components...")
+            X_train_dense_reduced, X_test_dense_reduced = svd_cache[n_components_svd]
+
+        X_train_final = X_train_dense_reduced
+        
+        X_test_final = X_test_dense_reduced
+
+        print(f"Final training data shape: {X_train_final.shape}")
+        print(f"Final testing data shape: {X_test_final.shape}")
+
+        predict_single_record_with_comparison(estimators, depth, n_components_svd)
 
     del X_train_sparse
     del X_test_sparse
+    del svd_cache
 
-    X_train_final = X_train_dense_reduced
-    y_train_final = y_train_full
-
-    X_test_final = X_test_dense_reduced
-
-    print(f"Final training data shape: {X_train_final.shape}")
-    print(f"Final testing data shape: {X_test_final.shape}")
-
-    if X_train_final is not X_train_dense_reduced:
-        del X_train_dense_reduced
-    if X_test_final is not X_test_dense_reduced:
-        del X_test_dense_reduced
-
-#    predict_single_record_plaintext(2, 4)
-#    predict_single_record_plaintext(5, 4)
-#    predict_single_record_plaintext(10, 4)
-
-    predict_single_record_with_comparison(2, 4, n_components_svd)
-    predict_single_record_with_comparison(5, 4, n_components_svd)
-    predict_single_record_with_comparison(10, 4, n_components_svd)
