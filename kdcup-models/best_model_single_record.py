@@ -89,7 +89,7 @@ def predict_single_record_plaintext(estimators, depth):
 
     inference_times = []
 
-    for i in range(X_test.shape[0]):
+    for i in range(1000):
         single_record_df = X_test[i:i+1].toarray()
 
         start_time = time.time()
@@ -168,7 +168,7 @@ def predict_single_record_with_comparison(estimators, depth):
 
     serialized_evaluation_keys = fhe_model_client.get_serialized_evaluation_keys()
 
-    for i in range(len(X_test)):
+    for i in range(1000):
         single_record_df = X_test.iloc[[i]]
         
         X_single_record_processed = preprocessor.transform(single_record_df).toarray()
