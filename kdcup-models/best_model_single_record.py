@@ -119,7 +119,7 @@ def predict_single_record_plaintext(estimators, depth):
     print(f"Mean inference time/record: {mean_inference_time:.4f} seconds")
     print("="*61 + "\n")
 
-def predict_single_record_with_comparison(estimators, depth):
+def predict_single_record_with_comparison(estimators, depth, records):
     """
     Loads a pre-compiled FHE model, predicts on a single record, and
     compares the data's state before encryption and after decryption.
@@ -168,7 +168,7 @@ def predict_single_record_with_comparison(estimators, depth):
 
     serialized_evaluation_keys = fhe_model_client.get_serialized_evaluation_keys()
 
-    for i in range(1000):
+    for i in range(records):
         single_record_df = X_test.iloc[[i]]
         
         X_single_record_processed = preprocessor.transform(single_record_df).toarray()
@@ -211,6 +211,6 @@ if __name__ == "__main__":
     predict_single_record_plaintext(100, None)
     predict_single_record_plaintext(100, 4)
 
-    predict_single_record_with_comparison(2, 2)
-    predict_single_record_with_comparison(100, None)
-    predict_single_record_with_comparison(100, 4)
+    predict_single_record_with_comparison(2, 2, 1000)
+    predict_single_record_with_comparison(100, None, 10)
+    predict_single_record_with_comparison(100, 4, 100)
