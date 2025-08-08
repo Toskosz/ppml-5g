@@ -73,7 +73,7 @@ df.dropna(inplace=True)
 
 # Initial split into full train and test sets
 # Using 'attack' for stratification as it's the original label
-train_df, test_df = train_test_split(df, test_size=0.2, random_state=42, stratify=df['attack'])
+train_df, test_df = train_test_split(df, test_size=0.2, random_state=42, stratify=df['label'])
 print(f"Data split into {len(train_df)} training samples and {len(test_df)} testing samples.")
 
 numerical_features_selected = [
