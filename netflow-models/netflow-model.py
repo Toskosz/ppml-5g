@@ -132,11 +132,11 @@ for n_estimators, max_depth in zip(n_estimators_list, max_depth_list):
         max_depth=max_depth,
         random_state=42
     )
-    classifier.fit(X_train_final, y_train_final)
+    classifier.fit(X_train_final.toarray(), y_train_final)
 
     log_time()
     print("Start prediction in the clear...")
-    y_pred = classifier.predict(X_test_final)
+    y_pred = classifier.predict(X_test_final.toarray())
     log_time()
     print("Plain text model metrics:")
     log_model_metrics(y_test_final, y_pred)
