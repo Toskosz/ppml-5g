@@ -1,5 +1,3 @@
-# Preparation to match Scapy.
-
 from concrete.ml.deployment import FHEModelDev
 from concrete.ml.sklearn.rf import RandomForestClassifier
 import datetime
@@ -117,8 +115,8 @@ y_test_final = y_test_full
 print(f"Final training data shape: {X_train_final.shape}")
 print(f"Final testing data shape: {X_test_final.shape}")
 
-n_estimators_list = [2, 5, 10, 25, 50, 100]
-max_depth_list = [4, 4, 4, 4, 4, 4]
+n_estimators_list = [2, 5, 10, 25]
+max_depth_list = [8, 8, 8, 8, 8, 8]
 
 for n_estimators, max_depth in zip(n_estimators_list, max_depth_list):
     print("\n" + "="*60)
