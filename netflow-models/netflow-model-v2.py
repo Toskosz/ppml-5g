@@ -75,13 +75,8 @@ print(f"Data split into {len(train_df)} training samples and {len(test_df)} test
 numerical_features_selected = [
     'in_bytes',
     'out_bytes',
-    'in_pkts',
-    'out_pkts',
-    'tcp_flags',
-    'flow_duration',
-    'label'
 ]
-categorical_features_selected = ['protocol', 'l7_proto', 'ip_version']
+categorical_features_selected = ['protocol', 'l7_proto']
 
 preprocessor = ColumnTransformer(
     transformers=[
