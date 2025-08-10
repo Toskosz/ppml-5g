@@ -115,8 +115,8 @@ y_test_final = y_test_full
 print(f"Final training data shape: {X_train_final.shape}")
 print(f"Final testing data shape: {X_test_final.shape}")
 
-n_estimators_list = [2, 5, 2, 5]
-max_depth_list = [16, 16, 32, 32]
+n_estimators_list = [3, 4, 3, 4, 2, 5]
+max_depth_list = [16, 16, 32, 32, 64, 64]
 
 for n_estimators, max_depth in zip(n_estimators_list, max_depth_list):
     print("\n" + "="*60)
