@@ -1,0 +1,36 @@
+nohup: ignoring input
+[LOG] Current time: 2025-08-08 12:54:46 -03-0300
+Scikit-learn version: 1.5.0
+Loading data from 'NF-UNSW-NB15-v3.csv'...
+Data split into 1794344 training samples and 448587 testing samples.
+Applying preprocessing (MinMaxScaler and OneHotEncoder)...
+Shape after initial preprocessing (sparse) - X_train: (1794344, 136), X_test: (448587, 136)
+Final training data shape: (1794344, 136)
+Final testing data shape: (448587, 136)
+
+============================================================
+STARTING TEST FOR n_estimators = 2, max_depth = 2
+============================================================
+[LOG] Current time: 2025-08-08 12:55:00 -03-0300
+Training RandomForestClassifier...
+Traceback (most recent call last):
+  File "/home/thiagotokarski/ppml-5g/netflow-models/netflow-model.py", line 135, in <module>
+    classifier.fit(X_train_final, y_train_final)
+  File "/home/thiagotokarski/ppml-5g/venv/lib/python3.11/site-packages/concrete/ml/sklearn/base.py", line 952, in fit
+    X, y = check_X_y_and_assert_multi_output(X, y)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thiagotokarski/ppml-5g/venv/lib/python3.11/site-packages/concrete/ml/common/check_inputs.py", line 73, in check_X_y_and_assert_multi_output
+    X, y = check_X_y_and_assert(X, y, *args, multi_output=multi_output, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thiagotokarski/ppml-5g/venv/lib/python3.11/site-packages/concrete/ml/common/check_inputs.py", line 51, in check_X_y_and_assert
+    X, y = sklearn.utils.check_X_y(X, y, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thiagotokarski/ppml-5g/venv/lib/python3.11/site-packages/sklearn/utils/validation.py", line 1273, in check_X_y
+    X = check_array(
+        ^^^^^^^^^^^^
+  File "/home/thiagotokarski/ppml-5g/venv/lib/python3.11/site-packages/sklearn/utils/validation.py", line 966, in check_array
+    array = _ensure_sparse_format(
+            ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thiagotokarski/ppml-5g/venv/lib/python3.11/site-packages/sklearn/utils/validation.py", line 598, in _ensure_sparse_format
+    raise TypeError(
+TypeError: Sparse data was passed for X, but dense data is required. Use '.toarray()' to convert to a dense numpy array.
