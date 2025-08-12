@@ -1,0 +1,260 @@
+nohup: ignoring input
+[LOG] Current time: 2025-08-10 23:58:24 -03-0300
+Scikit-learn version: 1.5.0
+Loading data from 'NF-UNSW-NB15-v3.csv'...
+Data split into 1794344 training samples and 448587 testing samples.
+Applying preprocessing (MinMaxScaler and OneHotEncoder)...
+Shape after initial preprocessing (sparse) - X_train: (1794344, 134), X_test: (448587, 134)
+
+Applying TruncatedSVD to reduce feature count from 134 to 100...
+Shape after SVD reduction (dense) - X_train: (1794344, 100), X_test: (448587, 100)
+Final training data shape: (1794344, 100)
+Final testing data shape: (448587, 100)
+
+============================================================
+STARTING TEST FOR n_estimators = 2, max_depth = 2
+============================================================
+[LOG] Current time: 2025-08-10 23:59:29 -03-0300
+Training RandomForestClassifier...
+[LOG] Current time: 2025-08-10 23:59:41 -03-0300
+Start prediction in the clear...
+[LOG] Current time: 2025-08-10 23:59:43 -03-0300
+Plain text model metrics:
+--- Model Evaluation ---
+Accuracy: 0.9619
+Precision: 0.9592
+Recall: 0.9619
+F1-Score: 0.9464
+
+--- Confusion Matrix ---
+[[430024    182]
+ [ 16908   1473]]
+
+--- Classification Report ---
+              precision    recall  f1-score   support
+
+           0       0.96      1.00      0.98    430206
+           1       0.89      0.08      0.15     18381
+
+    accuracy                           0.96    448587
+   macro avg       0.93      0.54      0.56    448587
+weighted avg       0.96      0.96      0.95    448587
+
+[LOG] Current time: 2025-08-10 23:59:45 -03-0300
+Compiling FHE model...
+[LOG] Current time: 2025-08-11 00:21:07 -03-0300
+Finished FHE model compilation.
+[LOG] Current time: 2025-08-11 00:21:07 -03-0300
+Making FHE simulation prediction...
+[LOG] Current time: 2025-08-11 01:03:50 -03-0300
+FHE model metrics (simulated):
+--- Model Evaluation ---
+Accuracy: 0.9619
+Precision: 0.9592
+Recall: 0.9619
+F1-Score: 0.9464
+
+--- Confusion Matrix ---
+[[430024    182]
+ [ 16908   1473]]
+
+--- Classification Report ---
+              precision    recall  f1-score   support
+
+           0       0.96      1.00      0.98    430206
+           1       0.89      0.08      0.15     18381
+
+    accuracy                           0.96    448587
+   macro avg       0.93      0.54      0.56    448587
+weighted avg       0.96      0.96      0.95    448587
+
+
+Saving compiled FHE circuit and client assets to disk...
+[LOG] Current time: 2025-08-11 01:03:52 -03-0300
+FHE assets saved to ./fhe_model_2_estimators_2_depth_svd_100_components/
+
+============================================================
+STARTING TEST FOR n_estimators = 4, max_depth = 2
+============================================================
+[LOG] Current time: 2025-08-11 01:03:52 -03-0300
+Training RandomForestClassifier...
+[LOG] Current time: 2025-08-11 01:04:05 -03-0300
+Start prediction in the clear...
+[LOG] Current time: 2025-08-11 01:04:06 -03-0300
+Plain text model metrics:
+--- Model Evaluation ---
+Accuracy: 0.9628
+Precision: 0.9603
+Recall: 0.9628
+F1-Score: 0.9483
+
+--- Confusion Matrix ---
+[[429985    221]
+ [ 16488   1893]]
+
+--- Classification Report ---
+              precision    recall  f1-score   support
+
+           0       0.96      1.00      0.98    430206
+           1       0.90      0.10      0.18     18381
+
+    accuracy                           0.96    448587
+   macro avg       0.93      0.55      0.58    448587
+weighted avg       0.96      0.96      0.95    448587
+
+[LOG] Current time: 2025-08-11 01:04:08 -03-0300
+Compiling FHE model...
+[LOG] Current time: 2025-08-11 01:25:36 -03-0300
+Finished FHE model compilation.
+[LOG] Current time: 2025-08-11 01:25:36 -03-0300
+Making FHE simulation prediction...
+[LOG] Current time: 2025-08-11 02:08:19 -03-0300
+FHE model metrics (simulated):
+--- Model Evaluation ---
+Accuracy: 0.9628
+Precision: 0.9603
+Recall: 0.9628
+F1-Score: 0.9483
+
+--- Confusion Matrix ---
+[[429985    221]
+ [ 16488   1893]]
+
+--- Classification Report ---
+              precision    recall  f1-score   support
+
+           0       0.96      1.00      0.98    430206
+           1       0.90      0.10      0.18     18381
+
+    accuracy                           0.96    448587
+   macro avg       0.93      0.55      0.58    448587
+weighted avg       0.96      0.96      0.95    448587
+
+
+Saving compiled FHE circuit and client assets to disk...
+[LOG] Current time: 2025-08-11 02:08:21 -03-0300
+FHE assets saved to ./fhe_model_4_estimators_2_depth_svd_100_components/
+
+============================================================
+STARTING TEST FOR n_estimators = 2, max_depth = 4
+============================================================
+[LOG] Current time: 2025-08-11 02:08:21 -03-0300
+Training RandomForestClassifier...
+[LOG] Current time: 2025-08-11 02:08:33 -03-0300
+Start prediction in the clear...
+[LOG] Current time: 2025-08-11 02:08:35 -03-0300
+Plain text model metrics:
+--- Model Evaluation ---
+Accuracy: 0.9730
+Precision: 0.9728
+Recall: 0.9730
+F1-Score: 0.9670
+
+--- Confusion Matrix ---
+[[429955    251]
+ [ 11848   6533]]
+
+--- Classification Report ---
+              precision    recall  f1-score   support
+
+           0       0.97      1.00      0.99    430206
+           1       0.96      0.36      0.52     18381
+
+    accuracy                           0.97    448587
+   macro avg       0.97      0.68      0.75    448587
+weighted avg       0.97      0.97      0.97    448587
+
+[LOG] Current time: 2025-08-11 02:08:37 -03-0300
+Compiling FHE model...
+[LOG] Current time: 2025-08-11 02:30:11 -03-0300
+Finished FHE model compilation.
+[LOG] Current time: 2025-08-11 02:30:11 -03-0300
+Making FHE simulation prediction...
+[LOG] Current time: 2025-08-11 03:13:28 -03-0300
+FHE model metrics (simulated):
+--- Model Evaluation ---
+Accuracy: 0.9730
+Precision: 0.9728
+Recall: 0.9730
+F1-Score: 0.9670
+
+--- Confusion Matrix ---
+[[429955    251]
+ [ 11848   6533]]
+
+--- Classification Report ---
+              precision    recall  f1-score   support
+
+           0       0.97      1.00      0.99    430206
+           1       0.96      0.36      0.52     18381
+
+    accuracy                           0.97    448587
+   macro avg       0.97      0.68      0.75    448587
+weighted avg       0.97      0.97      0.97    448587
+
+
+Saving compiled FHE circuit and client assets to disk...
+[LOG] Current time: 2025-08-11 03:13:30 -03-0300
+FHE assets saved to ./fhe_model_2_estimators_4_depth_svd_100_components/
+
+============================================================
+STARTING TEST FOR n_estimators = 4, max_depth = 4
+============================================================
+[LOG] Current time: 2025-08-11 03:13:30 -03-0300
+Training RandomForestClassifier...
+[LOG] Current time: 2025-08-11 03:13:45 -03-0300
+Start prediction in the clear...
+[LOG] Current time: 2025-08-11 03:13:49 -03-0300
+Plain text model metrics:
+--- Model Evaluation ---
+Accuracy: 0.9730
+Precision: 0.9727
+Recall: 0.9730
+F1-Score: 0.9670
+
+--- Confusion Matrix ---
+[[429944    262]
+ [ 11836   6545]]
+
+--- Classification Report ---
+              precision    recall  f1-score   support
+
+           0       0.97      1.00      0.99    430206
+           1       0.96      0.36      0.52     18381
+
+    accuracy                           0.97    448587
+   macro avg       0.97      0.68      0.75    448587
+weighted avg       0.97      0.97      0.97    448587
+
+[LOG] Current time: 2025-08-11 03:13:51 -03-0300
+Compiling FHE model...
+[LOG] Current time: 2025-08-11 03:35:27 -03-0300
+Finished FHE model compilation.
+[LOG] Current time: 2025-08-11 03:35:27 -03-0300
+Making FHE simulation prediction...
+[LOG] Current time: 2025-08-11 04:19:15 -03-0300
+FHE model metrics (simulated):
+--- Model Evaluation ---
+Accuracy: 0.9730
+Precision: 0.9727
+Recall: 0.9730
+F1-Score: 0.9670
+
+--- Confusion Matrix ---
+[[429944    262]
+ [ 11836   6545]]
+
+--- Classification Report ---
+              precision    recall  f1-score   support
+
+           0       0.97      1.00      0.99    430206
+           1       0.96      0.36      0.52     18381
+
+    accuracy                           0.97    448587
+   macro avg       0.97      0.68      0.75    448587
+weighted avg       0.97      0.97      0.97    448587
+
+
+Saving compiled FHE circuit and client assets to disk...
+[LOG] Current time: 2025-08-11 04:19:17 -03-0300
+FHE assets saved to ./fhe_model_4_estimators_4_depth_svd_100_components/
