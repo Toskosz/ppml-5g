@@ -120,12 +120,10 @@ if __name__ == "__main__":
     del df
 
     models_to_test = [
-        {'estimators': 2, 'depth': 8, 'svd': 100},
-        {'estimators': 4, 'depth': 8, 'svd': 100},
-        {'estimators': 2, 'depth': 16, 'svd': 100},
-        {'estimators': 4, 'depth': 16, 'svd': 100},
-        {'estimators': 2, 'depth': 32, 'svd': 100},
-        {'estimators': 4, 'depth': 32, 'svd': 100},
+        {'estimators': 2, 'depth': 2, 'svd': 100},
+        {'estimators': 4, 'depth': 2, 'svd': 100},
+        {'estimators': 2, 'depth': 4, 'svd': 100},
+        {'estimators': 4, 'depth': 4, 'svd': 100},
     ]
 
     svd_cache = {}
