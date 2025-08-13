@@ -1,4 +1,5 @@
 from concrete.ml.deployment import FHEModelClient, FHEModelServer
+from concrete.ml.sklearn.rf import RandomForestClassifier
 from sklearn.compose import ColumnTransformer
 from sklearn.decomposition import TruncatedSVD # Import TruncatedSVD
 from sklearn.model_selection import train_test_split
@@ -17,6 +18,50 @@ def log_time():
     formatted_time = brasilia_now.strftime("%Y-%m-%d %H:%M:%S %Z%z")
     print(f"[LOG] Current time: {formatted_time}")
 
+def predict_single_record_plain_text(estimators, depth, svd):
+    inference_times = []
+
+    classifier = RandomForestClassifier(
+        n_estimators=estimators,
+        max_depth=depth,
+        random_state=42
+    )
+
+    y_train_final = train_df['label']
+
+    classifier.fit(X_train_final, y_train_final)
+
+    for i in range(1000):
+
+        X_single_record_processed = X_test_final[i:i+1]
+
+        start_time = time.time()
+
+        result = classifier.predict(X_single_record_processed)
+
+        end_time = time.time()
+
+        predicted_label = 1 if result[0][1] > 0.5 else 0
+
+        duration = end_time - start_time
+        inference_times.append(duration)
+
+        true_label_binary = test_df.iloc[i]['label']
+
+        print(f"Record {i+1}/1000 | Predicted: {predicted_label} | True: {true_label_binary} | Time: {duration:.4f}s")
+
+    print("\n[STEP 4] Calculating final statistics...")
+    log_time()
+
+    total_records = len(inference_times)
+    total_inference_time = sum(inference_times)
+    mean_inference_time = np.mean(inference_times) if total_records > 0 else 0
+
+    print("\n" + "="*20 + " INFERENCE SUMMARY " + "="*20)
+    print(f"Total records processed: {total_records}")
+    print(f"   Total inference time: {total_inference_time:.4f} seconds")
+    print(f"Mean inference time/record: {mean_inference_time:.4f} seconds")
+    print("="*61 + "\n")
 
 def predict_single_record_with_comparison(estimators, depth, svd):
     log_time()
@@ -153,7 +198,8 @@ if __name__ == "__main__":
         print(f"Final training data shape: {X_train_final.shape}")
         print(f"Final testing data shape: {X_test_final.shape}")
 
-        predict_single_record_with_comparison(estimators, depth, n_components_svd)
+        predict_single_record_plain_text(estimators, depth, n_components_svd)
+#        predict_single_record_with_comparison(estimators, depth, n_components_svd)
 
     del X_train_sparse
     del X_test_sparse
