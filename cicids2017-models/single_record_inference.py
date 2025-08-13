@@ -52,7 +52,7 @@ def predict_single_record_plaintext(estimators, depth, svd):
 
         end_time = time.time()
 
-        predicted_label = 1 if result[0][1] > 0.5 else 0
+        predicted_label = result
 
         duration = end_time - start_time
         inference_times.append(duration)
