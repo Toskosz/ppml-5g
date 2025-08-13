@@ -19,6 +19,17 @@ def log_time():
     print(f"[LOG] Current time: {formatted_time}")
 
 def predict_single_record_plain_text(estimators, depth, svd):
+    combined_csv_path = 'NF-UNSW-NB15-v3.csv'
+    df = pd.read_csv(combined_csv_path)
+
+    df = clean_col_names(df)
+    df.replace([np.inf, -np.inf], np.nan, inplace=True)
+    df.dropna(inplace=True)
+
+    df['binary_label'] = df['label']
+
+    train_df, test_df = train_test_split(df, test_size=0.2, random_state=42, stratify=df['label'])
+ 
     inference_times = []
 
     classifier = RandomForestClassifier(

@@ -19,6 +19,14 @@ def log_time():
     print(f"[LOG] Current time: {formatted_time}")
 
 def predict_single_record_plaintext(estimators, depth, svd):
+    combined_csv_path = 'CIC-IDS-2017-Combined.csv'
+    df = pd.read_csv(combined_csv_path)
+
+    df = clean_col_names(df)
+    df.replace([np.inf, -np.inf], np.nan, inplace=True)
+    df.dropna(inplace=True)
+
+    df['binary_label'] = (df['label'] != 'BENIGN').astype(int)
 
     classifier = RandomForestClassifier(
         n_estimators=estimators,
