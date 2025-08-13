@@ -116,11 +116,11 @@ max_depth_list = [2, None, 4]
 
 for n_estimators, max_depth in zip(n_estimators_list, max_depth_list):
     print("\n" + "="*60)
-    print(f"STARTING TEST FOR n_estimators = {n_estimators}")
+    print(f"STARTING TEST FOR n_estimators = {n_estimators} max_depth = {max_depth}")
     print("="*60)
 
     log_time()
-    print(f"Training RandomForestClassifier with {n_estimators} estimators...")
+    print(f"Training ...")
 
     classifier = RandomForestClassifier(n_estimators=n_estimators, max_depth=max_depth, random_state=42)
     classifier.fit(X_train.toarray(), y_train)
