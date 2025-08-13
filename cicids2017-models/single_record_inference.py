@@ -26,6 +26,8 @@ def predict_single_record_plaintext(estimators, depth, svd):
         random_state=42
     )
 
+    train_df, test_df = train_test_split(df, test_size=0.2, random_state=42, stratify=df['label'])
+
     y_train_full = train_df['binary_label'] # Renamed to y_train_full for clarity
 
     classifier.fit(X_train_final, y_train_full)
