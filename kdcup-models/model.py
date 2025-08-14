@@ -111,8 +111,8 @@ with open('preprocessor.pkl', 'wb') as f:
 y_train = train_df['binary_label']
 y_test = test_df['binary_label']
 
-n_estimators_list = [2, 100, 100] # List of n_estimators values to test
-max_depth_list = [2, None, 4]
+n_estimators_list = [2, 2, 4, 4, 100, 100, 100] # List of n_estimators values to test
+max_depth_list = [2, 4, 2, 4, 2, 4, None]
 
 for n_estimators, max_depth in zip(n_estimators_list, max_depth_list):
     print("\n" + "="*60)
