@@ -207,10 +207,12 @@ def predict_single_record_with_comparison(estimators, depth, records):
     print("="*61 + "\n")
 
 if __name__ == "__main__":
-    predict_single_record_plaintext(2, 2)
-    predict_single_record_plaintext(100, None)
-    predict_single_record_plaintext(100, 4)
+    predict_single_record_plaintext(2, 4)
+    predict_single_record_plaintext(4, 2)
+    predict_single_record_plaintext(4, 4)
+    predict_single_record_plaintext(100, 2)
 
-    predict_single_record_with_comparison(2, 2, 1000)
-    predict_single_record_with_comparison(100, None, 10)
-    predict_single_record_with_comparison(100, 4, 100)
+    predict_single_record_with_comparison(2, 4, 1000)
+    predict_single_record_with_comparison(4, 2, 1000)
+    predict_single_record_with_comparison(4, 4, 1000)
+    predict_single_record_with_comparison(100, 2, 1000)
