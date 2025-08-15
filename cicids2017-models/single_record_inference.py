@@ -176,9 +176,9 @@ if __name__ == "__main__":
     del df
 
     models_to_test = [
-        {'estimators': 2, 'depth': 4, 'svd': 200},
-        {'estimators': 5, 'depth': 4, 'svd': 200},
-        {'estimators': 10, 'depth': 4, 'svd': 200},
+        {'estimators': 2, 'depth': 2, 'svd': 200},
+        {'estimators': 4, 'depth': 2, 'svd': 200},
+        {'estimators': 4, 'depth': 4, 'svd': 200},
     ]
 
     svd_cache = {}
@@ -209,7 +209,7 @@ if __name__ == "__main__":
         print(f"Final testing data shape: {X_test_final.shape}")
 
         predict_single_record_plaintext(estimators, depth, n_components_svd)
-#        predict_single_record_with_comparison(estimators, depth, n_components_svd)
+        predict_single_record_with_comparison(estimators, depth, n_components_svd)
 
     del X_train_sparse
     del X_test_sparse
