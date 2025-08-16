@@ -60,7 +60,7 @@ def predict_single_record_plaintext(estimators, depth, svd):
         true_label_text = test_df.iloc[i]['label']
         true_label_binary = 1 if true_label_text != 'BENIGN' else 0
 
-        print(f"Record {i+1}/1000 | Predicted: {predicted_label} | True: {true_label_binary} | Time: {duration:.4f}s")
+#        print(f"Record {i+1}/1000 | Predicted: {predicted_label} | True: {true_label_binary} | Time: {duration:.4f}s")
 
     print("\n[STEP 4] Calculating final statistics...")
     log_time()
@@ -126,7 +126,7 @@ def predict_single_record_with_comparison(estimators, depth, svd):
         true_label_text = test_df.iloc[i]['label']
         true_label_binary = 1 if true_label_text != 'BENIGN' else 0
 
-        print(f"Record {i+1}/1000 | Predicted: {predicted_label} | True: {true_label_binary} | Time: {duration:.4f}s")
+#        print(f"Record {i+1}/1000 | Predicted: {predicted_label} | True: {true_label_binary} | Time: {duration:.4f}s")
 
     print("\n[STEP 4] Calculating final statistics...")
     log_time()

@@ -104,7 +104,7 @@ def predict_single_record_plaintext(estimators, depth):
         true_label_text = test_df.iloc[i]['label']
         true_label_binary = 1 if true_label_text != 'normal' else 0
 
-        print(f"Record {i+1}/{X_test.shape[0]} | Predicted: {output[0]} | True: {true_label_binary} | Time: {duration:.4f}s")
+#        print(f"Record {i+1}/{X_test.shape[0]} | Predicted: {output[0]} | True: {true_label_binary} | Time: {duration:.4f}s")
 
     log_time()
     print("\nCalculating final statistics...")
@@ -199,7 +199,7 @@ def predict_single_record_with_comparison(estimators, depth, records):
         true_label_text = test_df.iloc[i]['label']
         true_label_binary = 1 if true_label_text != 'normal' else 0
 
-        print(f"Record {i+1}/{len(X_test)} | Predicted: {predicted_label} | True: {true_label_binary} | Time: {duration:.4f}s")
+#        print(f"Record {i+1}/{len(X_test)} | Predicted: {predicted_label} | True: {true_label_binary} | Time: {duration:.4f}s")
 
     print("\n[STEP 4] Calculating final statistics...")
     log_time()
