@@ -165,15 +165,23 @@ def predict_single_record_with_comparison(estimators, depth, records):
 
     print("\n[STEP 3] Processing all records...")
     inference_times = []
+    preprocessing_times = []
 
     serialized_evaluation_keys = fhe_model_client.get_serialized_evaluation_keys()
 
     for i in range(records):
         single_record_df = X_test.iloc[[i]]
-        
+
+        start_time_preprocessing = time.time()
+
         X_single_record_processed = preprocessor.transform(single_record_df).toarray()
 
         encrypted_input = fhe_model_client.quantize_encrypt_serialize(X_single_record_processed)
+
+        end_time_preprocessing = time.time()
+
+        preprocessing_duration = end_time_preprocessing - start_time_preprocessing
+        preprocessing_times.append(preprocessing_duration)
 
         start_time = time.time()
 
@@ -199,11 +207,14 @@ def predict_single_record_with_comparison(estimators, depth, records):
     total_records = len(inference_times)
     total_inference_time = sum(inference_times)
     mean_inference_time = np.mean(inference_times) if total_records > 0 else 0
+    mean_preprocessing_time = np.mean(preprocessing_times) if total_records > 0 else 0
 
     print("\n" + "="*20 + " INFERENCE SUMMARY " + "="*20)
     print(f"Total records processed: {total_records}")
     print(f"   Total inference time: {total_inference_time:.4f} seconds")
     print(f"Mean inference time/record: {mean_inference_time:.4f} seconds")
+    print(f"Mean preprocessing time/record: {mean_preprocessing_time:.4f} seconds")
+
     print("="*61 + "\n")
 
 if __name__ == "__main__":
