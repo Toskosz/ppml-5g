@@ -1,10 +1,20 @@
+# Dataset: CSE-CIC-IDS-2018
+# Replaces: KDD Cup 1999 / NSL-KDD (removed from CIC servers, deprecated)
+# Download: aws s3 sync --no-sign-request s3://cse-cic-ids2018/ CIC-IDS-2018/
+# Features: CICFlowMeter-V3; model uses 5 numerical + 2 categorical
+
 from concrete.ml.deployment import FHEModelClient, FHEModelServer
 import datetime
+import glob
+import numpy as np
+import os
 import pandas as pd
 import pickle
 import sklearn
+from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import OneHotEncoder, MinMaxScaler
 from sklearn.compose import ColumnTransformer
+from sklearn.decomposition import TruncatedSVD
 from sklearn.ensemble import RandomForestClassifier as RandomForestSklearn
 from sklearn.metrics import (
     accuracy_score,
@@ -15,8 +25,8 @@ from sklearn.metrics import (
     recall_score
 )
 from zoneinfo import ZoneInfo
-import numpy as np
 import time
+
 
 def log_time():
     """Prints the current time in Brasília timezone."""
@@ -26,46 +36,46 @@ def log_time():
     formatted_time = brasilia_now.strftime("%Y-%m-%d %H:%M:%S %Z%z")
     print(f"[LOG] Current time: {formatted_time}")
 
-def predict_single_record_plaintext(estimators, depth):
-    column_names = [
-        "duration", "protocol_type", "service", "flag", "src_bytes", "dst_bytes", "land",
-        "wrong_fragment", "urgent", "hot", "num_failed_logins", "logged_in",
-        "num_compromised", "root_shell", "su_attempted", "num_root", "num_file_creations",
-        "num_shells", "num_access_files", "num_outbound_cmds", "is_host_login",
-        "is_guest_login", "count", "srv_count", "serror_rate", "srv_serror_rate",
-        "rerror_rate", "srv_rerror_rate", "same_srv_rate", "diff_srv_rate", "srv_diff_host_rate",
-        "dst_host_count", "dst_host_srv_count", "dst_host_same_srv_rate",
-        "dst_host_diff_srv_rate", "dst_host_same_src_port_rate", "dst_host_srv_diff_host_rate",
-        "dst_host_serror_rate", "dst_host_srv_serror_rate", "dst_host_rerror_rate",
-        "dst_host_srv_rerror_rate", "label", "difficulty_level"
-    ]
 
-    train_df = pd.read_csv('Train.txt', delimiter=',', header=None, names=column_names)
-    test_df = pd.read_csv('Test.txt', delimiter=',', header=None, names=column_names)
+def clean_col_names(df):
+    """Cleans column names to be Python-friendly."""
+    cols = df.columns
+    new_cols = [col.strip().replace(' ', '_').replace('/', '_').lower() for col in cols]
+    df.columns = new_cols
+    return df
 
-    def convert_flag_to_scapy(flag):
-        flag_translation = {
-            'REJ': 'R',
-            'SF': 'PA',
-            'S0': 'S',
-            'RSTO': 'R',
-            'S1': 'S',
-            'S2': 'S',
-            'S3': 'S',
-            'RSTOS0': 'R',
-            'OTH': ''
-        }
-        return ''.join([flag_translation.get(f, '') for f in flag])
 
-    train_df['flag'] = train_df['flag'].apply(convert_flag_to_scapy)
-    test_df['flag'] = test_df['flag'].apply(convert_flag_to_scapy)
+def load_and_preprocess(n_components_svd=100):
+    """
+    Loads CSE-CIC-IDS-2018 data, applies preprocessing and TruncatedSVD.
+    Returns X_train_final, X_test_final, y_train_full, y_test_full, test_labels, preprocessor.
+    """
+    combined_csv_path = 'CIC-IDS-2018-Combined.csv'
+    data_folder = 'CIC-IDS-2018'
 
-    train_df['binary_label'] = (train_df['label'] != 'normal').astype(int)
-    test_df['binary_label'] = (test_df['label'] != 'normal').astype(int)
+    if os.path.exists(combined_csv_path):
+        df = pd.read_csv(combined_csv_path)
+    else:
+        all_files = glob.glob(os.path.join(data_folder, "*.csv"))
+        if not all_files:
+            raise FileNotFoundError(
+                f"No CSV files found in '{data_folder}'. "
+                f"Download with: aws s3 sync --no-sign-request s3://cse-cic-ids2018/ {data_folder}/"
+            )
+        df_list = [pd.read_csv(f, low_memory=False) for f in all_files]
+        df = pd.concat(df_list, ignore_index=True)
+        df.to_csv(combined_csv_path, index=False)
 
-    features_to_use = ['protocol_type', 'service', 'src_bytes', 'dst_bytes']
-    categorical_features = ['protocol_type', 'service']
-    numerical_features = ['src_bytes', 'dst_bytes']
+    df = clean_col_names(df)
+    df.replace([np.inf, -np.inf], np.nan, inplace=True)
+    df.dropna(inplace=True)
+
+    df['binary_label'] = (df['label'] != 'benign').astype(int)
+
+    train_df, test_df = train_test_split(df, test_size=0.2, random_state=42, stratify=df['label'])
+
+    numerical_features = ['syn_cnt', 'ack_cnt', 'fin_cnt', 'rst_cnt', 'tot_l_fw_pkt']
+    categorical_features = ['protocol', 'dst_port']
 
     preprocessor = ColumnTransformer(
         transformers=[
@@ -75,36 +85,60 @@ def predict_single_record_plaintext(estimators, depth):
         remainder='drop'
     )
 
-    X_train = preprocessor.fit_transform(train_df[features_to_use])
-    X_test = preprocessor.transform(test_df[features_to_use])
+    X_train_sparse = preprocessor.fit_transform(train_df)
+    X_test_sparse = preprocessor.transform(test_df)
 
-    with open('preprocessor.pkl', 'wb') as f:
+    with open('preprocessor_cic_ids_2018.pkl', 'wb') as f:
         pickle.dump(preprocessor, f)
 
-    y_train = train_df['binary_label']
-    y_test = test_df['binary_label']
+    y_train_full = train_df['binary_label']
+    y_test_full = test_df['binary_label']
+    # Keep label strings for result printing
+    test_labels = test_df['label'].reset_index(drop=True)
 
-    classifier = RandomForestSklearn(n_estimators=estimators, max_depth=depth, random_state=42)
-    classifier.fit(X_train.toarray(), y_train)
+    del train_df
+    del df
+
+    svd = TruncatedSVD(n_components=n_components_svd, random_state=42)
+    X_train_final = svd.fit_transform(X_train_sparse)
+    X_test_final = svd.transform(X_test_sparse)
+
+    del X_train_sparse
+    del X_test_sparse
+
+    return X_train_final, X_test_final, y_train_full, y_test_full, test_labels, preprocessor
+
+
+def predict_single_record_plaintext(estimators, depth, n_components_svd=100):
+    log_time()
+    print(f"\n--- Plaintext Inference | estimators={estimators}, depth={depth} ---")
+
+    X_train_final, X_test_final, y_train_full, y_test_full, test_labels, _ = \
+        load_and_preprocess(n_components_svd)
+
+    classifier = RandomForestSklearn(
+        n_estimators=estimators,
+        max_depth=depth,
+        random_state=42
+    )
+    classifier.fit(X_train_final, y_train_full)
 
     inference_times = []
 
     for i in range(1000):
-        single_record_df = X_test[i:i+1].toarray()
+        single_record = X_test_final[i:i+1]
 
         start_time = time.time()
-
-        output = classifier.predict(single_record_df)
-
+        output = classifier.predict(single_record)
         end_time = time.time()
 
         duration = end_time - start_time
         inference_times.append(duration)
 
-        true_label_text = test_df.iloc[i]['label']
-        true_label_binary = 1 if true_label_text != 'normal' else 0
+        true_label_text = test_labels.iloc[i]
+        true_label_binary = 0 if true_label_text == 'benign' else 1
 
-#        print(f"Record {i+1}/{X_test.shape[0]} | Predicted: {output[0]} | True: {true_label_binary} | Time: {duration:.4f}s")
+#        print(f"Record {i+1}/1000 | Predicted: {output[0]} | True: {true_label_binary} | Time: {duration:.4f}s")
 
     log_time()
     print("\nCalculating final statistics...")
@@ -116,90 +150,68 @@ def predict_single_record_plaintext(estimators, depth):
     print("\n" + "="*20 + " INFERENCE SUMMARY " + "="*20)
     print(f"Total records processed: {total_records}")
     print(f"   Total inference time: {total_inference_time:.4f} seconds")
-    print(f"Mean inference time/record: {mean_inference_time:.4f} seconds")
+    print(f"Mean inference time/record: {mean_inference_time:.6f} seconds")
     print("="*61 + "\n")
 
-def predict_single_record_with_comparison(estimators, depth, records):
+
+def predict_single_record_with_comparison(estimators, depth, records=1000, n_components_svd=100):
     """
-    Loads a pre-compiled FHE model, predicts on a single record, and
-    compares the data's state before encryption and after decryption.
+    Loads a pre-compiled FHE model, runs inference on individual records,
+    and reports timing for both FHE execution and preprocessing.
     """
     log_time()
-    print("--- FHE Prediction with Before & After Comparison ---")
+    print(f"\n--- FHE Inference | estimators={estimators}, depth={depth} ---")
+
+    model_dir = f"./kdcup-models/fhe_model_{estimators}_estimators_{depth}_depth_svd_{n_components_svd}_components/"
 
     print("\n[STEP 1] Loading pre-compiled FHE circuit and preprocessor...")
     try:
-        fhe_model_server = FHEModelServer(f"./kdcup-models/fhe_model_{estimators}_estimators_{depth}_depth/")
+        fhe_model_server = FHEModelServer(model_dir)
         fhe_model_server.load()
-        fhe_model_client = FHEModelClient(f"./kdcup-models/fhe_model_{estimators}_estimators_{depth}_depth/")
-        with open('preprocessor.pkl', 'rb') as f:
+        fhe_model_client = FHEModelClient(model_dir)
+        with open('preprocessor_cic_ids_2018.pkl', 'rb') as f:
             preprocessor = pickle.load(f)
     except FileNotFoundError as e:
         print(f"Error loading model files: {e}")
-        print("Please run the 'train.py' script first to generate the necessary files.")
+        print("Please run model.py first to generate the FHE assets.")
         return
 
-    print("\n[STEP 2] Preparing and inspecting data on the CLIENT-SIDE before encryption...")
-    
-    column_names = [
-        "duration", "protocol_type", "service", "flag", "src_bytes", "dst_bytes", "land",
-        "wrong_fragment", "urgent", "hot", "num_failed_logins", "logged_in",
-        "num_compromised", "root_shell", "su_attempted", "num_root", "num_file_creations",
-        "num_shells", "num_access_files", "num_outbound_cmds", "is_host_login",
-        "is_guest_login", "count", "srv_count", "serror_rate", "srv_serror_rate",
-        "rerror_rate", "srv_rerror_rate", "same_srv_rate", "diff_srv_rate", "srv_diff_host_rate",
-        "dst_host_count", "dst_host_srv_count", "dst_host_same_srv_rate",
-        "dst_host_diff_srv_rate", "dst_host_same_src_port_rate", "dst_host_srv_diff_host_rate",
-        "dst_host_serror_rate", "dst_host_srv_serror_rate", "dst_host_rerror_rate",
-        "dst_host_srv_rerror_rate", "label", "difficulty_level"
-    ]
-    try:
-        test_df = pd.read_csv('Test.txt', delimiter=',', header=None, names=column_names)
-    except FileNotFoundError:
-        print("Error: Test.txt not found.")
-        return
+    print("\n[STEP 2] Preparing data on the CLIENT-SIDE before encryption...")
 
-    print(f"Found {len(test_df)} records to process.")
-    features_to_use = ['protocol_type', 'service', 'flag', 'src_bytes', 'dst_bytes']
-    X_test = test_df[features_to_use]
+    _, X_test_final, _, _, test_labels, _ = load_and_preprocess(n_components_svd)
 
-    print("\n[STEP 3] Processing all records...")
+    print(f"Found {len(test_labels)} records to process.")
+
+    print("\n[STEP 3] Processing records...")
     inference_times = []
     preprocessing_times = []
 
     serialized_evaluation_keys = fhe_model_client.get_serialized_evaluation_keys()
 
     for i in range(records):
-        single_record_df = X_test.iloc[[i]]
+        single_record = X_test_final[i:i+1]
 
-        start_time_preprocessing = time.time()
+        start_preprocessing = time.time()
+        encrypted_input = fhe_model_client.quantize_encrypt_serialize(single_record)
+        end_preprocessing = time.time()
 
-        X_single_record_processed = preprocessor.transform(single_record_df).toarray()
-
-        encrypted_input = fhe_model_client.quantize_encrypt_serialize(X_single_record_processed)
-
-        end_time_preprocessing = time.time()
-
-        preprocessing_duration = end_time_preprocessing - start_time_preprocessing
+        preprocessing_duration = end_preprocessing - start_preprocessing
         preprocessing_times.append(preprocessing_duration)
 
         start_time = time.time()
-
         encrypted_output = fhe_model_server.run(encrypted_input, serialized_evaluation_keys)
-
         end_time = time.time()
 
         result = fhe_model_client.deserialize_decrypt_dequantize(encrypted_output)
-
         predicted_label = 1 if result[0][1] > 0.5 else 0
 
         duration = end_time - start_time
         inference_times.append(duration)
 
-        true_label_text = test_df.iloc[i]['label']
-        true_label_binary = 1 if true_label_text != 'normal' else 0
+        true_label_text = test_labels.iloc[i]
+        true_label_binary = 0 if true_label_text == 'benign' else 1
 
-#        print(f"Record {i+1}/{len(X_test)} | Predicted: {predicted_label} | True: {true_label_binary} | Time: {duration:.4f}s")
+#        print(f"Record {i+1}/{records} | Predicted: {predicted_label} | True: {true_label_binary} | Time: {duration:.4f}s")
 
     print("\n[STEP 4] Calculating final statistics...")
     log_time()
@@ -212,10 +224,10 @@ def predict_single_record_with_comparison(estimators, depth, records):
     print("\n" + "="*20 + " INFERENCE SUMMARY " + "="*20)
     print(f"Total records processed: {total_records}")
     print(f"   Total inference time: {total_inference_time:.4f} seconds")
-    print(f"Mean inference time/record: {mean_inference_time:.4f} seconds")
-    print(f"Mean preprocessing time/record: {mean_preprocessing_time:.4f} seconds")
-
+    print(f"Mean inference time/record: {mean_inference_time:.6f} seconds")
+    print(f"Mean preprocessing time/record: {mean_preprocessing_time:.6f} seconds")
     print("="*61 + "\n")
+
 
 if __name__ == "__main__":
     predict_single_record_plaintext(2, 4)

@@ -1,3 +1,8 @@
+# Dataset: CIC-UNSW-NB15 (2024)
+# Replaces: NF-UNSW-NB15-v3 (UQ hosting unavailable; switched to CICFlowMeter feature schema)
+# Download: http://cicresearch.ca/CICDataset/CIC-UNSW/ (see https://www.unb.ca/cic/datasets/cic-unsw-nb15.html)
+# Task: multi-class classification (9 attack categories)
+# Features: CICFlowMeter output; model uses 5 numerical + 2 categorical
 from concrete.ml.deployment import FHEModelDev
 from concrete.ml.sklearn.rf import RandomForestClassifier
 import datetime
@@ -49,13 +54,16 @@ def log_model_metrics(y_test, y_pred):
 log_time()
 print(f"Scikit-learn version: {sklearn.__version__}")
 
-csv_path = 'NF-UNSW-NB15-v3.csv'
+csv_path = 'CICFlowMeter_out.csv'
 
 if os.path.exists(csv_path):
     print(f"Loading data from '{csv_path}'...")
-    df = pd.read_csv(csv_path)
+    df = pd.read_csv(csv_path, low_memory=False)
 else:
-    raise FileNotFoundError(f"Dataset file not found: '{csv_path}'. Please check the path.")
+    raise FileNotFoundError(
+        f"Dataset file not found: '{csv_path}'. "
+        "Download CIC-UNSW-NB15 from http://cicresearch.ca/CICDataset/CIC-UNSW/"
+    )
 
 def clean_col_names(df):
     """Cleans column names to be Python-friendly."""
@@ -72,11 +80,11 @@ df.dropna(inplace=True)
 train_df, test_df = train_test_split(df, test_size=0.2, random_state=42, stratify=df['label'])
 print(f"Data split into {len(train_df)} training samples and {len(test_df)} testing samples.")
 
-numerical_features_selected = [
-    'in_bytes',
-    'out_bytes',
-]
-categorical_features_selected = ['protocol', 'l7_proto']
+# CICFlowMeter features available in CIC-UNSW-NB15 (2024)
+# Switched from NetFlow schema (in_bytes, out_bytes, protocol, l7_proto) which was specific to
+# NF-UNSW-NB15; l7_proto is not produced by CICFlowMeter.
+numerical_features_selected = ['syn_cnt', 'ack_cnt', 'fin_cnt', 'rst_cnt', 'tot_l_fw_pkt']
+categorical_features_selected = ['protocol', 'dst_port']
 
 preprocessor = ColumnTransformer(
     transformers=[
@@ -98,7 +106,7 @@ del train_df
 del test_df
 del df
 
-with open('preprocessor_netflow.pkl', 'wb') as f:
+with open('preprocessor_cicunsw.pkl', 'wb') as f:
     pickle.dump(preprocessor, f)
 
 # --- Dimensionality Reduction using TruncatedSVD ---
@@ -111,6 +119,10 @@ X_train_final = svd.fit_transform(X_train_sparse)
 X_test_final = svd.transform(X_test_sparse)
 
 print(f"Shape after SVD reduction (dense) - X_train: {X_train_final.shape}, X_test: {X_test_final.shape}")
+
+with open('svd_cicunsw.pkl', 'wb') as f:
+    pickle.dump(svd, f)
+print("SVD saved to 'svd_cicunsw.pkl'.")
 
 del X_train_sparse
 del X_test_sparse

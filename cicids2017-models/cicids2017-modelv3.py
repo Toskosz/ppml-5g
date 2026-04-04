@@ -1,4 +1,6 @@
-# Preparation to match Scapy.
+# Dataset: CSE-CIC-IDS-2018
+# Replaces: CIC-IDS-2017 (superseded by IDS-2018 with larger scale and same CICFlowMeter feature schema)
+# Download: aws s3 sync --no-sign-request s3://cse-cic-ids2018/ CIC-IDS-2018/
 
 from concrete.ml.deployment import FHEModelDev
 from concrete.ml.sklearn.rf import RandomForestClassifier
@@ -52,8 +54,8 @@ def log_model_metrics(y_test, y_pred):
 log_time()
 print(f"Scikit-learn version: {sklearn.__version__}")
 
-data_folder = 'CICIDS2017'
-combined_csv_path = 'CIC-IDS-2017-Combined.csv'
+data_folder = 'CIC-IDS-2018'
+combined_csv_path = 'CIC-IDS-2018-Combined.csv'
 
 if os.path.exists(combined_csv_path):
     print(f"Found existing combined file. Loading '{combined_csv_path}'...")
@@ -62,8 +64,11 @@ else:
     print(f"No combined file found. Assembling data from '{data_folder}' folder...")
     all_files = glob.glob(os.path.join(data_folder, "*.csv"))
     if not all_files:
-        raise FileNotFoundError(f"No CSV files found in the '{data_folder}' directory. Please check the path.")
-    df_list = [pd.read_csv(file) for file in all_files]
+        raise FileNotFoundError(
+            f"No CSV files found in '{data_folder}'. "
+            f"Download with: aws s3 sync --no-sign-request s3://cse-cic-ids2018/ {data_folder}/"
+        )
+    df_list = [pd.read_csv(file, low_memory=False) for file in all_files]
     df = pd.concat(df_list, ignore_index=True)
     print(f"Successfully combined {len(all_files)} files.")
     df.to_csv(combined_csv_path, index=False)
@@ -72,7 +77,7 @@ else:
 def clean_col_names(df):
     """Cleans column names to be Python-friendly."""
     cols = df.columns
-    new_cols = [col.strip().replace(' ', '_').lower() for col in cols]
+    new_cols = [col.strip().replace(' ', '_').replace('/', '_').lower() for col in cols]
     df.columns = new_cols
     return df
 
@@ -80,14 +85,17 @@ df = clean_col_names(df)
 df.replace([np.inf, -np.inf], np.nan, inplace=True)
 df.dropna(inplace=True)
 
-df['binary_label'] = (df['label'] != 'BENIGN').astype(int)
+df['binary_label'] = (df['label'] != 'benign').astype(int)
 
 # Initial split into full train and test sets
 train_df, test_df = train_test_split(df, test_size=0.2, random_state=42, stratify=df['label'])
 print(f"Data split into {len(train_df)} training samples and {len(test_df)} testing samples.")
 
-numerical_features_selected = ['syn_flag_count','ack_flag_count', 'fin_flag_count', 'rst_flag_count', 'total_length_of_fwd_packets', 'total_length_of_bwd_packets']
-categorical_features_selected = ['destination_port']
+# CICFlowMeter-V3 features available in CSE-CIC-IDS-2018
+# Note: total_length_of_bwd_packets from IDS-2017 has no direct equivalent in IDS-2018;
+# dropped in favour of a clean 5-feature numerical set.
+numerical_features_selected = ['syn_cnt', 'ack_cnt', 'fin_cnt', 'rst_cnt', 'tot_l_fw_pkt']
+categorical_features_selected = ['protocol', 'dst_port']
 
 # Preprocessor will output a sparse matrix due to OneHotEncoder
 preprocessor = ColumnTransformer(
@@ -113,7 +121,7 @@ del train_df
 del test_df
 del df
 
-with open('preprocessor_cic_kdd_equivalent.pkl', 'wb') as f:
+with open('preprocessor_cic_ids_2018.pkl', 'wb') as f:
     pickle.dump(preprocessor, f)
 
 
@@ -128,45 +136,21 @@ X_test_dense_reduced = svd.transform(X_test_sparse)
 
 print(f"Shape after SVD reduction (dense) - X_train: {X_train_dense_reduced.shape}, X_test: {X_test_dense_reduced.shape}")
 
+with open('svd_cic_ids_2018.pkl', 'wb') as f:
+    pickle.dump(svd, f)
+print("SVD saved to 'svd_cic_ids_2018.pkl'.")
+
 del X_train_sparse
 del X_test_sparse
 
-# --- Row Sampling using np.random.choice (as requested) ---
-# X_train_dense_reduced and X_test_dense_reduced are the inputs for sampling
-#sample_size = 80000 # <-- Your desired number of training samples after SVD
-#test_sample_size = 16000 # <-- Your desired number of testing samples after SVD
-
-#print(f"\nApplying row sampling: training samples to {sample_size}, testing samples to {test_sample_size}...")
-
-# Check if sampling is actually needed for training data
-#if X_train_dense_reduced.shape[0] > sample_size:
-#    np.random.seed(42) # for reproducibility
-#    # Indices for the X_train_dense_reduced array
-#    indices = np.random.choice(X_train_dense_reduced.shape[0], sample_size, replace=False)
-#    X_train_final = X_train_dense_reduced[indices]
-#    y_train_final = y_train_full.iloc[indices]
-#else:
 X_train_final = X_train_dense_reduced
 y_train_final = y_train_full
 
-# Check if sampling is actually needed for test data
-#if X_test_dense_reduced.shape[0] > test_sample_size:
-#    np.random.seed(42) 
-#    test_indices = np.random.choice(X_test_dense_reduced.shape[0], test_sample_size, replace=False)
-#    X_test_final = X_test_dense_reduced[test_indices]
-#    y_test_final = y_test_full.iloc[test_indices]
-#else:
 X_test_final = X_test_dense_reduced
 y_test_final = y_test_full
 
 print(f"Final training data shape: {X_train_final.shape}")
 print(f"Final testing data shape: {X_test_final.shape}")
-
-# Clear reduced dense data if not used for final processing (if smaller sample was taken)
-if X_train_final is not X_train_dense_reduced:
-    del X_train_dense_reduced
-if X_test_final is not X_test_dense_reduced:
-    del X_test_dense_reduced
 
 n_estimators_list = [2]
 max_depth_list = [4]
@@ -191,4 +175,16 @@ for n_estimators, max_depth in zip(n_estimators_list, max_depth_list):
     log_time()
     print("Plain text model metrics:")
     log_model_metrics(y_test_final, y_pred)
+
+    log_time()
+    print("Compiling model to FHE circuit...")
+    classifier.compile(X_train_final)
+    log_time()
+    print("FHE compilation complete. Saving FHE model assets...")
+    fhe_model_dir = f"./cicids2017-models/fhe_model_{n_estimators}_estimators_{max_depth}_depth_svd_{n_components_svd}_components"
+    os.makedirs(fhe_model_dir, exist_ok=True)
+    dev = FHEModelDev(fhe_model_dir, classifier)
+    dev.save()
+    log_time()
+    print(f"FHE model saved to '{fhe_model_dir}'.")
 
