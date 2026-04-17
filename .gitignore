@@ -1,0 +1,7 @@
+*.zip
+*.pkl
+*.log
+*.csv
+*:Zone.Identifier
+venv/
+dataset/
