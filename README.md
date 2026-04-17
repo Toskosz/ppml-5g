@@ -40,7 +40,7 @@ the relevant starting point — but no labeled attack benchmark exists for those
 
 ## Model Families and Datasets
 
-### 1. `kdcup-models/` — Binary Classification
+### 1. `cicids2018-kdd-models/` — Binary Classification
 
 | Property | Value |
 |---|---|
@@ -65,7 +65,7 @@ aws s3 sync --no-sign-request s3://cse-cic-ids2018/ CIC-IDS-2018/
 
 ---
 
-### 2. `cicids2017-models/` — Binary Classification
+### 2. `cicids2018-models/` — Binary Classification
 
 | Property | Value |
 |---|---|
@@ -95,7 +95,7 @@ aws s3 sync --no-sign-request s3://cse-cic-ids2018/ CIC-IDS-2018/
 
 ---
 
-### 3. `netflow-models/` — Multi-class Classification
+### 3. `cicunswnb15-models/` — Multi-class Classification
 
 | Property | Value |
 |---|---|
@@ -162,9 +162,9 @@ pip install -r macos_requirements.txt
 
 ```bash
 # From the repo root:
-python kdcup-models/model.py
-python cicids2017-models/cicids2017-modelv3.py
-python netflow-models/model.py
+python cicids2018-kdd-models/model.py
+python cicids2018-models/cicids2018-modelv3.py
+python cicunswnb15-models/model.py
 ```
 
 Data files must be in the working directory as listed above. Each script will look for
@@ -173,9 +173,9 @@ a combined CSV cache before re-reading the folder.
 ### Single-record inference timing
 
 ```bash
-python kdcup-models/best_model_single_record.py
-python cicids2017-models/single_record_inference.py
-python netflow-models/single_record_inference.py
+python cicids2018-kdd-models/best_model_single_record.py
+python cicids2018-models/single_record_inference.py
+python cicunswnb15-models/single_record_inference.py
 ```
 
 These scripts measure per-record plaintext and FHE inference latency over 1000 records.
@@ -184,11 +184,11 @@ These scripts measure per-record plaintext and FHE inference latency over 1000 r
 
 ## Dataset History
 
-| Folder | Original Dataset | Year | Status | Replacement |
-|---|---|---|---|---|
-| `kdcup-models/` | KDD Cup 1999 / NSL-KDD | 1999/2009 | Removed from CIC servers | CSE-CIC-IDS-2018 |
-| `cicids2017-models/` | CIC-IDS-2017 | 2017 | Still available; superseded | CSE-CIC-IDS-2018 |
-| `netflow-models/` | NF-UNSW-NB15-v3 | 2021 | UQ hosting unavailable (502) | CIC-UNSW-NB15 2024 |
+| Folder | Original Dataset | Year | Status | Current Dataset | Notes |
+|---|---|---|---|---|---|
+| `cicids2018-kdd-models/` | KDD Cup 1999 / NSL-KDD | 1999/2009 | Removed from CIC servers | CSE-CIC-IDS-2018 | Named for historical origin; now uses IDS-2018 |
+| `cicids2018-models/` | CIC-IDS-2017 | 2017 | Still available; superseded | CSE-CIC-IDS-2018 | Renamed from `cicids2017-models/` |
+| `cicunswnb15-models/` | NF-UNSW-NB15-v3 | 2021 | UQ hosting unavailable (502) | CIC-UNSW-NB15 (2024) | Renamed from `netflow-models/`; uses CICFlowMeter schema |
 
 ---
 
@@ -199,12 +199,12 @@ These scripts measure per-record plaintext and FHE inference latency over 1000 r
 <!-- TODO: save processed train/test arrays to avoid re-preprocessing on every inference run -->
 <!--
   Problem:
-  cicids2017-models/single_record_inference.py and netflow-models/single_record_inference.py
+  cicids2018-models/single_record_inference.py and cicunswnb15-models/single_record_inference.py
   both call load_and_preprocess(), which reads the full CSV, splits it, and applies the saved
   preprocessor + SVD on every run. This means inference startup time is as slow as training.
 
   Fix:
-  After training (in model.py / cicids2017-modelv3.py), serialize the final arrays:
+  After training (in model.py / cicids2018-modelv3.py), serialize the final arrays:
     np.save('X_train_final_cic_ids_2018.npy', X_train_final)
     np.save('X_test_final_cic_ids_2018.npy', X_test_final)
     y_train_full.to_pickle('y_train_cic_ids_2018.pkl')
@@ -215,11 +215,11 @@ These scripts measure per-record plaintext and FHE inference latency over 1000 r
   instead of re-reading and re-splitting the CSV. Fall back to the full pipeline only if the
   .npy files are missing (first run).
 
-  Same pattern applies to netflow-models/ with filenames *_cicunsw.npy / *.pkl.
+  Same pattern applies to cicunswnb15-models/ with filenames *_cicunsw.npy / *.pkl.
 -->
 
-1. **Inference startup time** — `load_and_preprocess()` in both `cicids2017-models/single_record_inference.py`
-   and `netflow-models/single_record_inference.py` re-reads and re-splits the full CSV on every run.
+1. **Inference startup time** — `load_and_preprocess()` in both `cicids2018-models/single_record_inference.py`
+   and `cicunswnb15-models/single_record_inference.py` re-reads and re-splits the full CSV on every run.
    Training scripts should serialize the final `X_train`, `X_test`, `y_train`, `y_test` arrays
    (e.g. `np.save` / `pd.Series.to_pickle`) so inference scripts can load them directly instead of
    reprocessing from scratch.
@@ -247,7 +247,7 @@ These scripts measure per-record plaintext and FHE inference latency over 1000 r
   Implementation plan for fivegnidd-models/:
   1. Download dataset from IEEE DataPort (requires free account)
   2. Inspect column schema — likely compatible with CICFlowMeter feature names
-  3. Create model.py mirroring netflow-models/model.py structure
+  3. Create model.py mirroring cicunswnb15-models/model.py structure
   4. Create single_record_inference.py
   5. Document fit within O-RAN N6-interface context (same as other models)
   6. Note that this is the only dataset in the project collected from a real 5G testbed
