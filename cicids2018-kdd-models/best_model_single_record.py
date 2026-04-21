@@ -11,6 +11,8 @@ import os
 import pandas as pd
 import pickle
 import sklearn
+import sys
+import time as _time
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import OneHotEncoder, MinMaxScaler
 from sklearn.compose import ColumnTransformer
@@ -27,14 +29,19 @@ from sklearn.metrics import (
 from zoneinfo import ZoneInfo
 import time
 
+_wall_start = _time.time()
 
-def log_time():
-    """Prints the current time in Brasília timezone."""
+def log_time(msg=None):
     brasilia_tz = ZoneInfo("America/Sao_Paulo")
     utc_now = datetime.datetime.now(datetime.timezone.utc)
     brasilia_now = utc_now.astimezone(brasilia_tz)
     formatted_time = brasilia_now.strftime("%Y-%m-%d %H:%M:%S %Z%z")
-    print(f"[LOG] Current time: {formatted_time}")
+    elapsed = _time.time() - _wall_start
+    if msg:
+        print(f"[LOG {formatted_time}] (elapsed {elapsed:,.1f}s) {msg}")
+    else:
+        print(f"[LOG {formatted_time}] (elapsed {elapsed:,.1f}s)")
+    sys.stdout.flush()
 
 
 def clean_col_names(df):
@@ -46,15 +53,14 @@ def clean_col_names(df):
 
 
 def load_and_preprocess(n_components_svd=100):
-    """
-    Loads CSE-CIC-IDS-2018 data, applies preprocessing and TruncatedSVD.
-    Returns X_train_final, X_test_final, y_train_full, y_test_full, test_labels, preprocessor.
-    """
+    log_time(f"Loading and preprocessing data (SVD components={n_components_svd})...")
     combined_csv_path = 'CIC-IDS-2018-Combined.csv'
     data_folder = 'CIC-IDS-2018'
 
     if os.path.exists(combined_csv_path):
+        log_time(f"Loading '{combined_csv_path}'...")
         df = pd.read_csv(combined_csv_path)
+        log_time(f"Loaded {len(df)} rows.")
     else:
         all_files = glob.glob(os.path.join(data_folder, "*.csv"))
         if not all_files:
@@ -62,16 +68,18 @@ def load_and_preprocess(n_components_svd=100):
                 f"No CSV files found in '{data_folder}'. "
                 f"Download with: aws s3 sync --no-sign-request s3://cse-cic-ids2018/ {data_folder}/"
             )
+        log_time(f"Reading {len(all_files)} CSV files...")
         df_list = [pd.read_csv(f, low_memory=False) for f in all_files]
         df = pd.concat(df_list, ignore_index=True)
         df.to_csv(combined_csv_path, index=False)
+        log_time(f"Combined and saved {len(df)} rows to '{combined_csv_path}'.")
 
     df = clean_col_names(df)
     df.replace([np.inf, -np.inf], np.nan, inplace=True)
     df.dropna(inplace=True)
-
     df['binary_label'] = (df['label'] != 'benign').astype(int)
 
+    log_time("Splitting data 80/20...")
     train_df, test_df = train_test_split(df, test_size=0.2, random_state=42, stratify=df['label'])
 
     numerical_features = ['syn_cnt', 'ack_cnt', 'fin_cnt', 'rst_cnt', 'tot_l_fw_pkt']
@@ -85,45 +93,54 @@ def load_and_preprocess(n_components_svd=100):
         remainder='drop'
     )
 
+    log_time("Fitting preprocessor...")
     X_train_sparse = preprocessor.fit_transform(train_df)
     X_test_sparse = preprocessor.transform(test_df)
+    log_time(f"Preprocessing done. X_train: {X_train_sparse.shape}, X_test: {X_test_sparse.shape}")
 
     with open('preprocessor_cic_ids_2018.pkl', 'wb') as f:
         pickle.dump(preprocessor, f)
 
     y_train_full = train_df['binary_label']
     y_test_full = test_df['binary_label']
-    # Keep label strings for result printing
     test_labels = test_df['label'].reset_index(drop=True)
 
     del train_df
     del df
 
+    log_time(f"Applying TruncatedSVD ({X_train_sparse.shape[1]} → {n_components_svd})...")
     svd = TruncatedSVD(n_components=n_components_svd, random_state=42)
     X_train_final = svd.fit_transform(X_train_sparse)
     X_test_final = svd.transform(X_test_sparse)
+    log_time(f"SVD done. Explained variance: {svd.explained_variance_ratio_.sum():.4f}")
 
     del X_train_sparse
     del X_test_sparse
 
+    log_time(f"Data ready — train: {X_train_final.shape}, test: {X_test_final.shape}")
     return X_train_final, X_test_final, y_train_full, y_test_full, test_labels, preprocessor
 
 
 def predict_single_record_plaintext(estimators, depth, n_components_svd=100):
-    log_time()
-    print(f"\n--- Plaintext Inference | estimators={estimators}, depth={depth} ---")
+    config_tag = f"plaintext|n={estimators},d={depth}"
+    log_time(f"[{config_tag}] Starting plaintext inference benchmark")
 
     X_train_final, X_test_final, y_train_full, y_test_full, test_labels, _ = \
         load_and_preprocess(n_components_svd)
 
+    log_time(f"[{config_tag}] Training sklearn RandomForest ({estimators} estimators, depth={depth})...")
+    t_train_start = _time.time()
     classifier = RandomForestSklearn(
         n_estimators=estimators,
         max_depth=depth,
         random_state=42
     )
     classifier.fit(X_train_final, y_train_full)
+    log_time(f"[{config_tag}] Training completed in {_time.time() - t_train_start:,.1f}s")
 
+    log_time(f"[{config_tag}] Running inference on 1000 records...")
     inference_times = []
+    report_interval = 200
 
     for i in range(1000):
         single_record = X_test_final[i:i+1]
@@ -138,10 +155,12 @@ def predict_single_record_plaintext(estimators, depth, n_components_svd=100):
         true_label_text = test_labels.iloc[i]
         true_label_binary = 0 if true_label_text == 'benign' else 1
 
-#        print(f"Record {i+1}/1000 | Predicted: {output[0]} | True: {true_label_binary} | Time: {duration:.4f}s")
+        if (i + 1) % report_interval == 0:
+            avg_so_far = np.mean(inference_times)
+            log_time(f"[{config_tag}] Processed {i+1}/1000 records (avg {avg_so_far:.6f}s/record)")
 
-    log_time()
-    print("\nCalculating final statistics...")
+    log_time(f"[{config_tag}] All 1000 records processed.")
+    log_time("Calculating final statistics...")
 
     total_records = len(inference_times)
     total_inference_time = sum(inference_times)
@@ -155,38 +174,37 @@ def predict_single_record_plaintext(estimators, depth, n_components_svd=100):
 
 
 def predict_single_record_with_comparison(estimators, depth, records=1000, n_components_svd=100):
-    """
-    Loads a pre-compiled FHE model, runs inference on individual records,
-    and reports timing for both FHE execution and preprocessing.
-    """
-    log_time()
-    print(f"\n--- FHE Inference | estimators={estimators}, depth={depth} ---")
+    config_tag = f"fhe|n={estimators},d={depth}"
+    log_time(f"[{config_tag}] Starting FHE inference benchmark")
 
     model_dir = f"./cicids2018-kdd-models/fhe_model_{estimators}_estimators_{depth}_depth_svd_{n_components_svd}_components/"
 
-    print("\n[STEP 1] Loading pre-compiled FHE circuit and preprocessor...")
+    log_time(f"[{config_tag}] [STEP 1/4] Loading FHE circuit from '{model_dir}'...")
     try:
         fhe_model_server = FHEModelServer(model_dir)
         fhe_model_server.load()
         fhe_model_client = FHEModelClient(model_dir)
         with open('preprocessor_cic_ids_2018.pkl', 'rb') as f:
             preprocessor = pickle.load(f)
+        log_time(f"[{config_tag}] FHE circuit and preprocessor loaded.")
     except FileNotFoundError as e:
-        print(f"Error loading model files: {e}")
+        log_time(f"[{config_tag}] ERROR loading model files: {e}")
         print("Please run model.py first to generate the FHE assets.")
         return
 
-    print("\n[STEP 2] Preparing data on the CLIENT-SIDE before encryption...")
-
+    log_time(f"[{config_tag}] [STEP 2/4] Preparing data...")
     _, X_test_final, _, _, test_labels, _ = load_and_preprocess(n_components_svd)
+    log_time(f"[{config_tag}] {len(test_labels)} test records available, processing {records}.")
 
-    print(f"Found {len(test_labels)} records to process.")
-
-    print("\n[STEP 3] Processing records...")
+    log_time(f"[{config_tag}] [STEP 3/4] Running FHE inference on {records} records...")
     inference_times = []
     preprocessing_times = []
 
+    log_time(f"[{config_tag}] Generating evaluation keys...")
     serialized_evaluation_keys = fhe_model_client.get_serialized_evaluation_keys()
+    log_time(f"[{config_tag}] Evaluation keys ready ({len(serialized_evaluation_keys):,} bytes).")
+
+    report_interval = max(1, records // 10)
 
     for i in range(records):
         single_record = X_test_final[i:i+1]
@@ -211,10 +229,12 @@ def predict_single_record_with_comparison(estimators, depth, records=1000, n_com
         true_label_text = test_labels.iloc[i]
         true_label_binary = 0 if true_label_text == 'benign' else 1
 
-#        print(f"Record {i+1}/{records} | Predicted: {predicted_label} | True: {true_label_binary} | Time: {duration:.4f}s")
+        if (i + 1) % report_interval == 0:
+            avg_inf = np.mean(inference_times)
+            avg_prep = np.mean(preprocessing_times)
+            log_time(f"[{config_tag}] Processed {i+1}/{records} records (avg inference: {avg_inf:.4f}s, avg encrypt: {avg_prep:.6f}s)")
 
-    print("\n[STEP 4] Calculating final statistics...")
-    log_time()
+    log_time(f"[{config_tag}] [STEP 4/4] All {records} records processed. Computing statistics...")
 
     total_records = len(inference_times)
     total_inference_time = sum(inference_times)
@@ -230,12 +250,24 @@ def predict_single_record_with_comparison(estimators, depth, records=1000, n_com
 
 
 if __name__ == "__main__":
-    predict_single_record_plaintext(2, 4)
-    predict_single_record_plaintext(4, 2)
-    predict_single_record_plaintext(4, 4)
-    predict_single_record_plaintext(100, 2)
+    configs = [
+        ("plaintext", 2, 4),
+        ("plaintext", 4, 2),
+        ("plaintext", 4, 4),
+        ("plaintext", 100, 2),
+        ("fhe", 2, 4, 1000),
+        ("fhe", 4, 2, 1000),
+        ("fhe", 4, 4, 1000),
+        ("fhe", 100, 2, 1000),
+    ]
+    total = len(configs)
+    log_time(f"Starting benchmark suite — {total} configurations to run")
 
-    predict_single_record_with_comparison(2, 4, 1000)
-    predict_single_record_with_comparison(4, 2, 1000)
-    predict_single_record_with_comparison(4, 4, 1000)
-    predict_single_record_with_comparison(100, 2, 1000)
+    for idx, cfg in enumerate(configs, 1):
+        log_time(f"=== Configuration {idx}/{total} ===")
+        if cfg[0] == "plaintext":
+            predict_single_record_plaintext(cfg[1], cfg[2])
+        else:
+            predict_single_record_with_comparison(cfg[1], cfg[2], cfg[3])
+
+    log_time(f"All {total} configurations complete.")
