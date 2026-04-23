@@ -91,10 +91,7 @@ df['binary_label'] = (df['label'] != 'benign').astype(int)
 train_df, test_df = train_test_split(df, test_size=0.2, random_state=42, stratify=df['label'])
 print(f"Data split into {len(train_df)} training samples and {len(test_df)} testing samples.")
 
-# CICFlowMeter-V3 features available in CSE-CIC-IDS-2018
-# Note: total_length_of_bwd_packets from IDS-2017 has no direct equivalent in IDS-2018;
-# dropped in favour of a clean 5-feature numerical set.
-numerical_features_selected = ['syn_cnt', 'ack_cnt', 'fin_cnt', 'rst_cnt', 'tot_l_fw_pkt']
+numerical_features_selected = ['syn_flag_cnt', 'ack_flag_cnt', 'fin_flag_cnt', 'rst_flag_cnt', 'totlen_fwd_pkts']
 categorical_features_selected = ['protocol', 'dst_port']
 
 # Preprocessor will output a sparse matrix due to OneHotEncoder
@@ -125,66 +122,73 @@ with open('preprocessor_cic_ids_2018.pkl', 'wb') as f:
     pickle.dump(preprocessor, f)
 
 
-# --- Dimensionality Reduction using TruncatedSVD ---
-n_components_svd = 100 # <-- CRITICAL: Adjust this value
-print(f"\nApplying TruncatedSVD to reduce feature count from {X_train_sparse.shape[1]} to {n_components_svd}...")
+# --- Dimensionality Reduction + Training Loop ---
+# Configs: (n_estimators, max_depth, n_components_svd)
+configs = [
+    (2, 2, 100),
+    (2, 2, 200),
+    (4, 2, 100),
+    (4, 2, 200),
+    (4, 4, 100),
+    (4, 4, 200),
+]
 
-svd = TruncatedSVD(n_components=n_components_svd, random_state=42)
+for n_components_svd in sorted(set(c[2] for c in configs)):
+    print(f"\n{'#'*60}")
+    print(f"# SVD with {n_components_svd} components")
+    print(f"{'#'*60}")
 
-X_train_dense_reduced = svd.fit_transform(X_train_sparse)
-X_test_dense_reduced = svd.transform(X_test_sparse)
+    print(f"\nApplying TruncatedSVD ({X_train_sparse.shape[1]} → {n_components_svd})...")
+    svd = TruncatedSVD(n_components=n_components_svd, random_state=42)
+    X_train_final = svd.fit_transform(X_train_sparse)
+    X_test_final = svd.transform(X_test_sparse)
+    print(f"SVD done. X_train: {X_train_final.shape}, X_test: {X_test_final.shape}. "
+          f"Explained variance: {svd.explained_variance_ratio_.sum():.4f}")
 
-print(f"Shape after SVD reduction (dense) - X_train: {X_train_dense_reduced.shape}, X_test: {X_test_dense_reduced.shape}")
+    svd_pkl_path = f'svd_cic_ids_2018_{n_components_svd}.pkl'
+    with open(svd_pkl_path, 'wb') as f:
+        pickle.dump(svd, f)
+    print(f"SVD saved to '{svd_pkl_path}'.")
 
-with open('svd_cic_ids_2018.pkl', 'wb') as f:
-    pickle.dump(svd, f)
-print("SVD saved to 'svd_cic_ids_2018.pkl'.")
+    y_train_final = y_train_full
+    y_test_final = y_test_full
 
-del X_train_sparse
-del X_test_sparse
+    for n_estimators, max_depth, _ in [c for c in configs if c[2] == n_components_svd]:
+        print("\n" + "="*60)
+        print(f"STARTING TEST FOR n_estimators={n_estimators}, max_depth={max_depth}, svd={n_components_svd}")
+        print("="*60)
 
-X_train_final = X_train_dense_reduced
-y_train_final = y_train_full
+        log_time()
+        print(f"Training RandomForestClassifier...")
+        classifier = RandomForestClassifier(
+            n_estimators=n_estimators,
+            max_depth=max_depth,
+            random_state=42
+        )
+        classifier.fit(X_train_final, y_train_final)
 
-X_test_final = X_test_dense_reduced
-y_test_final = y_test_full
+        log_time()
+        print("Start prediction in the clear...")
+        y_pred = classifier.predict(X_test_final)
+        log_time()
+        print("Plain text model metrics:")
+        log_model_metrics(y_test_final, y_pred)
 
-print(f"Final training data shape: {X_train_final.shape}")
-print(f"Final testing data shape: {X_test_final.shape}")
+        log_time()
+        print("Compiling model to FHE circuit...")
+        classifier.compile(X_train_final)
+        log_time()
+        print("FHE compilation complete. Saving FHE model assets...")
+        fhe_model_dir = f"./fhe_model_{n_estimators}_estimators_{max_depth}_depth_svd_{n_components_svd}_components"
+        os.makedirs(fhe_model_dir, exist_ok=True)
+        dev = FHEModelDev(fhe_model_dir, classifier)
+        dev.save()
+        log_time()
+        print(f"FHE model saved to '{fhe_model_dir}'.")
 
-n_estimators_list = [2]
-max_depth_list = [4]
+        del classifier
 
-for n_estimators, max_depth in zip(n_estimators_list, max_depth_list):
-    print("\n" + "="*60)
-    print(f"STARTING TEST FOR n_estimators = {n_estimators}, max_depth = {max_depth}")
-    print("="*60)
-
-    log_time()
-    print(f"Training RandomForestClassifier...")
-    classifier = RandomForestClassifier(
-        n_estimators=n_estimators,
-        max_depth=max_depth,
-        random_state=42
-    )
-    classifier.fit(X_train_final, y_train_final)
-
-    log_time()
-    print("Start prediction in the clear...")
-    y_pred = classifier.predict(X_test_final)
-    log_time()
-    print("Plain text model metrics:")
-    log_model_metrics(y_test_final, y_pred)
-
-    log_time()
-    print("Compiling model to FHE circuit...")
-    classifier.compile(X_train_final)
-    log_time()
-    print("FHE compilation complete. Saving FHE model assets...")
-     fhe_model_dir = f"./cicids2018-models/fhe_model_{n_estimators}_estimators_{max_depth}_depth_svd_{n_components_svd}_components"
-    os.makedirs(fhe_model_dir, exist_ok=True)
-    dev = FHEModelDev(fhe_model_dir, classifier)
-    dev.save()
-    log_time()
-    print(f"FHE model saved to '{fhe_model_dir}'.")
+    del X_train_final
+    del X_test_final
+    del svd
 

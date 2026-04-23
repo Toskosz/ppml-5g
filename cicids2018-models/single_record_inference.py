@@ -2,8 +2,8 @@
 # Replaces: CIC-IDS-2017
 # Prerequisite: run cicids2018-modelv3.py first to produce:
 #   - preprocessor_cic_ids_2018.pkl
-#   - svd_cic_ids_2018.pkl
-#   - cicids2018-models/fhe_model_2_estimators_4_depth_svd_100_components/
+#   - svd_cic_ids_2018_100.pkl / svd_cic_ids_2018_200.pkl
+#   - fhe_model_*_estimators_*_depth_svd_*_components/
 
 from concrete.ml.deployment import FHEModelClient, FHEModelServer
 from concrete.ml.sklearn.rf import RandomForestClassifier
@@ -35,13 +35,13 @@ def clean_col_names(df):
     return df
 
 
-def load_and_preprocess():
-     """
-     Loads CSE-CIC-IDS-2018 data and applies the saved preprocessor + SVD.
-     Returns X_train_final, X_test_final, y_train_full, y_test_full, test_labels.
-     Requires preprocessor_cic_ids_2018.pkl and svd_cic_ids_2018.pkl to exist
-     (produced by cicids2018-modelv3.py).
-     """
+def load_and_preprocess(n_components_svd=100):
+    """
+    Loads CSE-CIC-IDS-2018 data and applies the saved preprocessor + SVD.
+    Returns X_train_final, X_test_final, y_train_full, y_test_full, test_labels.
+    Requires preprocessor_cic_ids_2018.pkl and svd_cic_ids_2018_{n}.pkl to exist
+    (produced by cicids2018-modelv3.py).
+    """
     combined_csv_path = 'CIC-IDS-2018-Combined.csv'
     data_folder = 'CIC-IDS-2018'
 
@@ -85,8 +85,8 @@ def load_and_preprocess():
     del train_df
     del test_df
 
-    print("Loading saved SVD...")
-    with open('svd_cic_ids_2018.pkl', 'rb') as f:
+    print(f"Loading saved SVD ({n_components_svd} components)...")
+    with open(f'svd_cic_ids_2018_{n_components_svd}.pkl', 'rb') as f:
         svd = pickle.load(f)
 
     X_train_final = svd.transform(X_train_sparse)
@@ -101,7 +101,7 @@ def predict_single_record_plaintext(estimators, depth, n_components_svd=100):
     log_time()
     print(f"\n--- Plaintext Inference | estimators={estimators}, depth={depth} ---")
 
-    X_train_final, X_test_final, y_train_full, _, test_labels = load_and_preprocess()
+    X_train_final, X_test_final, y_train_full, _, test_labels = load_and_preprocess(n_components_svd)
 
     classifier = RandomForestClassifier(
         n_estimators=estimators,
@@ -148,7 +148,7 @@ def predict_single_record_with_comparison(estimators, depth, records=1000, n_com
     log_time()
     print(f"\n--- FHE Inference | estimators={estimators}, depth={depth} ---")
 
-     model_dir = f"./cicids2018-models/fhe_model_{estimators}_estimators_{depth}_depth_svd_{n_components_svd}_components/"
+    model_dir = f"./fhe_model_{estimators}_estimators_{depth}_depth_svd_{n_components_svd}_components/"
 
     print("\n[STEP 1] Loading pre-compiled FHE circuit...")
     try:
@@ -157,11 +157,11 @@ def predict_single_record_with_comparison(estimators, depth, records=1000, n_com
         fhe_model_client = FHEModelClient(model_dir)
     except FileNotFoundError as e:
         print(f"Error loading model files: {e}")
-        print("Please run cicids2017-modelv3.py first to generate the FHE assets.")
+        print("Please run cicids2018-modelv3.py first to generate the FHE assets.")
         return
 
     print("\n[STEP 2] Preparing data on the CLIENT-SIDE before encryption...")
-    _, X_test_final, _, _, test_labels = load_and_preprocess()
+    _, X_test_final, _, _, test_labels = load_and_preprocess(n_components_svd)
     print(f"Found {len(test_labels)} records to process.")
 
     print("\n[STEP 3] Processing records...")
@@ -210,5 +210,15 @@ def predict_single_record_with_comparison(estimators, depth, records=1000, n_com
 
 
 if __name__ == "__main__":
-    predict_single_record_plaintext(2, 4)
-    predict_single_record_with_comparison(2, 4, records=1000)
+    configs = [
+        (2, 2, 100),
+        (2, 2, 200),
+        (4, 2, 100),
+        (4, 2, 200),
+        (4, 4, 100),
+        (4, 4, 200),
+    ]
+    for estimators, depth, svd in configs:
+        predict_single_record_plaintext(estimators, depth, n_components_svd=svd)
+    for estimators, depth, svd in configs:
+        predict_single_record_with_comparison(estimators, depth, records=1000, n_components_svd=svd)

@@ -82,7 +82,7 @@ def load_and_preprocess(n_components_svd=100):
     log_time("Splitting data 80/20...")
     train_df, test_df = train_test_split(df, test_size=0.2, random_state=42, stratify=df['label'])
 
-    numerical_features = ['syn_cnt', 'ack_cnt', 'fin_cnt', 'rst_cnt', 'tot_l_fw_pkt']
+    numerical_features = ['syn_flag_cnt', 'ack_flag_cnt', 'fin_flag_cnt', 'rst_flag_cnt', 'totlen_fwd_pkts']
     categorical_features = ['protocol', 'dst_port']
 
     preprocessor = ColumnTransformer(
@@ -177,7 +177,7 @@ def predict_single_record_with_comparison(estimators, depth, records=1000, n_com
     config_tag = f"fhe|n={estimators},d={depth}"
     log_time(f"[{config_tag}] Starting FHE inference benchmark")
 
-    model_dir = f"./cicids2018-kdd-models/fhe_model_{estimators}_estimators_{depth}_depth_svd_{n_components_svd}_components/"
+    model_dir = f"./fhe_model_{estimators}_estimators_{depth}_depth_svd_{n_components_svd}_components/"
 
     log_time(f"[{config_tag}] [STEP 1/4] Loading FHE circuit from '{model_dir}'...")
     try:

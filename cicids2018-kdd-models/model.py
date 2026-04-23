@@ -113,7 +113,7 @@ train_df, test_df = train_test_split(df, test_size=0.2, random_state=42, stratif
 log_time(f"Train: {len(train_df)}, Test: {len(test_df)}.")
 
 # CICFlowMeter-V3 features available in CSE-CIC-IDS-2018
-numerical_features = ['syn_cnt', 'ack_cnt', 'fin_cnt', 'rst_cnt', 'tot_l_fw_pkt']
+numerical_features = ['syn_flag_cnt', 'ack_flag_cnt', 'fin_flag_cnt', 'rst_flag_cnt', 'totlen_fwd_pkts']
 categorical_features = ['protocol', 'dst_port']
 
 preprocessor = ColumnTransformer(

@@ -50,14 +50,14 @@ Training scripts expect data at the working directory (e.g. `CIC-IDS-2018/` fold
 - No package structure, no tests, no CI, no linter/formatter — each directory is a standalone experiment.
 - `cicids2018-kdd-models/` and `cicids2018-models/` are **binary** classifiers (benign/attack).
 - `cicunswnb15-models/` is **multi-class** (9 categories); its metrics use `average='weighted'`.
-- All three share the same 7-feature CICFlowMeter schema: `syn_cnt`, `ack_cnt`, `fin_cnt`, `rst_cnt`, `tot_l_fw_pkt` (numerical) + `protocol`, `dst_port` (categorical).
+- All three share the same 7-feature CICFlowMeter schema: `syn_flag_cnt`, `ack_flag_cnt`, `fin_flag_cnt`, `rst_flag_cnt`, `totlen_fwd_pkts` (numerical) + `protocol`, `dst_port` (categorical).
 - Preprocessing pipeline: `MinMaxScaler` + `OneHotEncoder` → `TruncatedSVD(n_components)` → saved as `.pkl`.
 
 ## Gotchas
 
 - **CWD matters.** All scripts use relative paths. Run `python model.py` from inside the model directory.
 - **`*.pkl` is gitignored**, but some legacy `.pkl` files were committed before the gitignore rule. Do not assume all preprocessors are in the repo.
-- **`cicids2018-kdd-models/`** uses `TruncatedSVD(100)`. **`cicids2018-models/`** uses `TruncatedSVD(200)`. The SVD dimension differs.
+- **`cicids2018-kdd-models/`** uses `TruncatedSVD(100)`. **`cicids2018-models/`** trains with both `TruncatedSVD(100)` and `TruncatedSVD(200)`.
 - Inference scripts (`single_record_inference.py`) re-run the full preprocessing pipeline on every invocation (they call `load_and_preprocess()` which re-reads the CSV). This is a known performance issue documented in README TODOs.
 - The `cicunswnb15-models/` label column is `Label` (capital L), while the CIC-IDS-2018 models use `label` (lowercase) after `clean_col_names()`.
 - `Train.txt` and `Test.txt` at the repo root are legacy KDD Cup 1999 data files — they are **not** used by any current model.
