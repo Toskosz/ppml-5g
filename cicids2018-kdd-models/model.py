@@ -182,8 +182,14 @@ print(f"\n{'Config':>30s} | {'Phase':>20s} | {'Wall Time':>12s}")
 print("-" * 70)
 
 n_estimators_list = [2, 4, 4, 100]
-max_depth_list = [4, 2, 4, 2]
+max_depth_list = [2, 2, 4, 2]
 total_configs = len(n_estimators_list)
+
+print("\n" + "#" * 70)
+print("#  PHASE 1: PLAINTEXT TRAINING & EVALUATION")
+print("#" * 70)
+
+trained_configs = []
 
 for idx, (n_estimators, max_depth) in enumerate(zip(n_estimators_list, max_depth_list), 1):
     config_tag = f"n={n_estimators}, d={max_depth}"
@@ -209,6 +215,47 @@ for idx, (n_estimators, max_depth) in enumerate(zip(n_estimators_list, max_depth
     pred_dur = _time.time() - t0
     log_time(f"[{config_tag}] Clear prediction completed in {pred_dur:,.1f}s")
 
+    log_time(f"[{config_tag}] Plaintext metrics:")
+    log_model_metrics(y_test_final, y_pred)
+
+    trained_configs.append({
+        'idx': idx,
+        'n_estimators': n_estimators,
+        'max_depth': max_depth,
+        'config_tag': config_tag,
+        'classifier': classifier,
+        'train_dur': train_dur,
+        'pred_dur': pred_dur,
+    })
+
+print("\n" + "=" * 70)
+print("  PLAINTEXT SUMMARY")
+print("=" * 70)
+print(f"{'Config':>20s} | {'Train (s)':>10s} | {'Predict (s)':>12s}")
+print("-" * 50)
+for cfg in trained_configs:
+    print(f"{cfg['config_tag']:>20s} | {cfg['train_dur']:>10.1f} | {cfg['pred_dur']:>12.1f}")
+print()
+
+log_time("Phase 1 complete — all plaintext variants trained and evaluated.")
+
+print("\n" + "#" * 70)
+print("#  PHASE 2: FHE COMPILATION & SIMULATION")
+print("#" * 70)
+
+for cfg in trained_configs:
+    config_tag = cfg['config_tag']
+    n_estimators = cfg['n_estimators']
+    max_depth = cfg['max_depth']
+    classifier = cfg['classifier']
+    train_dur = cfg['train_dur']
+    pred_dur = cfg['pred_dur']
+
+    print(f"\n{'='*60}")
+    print(f"  FHE for CONFIG {cfg['idx']}/{total_configs}: n_estimators={n_estimators}, max_depth={max_depth}")
+    print(f"{'='*60}")
+    sys.stdout.flush()
+
     t0 = _time.time()
     log_time(f"[{config_tag}] Compiling FHE circuit (this may take a long time)...")
     classifier.compile(X_train_final)
@@ -221,9 +268,6 @@ for idx, (n_estimators, max_depth) in enumerate(zip(n_estimators_list, max_depth
     fhe_dur = _time.time() - t0
     log_time(f"[{config_tag}] FHE simulation completed in {fhe_dur:,.1f}s")
 
-    log_time(f"[{config_tag}] Plain text metrics:")
-    log_model_metrics(y_test_final, y_pred)
-
     log_time(f"[{config_tag}] FHE metrics:")
     log_model_metrics(y_test_final, y_pred_fhe)
 
@@ -232,5 +276,17 @@ for idx, (n_estimators, max_depth) in enumerate(zip(n_estimators_list, max_depth
     dev = FHEModelDev(model_dir, classifier)
     dev.save()
     log_time(f"[{config_tag}] FHE assets saved. Summary — train: {train_dur:,.1f}s, predict: {pred_dur:,.1f}s, compile: {compile_dur:,.1f}s, fhe_sim: {fhe_dur:,.1f}s")
+
+    cfg['compile_dur'] = compile_dur
+    cfg['fhe_dur'] = fhe_dur
+
+print("\n" + "=" * 70)
+print("  FHE SUMMARY")
+print("=" * 70)
+print(f"{'Config':>20s} | {'Train (s)':>10s} | {'Predict (s)':>12s} | {'Compile (s)':>12s} | {'FHE Sim (s)':>12s}")
+print("-" * 80)
+for cfg in trained_configs:
+    print(f"{cfg['config_tag']:>20s} | {cfg['train_dur']:>10.1f} | {cfg['pred_dur']:>12.1f} | {cfg['compile_dur']:>12.1f} | {cfg['fhe_dur']:>12.1f}")
+print()
 
 log_time("All configurations complete.")
