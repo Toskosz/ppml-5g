@@ -105,6 +105,8 @@ else:
             chunk[col] = pd.to_numeric(chunk[col], errors='coerce')
         chunk.replace([np.inf, -np.inf], np.nan, inplace=True)
         chunk.dropna(subset=needed_cols, inplace=True)
+        for col in categorical_features:
+            chunk[col] = chunk[col].astype(str)
         chunks.append(chunk[needed_cols])
     df = pd.concat(chunks, ignore_index=True)
     del chunks
@@ -120,6 +122,8 @@ df.dropna(inplace=True)
 for col in numerical_features:
     df[col] = pd.to_numeric(df[col], errors='coerce')
 df.dropna(subset=numerical_features, inplace=True)
+for col in categorical_features:
+    df[col] = df[col].astype(str)
 log_time(f"Dropped {rows_before - len(df)} rows with NaN/Inf. Remaining: {len(df)} rows.")
 
 df['binary_label'] = (df['label'] != 'benign').astype(int)
