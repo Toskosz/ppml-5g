@@ -126,6 +126,7 @@ for col in categorical_features:
     df[col] = df[col].astype(str)
 log_time(f"Dropped {rows_before - len(df)} rows with NaN/Inf. Remaining: {len(df)} rows.")
 
+df['label'] = df['label'].str.strip().str.lower()
 df['binary_label'] = (df['label'] != 'benign').astype(int)
 log_time(f"Label distribution — benign: {(df['binary_label']==0).sum()}, attack: {(df['binary_label']==1).sum()}")
 
