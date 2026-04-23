@@ -101,6 +101,8 @@ else:
         log_time(f"  Reading file {i+1}/{len(all_files)}: {os.path.basename(f)}...")
         chunk = pd.read_csv(f, low_memory=False)
         chunk = clean_col_names(chunk)
+        for col in numerical_features:
+            chunk[col] = pd.to_numeric(chunk[col], errors='coerce')
         chunk.replace([np.inf, -np.inf], np.nan, inplace=True)
         chunk.dropna(subset=needed_cols, inplace=True)
         chunks.append(chunk[needed_cols])
@@ -115,6 +117,9 @@ df = clean_col_names(df)
 rows_before = len(df)
 df.replace([np.inf, -np.inf], np.nan, inplace=True)
 df.dropna(inplace=True)
+for col in numerical_features:
+    df[col] = pd.to_numeric(df[col], errors='coerce')
+df.dropna(subset=numerical_features, inplace=True)
 log_time(f"Dropped {rows_before - len(df)} rows with NaN/Inf. Remaining: {len(df)} rows.")
 
 df['binary_label'] = (df['label'] != 'benign').astype(int)
