@@ -76,6 +76,10 @@ def clean_col_names(df):
 
 log_time(f"Starting model.py — scikit-learn {sklearn.__version__}")
 
+numerical_features = ['syn_flag_cnt', 'ack_flag_cnt', 'fin_flag_cnt', 'rst_flag_cnt', 'totlen_fwd_pkts']
+categorical_features = ['protocol', 'dst_port']
+needed_cols = numerical_features + categorical_features + ['label']
+
 data_folder = 'CIC-IDS-2018'
 combined_csv_path = 'CIC-IDS-2018-Combined.csv'
 
@@ -85,15 +89,23 @@ if os.path.exists(combined_csv_path):
     log_time(f"Loaded {len(df)} rows from '{combined_csv_path}'.")
 else:
     log_time(f"No combined file found. Assembling data from '{data_folder}' folder...")
-    all_files = glob.glob(os.path.join(data_folder, "*.csv"))
+    all_files = sorted(glob.glob(os.path.join(data_folder, "*.csv")))
     if not all_files:
         raise FileNotFoundError(
             f"No CSV files found in '{data_folder}'. "
             f"Download with: aws s3 sync --no-sign-request s3://cse-cic-ids2018/ {data_folder}/"
         )
-    log_time(f"Found {len(all_files)} CSV files. Reading...")
-    df_list = [pd.read_csv(f, low_memory=False) for f in all_files]
-    df = pd.concat(df_list, ignore_index=True)
+    log_time(f"Found {len(all_files)} CSV files. Reading one at a time...")
+    chunks = []
+    for i, f in enumerate(all_files):
+        log_time(f"  Reading file {i+1}/{len(all_files)}: {os.path.basename(f)}...")
+        chunk = pd.read_csv(f, low_memory=False)
+        chunk = clean_col_names(chunk)
+        chunk.replace([np.inf, -np.inf], np.nan, inplace=True)
+        chunk.dropna(subset=needed_cols, inplace=True)
+        chunks.append(chunk[needed_cols])
+    df = pd.concat(chunks, ignore_index=True)
+    del chunks
     log_time(f"Combined {len(all_files)} files → {len(df)} rows.")
     df.to_csv(combined_csv_path, index=False)
     log_time(f"Saved combined data to '{combined_csv_path}'.")
@@ -111,10 +123,6 @@ log_time(f"Label distribution — benign: {(df['binary_label']==0).sum()}, attac
 log_time("Splitting data 80/20 (stratified)...")
 train_df, test_df = train_test_split(df, test_size=0.2, random_state=42, stratify=df['label'])
 log_time(f"Train: {len(train_df)}, Test: {len(test_df)}.")
-
-# CICFlowMeter-V3 features available in CSE-CIC-IDS-2018
-numerical_features = ['syn_flag_cnt', 'ack_flag_cnt', 'fin_flag_cnt', 'rst_flag_cnt', 'totlen_fwd_pkts']
-categorical_features = ['protocol', 'dst_port']
 
 preprocessor = ColumnTransformer(
     transformers=[
