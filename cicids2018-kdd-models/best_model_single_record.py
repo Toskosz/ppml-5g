@@ -27,7 +27,6 @@ from sklearn.metrics import (
     recall_score
 )
 from zoneinfo import ZoneInfo
-import time
 
 _wall_start = _time.time()
 
@@ -77,6 +76,12 @@ def load_and_preprocess(n_components_svd=100):
     df = clean_col_names(df)
     df.replace([np.inf, -np.inf], np.nan, inplace=True)
     df.dropna(inplace=True)
+    for col in numerical_features:
+        df[col] = pd.to_numeric(df[col], errors='coerce')
+    df.dropna(subset=numerical_features, inplace=True)
+    for col in categorical_features:
+        df[col] = df[col].astype(str)
+    df['label'] = df['label'].str.strip().str.lower()
     df['binary_label'] = (df['label'] != 'benign').astype(int)
 
     log_time("Splitting data 80/20...")
@@ -173,6 +178,61 @@ def predict_single_record_plaintext(estimators, depth, n_components_svd=100):
     print("="*61 + "\n")
 
 
+def prepare_test_data_with_saved_artifacts(n_components_svd=100):
+    log_time(f"Loading test data using saved preprocessor and SVD artifacts...")
+    numerical_features = ['syn_flag_cnt', 'ack_flag_cnt', 'fin_flag_cnt', 'rst_flag_cnt', 'totlen_fwd_pkts']
+    categorical_features = ['protocol', 'dst_port']
+
+    with open('preprocessor_cic_ids_2018.pkl', 'rb') as f:
+        preprocessor = pickle.load(f)
+    log_time("Loaded saved preprocessor.")
+
+    with open('svd_cic_ids_2018.pkl', 'rb') as f:
+        svd = pickle.load(f)
+    log_time("Loaded saved SVD.")
+
+    combined_csv_path = 'CIC-IDS-2018-Combined.csv'
+    data_folder = 'CIC-IDS-2018'
+
+    if os.path.exists(combined_csv_path):
+        log_time(f"Loading '{combined_csv_path}'...")
+        df = pd.read_csv(combined_csv_path)
+        log_time(f"Loaded {len(df)} rows.")
+    else:
+        all_files = sorted(glob.glob(os.path.join(data_folder, "*.csv")))
+        if not all_files:
+            raise FileNotFoundError(
+                f"No CSV files found in '{data_folder}'. "
+                f"Download with: aws s3 sync --no-sign-request s3://cse-cic-ids2018/ {data_folder}/"
+            )
+        log_time(f"Reading {len(all_files)} CSV files...")
+        df_list = [pd.read_csv(f, low_memory=False) for f in all_files]
+        df = pd.concat(df_list, ignore_index=True)
+        df.to_csv(combined_csv_path, index=False)
+        log_time(f"Combined and saved {len(df)} rows to '{combined_csv_path}'.")
+
+    df = clean_col_names(df)
+    df.replace([np.inf, -np.inf], np.nan, inplace=True)
+    df.dropna(inplace=True)
+    for col in numerical_features:
+        df[col] = pd.to_numeric(df[col], errors='coerce')
+    df.dropna(subset=numerical_features, inplace=True)
+    for col in categorical_features:
+        df[col] = df[col].astype(str)
+    df['label'] = df['label'].str.strip().str.lower()
+    df['binary_label'] = (df['label'] != 'benign').astype(int)
+
+    _, test_df = train_test_split(df, test_size=0.2, random_state=42, stratify=df['label'])
+    test_labels = test_df['label'].reset_index(drop=True)
+
+    X_test_sparse = preprocessor.transform(test_df)
+    X_test_final = svd.transform(X_test_sparse)
+    log_time(f"Test data ready — {X_test_final.shape}, using saved preprocessor and SVD.")
+
+    del df
+    return X_test_final, test_labels
+
+
 def predict_single_record_with_comparison(estimators, depth, records=1000, n_components_svd=100):
     config_tag = f"fhe|n={estimators},d={depth}"
     log_time(f"[{config_tag}] Starting FHE inference benchmark")
@@ -184,16 +244,14 @@ def predict_single_record_with_comparison(estimators, depth, records=1000, n_com
         fhe_model_server = FHEModelServer(model_dir)
         fhe_model_server.load()
         fhe_model_client = FHEModelClient(model_dir)
-        with open('preprocessor_cic_ids_2018.pkl', 'rb') as f:
-            preprocessor = pickle.load(f)
-        log_time(f"[{config_tag}] FHE circuit and preprocessor loaded.")
+        log_time(f"[{config_tag}] FHE circuit loaded.")
     except FileNotFoundError as e:
         log_time(f"[{config_tag}] ERROR loading model files: {e}")
         print("Please run model.py first to generate the FHE assets.")
         return
 
-    log_time(f"[{config_tag}] [STEP 2/4] Preparing data...")
-    _, X_test_final, _, _, test_labels, _ = load_and_preprocess(n_components_svd)
+    log_time(f"[{config_tag}] [STEP 2/4] Preparing data using saved artifacts...")
+    X_test_final, test_labels = prepare_test_data_with_saved_artifacts(n_components_svd)
     log_time(f"[{config_tag}] {len(test_labels)} test records available, processing {records}.")
 
     log_time(f"[{config_tag}] [STEP 3/4] Running FHE inference on {records} records...")
@@ -254,11 +312,9 @@ if __name__ == "__main__":
         ("plaintext", 2, 4),
         ("plaintext", 4, 2),
         ("plaintext", 4, 4),
-        ("plaintext", 100, 2),
         ("fhe", 2, 4, 1000),
         ("fhe", 4, 2, 1000),
         ("fhe", 4, 4, 1000),
-        ("fhe", 100, 2, 1000),
     ]
     total = len(configs)
     log_time(f"Starting benchmark suite — {total} configurations to run")
