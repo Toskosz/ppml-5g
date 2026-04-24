@@ -249,7 +249,7 @@ def predict_single_record_plaintext(estimators, depth, n_components_svd=100):
     return {'config_tag': config_tag, 'pred_dur': pred_dur}
 
 
-def prepare_test_data_with_saved_artifacts(n_components_svd=100):
+def prepare_test_data_with_saved_artifacts():
     log_time("Loading test data using saved preprocessor and SVD artifacts...")
 
     with open('preprocessor_cic_ids_2018.pkl', 'rb') as f:
@@ -346,7 +346,7 @@ def predict_single_record_with_comparison(estimators, depth, records=1000, n_com
         return
 
     log_time(f"[{config_tag}] [STEP 2/4] Preparing data using saved artifacts...")
-    X_test_final, y_test_full, test_labels = prepare_test_data_with_saved_artifacts(n_components_svd)
+    X_test_final, y_test_full, test_labels = prepare_test_data_with_saved_artifacts()
     log_time(f"[{config_tag}] {len(test_labels)} test records available, processing {records}.")
 
     log_time(f"[{config_tag}] [STEP 3/4] Running FHE inference on {records} records...")
@@ -414,9 +414,11 @@ if __name__ == "__main__":
     log_time(f"Starting best_model_single_record.py — scikit-learn {sklearn.__version__}")
 
     configs = [
+        ("plaintext", 2, 2),
         ("plaintext", 2, 4),
         ("plaintext", 4, 2),
         ("plaintext", 4, 4),
+        ("fhe", 2, 2, 1000),
         ("fhe", 2, 4, 1000),
         ("fhe", 4, 2, 1000),
         ("fhe", 4, 4, 1000),

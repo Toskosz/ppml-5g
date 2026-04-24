@@ -181,8 +181,8 @@ log_time(f"Final training data: {X_train_final.shape}, testing data: {X_test_fin
 print(f"\n{'Config':>30s} | {'Phase':>20s} | {'Wall Time':>12s}")
 print("-" * 70)
 
-n_estimators_list = [2, 4, 4, 100]
-max_depth_list = [2, 2, 4, 2]
+n_estimators_list = [2, 2, 4, 4]
+max_depth_list = [2, 4, 2, 4]
 total_configs = len(n_estimators_list)
 
 print("\n" + "#" * 70)
