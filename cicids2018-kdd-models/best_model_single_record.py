@@ -184,19 +184,29 @@ def predict_single_record_plaintext(estimators, depth, n_components_svd=100):
     sys.stdout.flush()
     log_time(f"[{config_tag}] Starting plaintext inference benchmark")
 
-    X_train_final, X_test_final, y_train_full, y_test_full, test_labels, _ = \
-        load_and_preprocess(n_components_svd)
+    pkl_path = f"plaintext_model_{estimators}_estimators_{depth}_depth.pkl"
+    if os.path.exists(pkl_path):
+        log_time(f"[{config_tag}] Loading saved plaintext model from '{pkl_path}'...")
+        with open(pkl_path, 'rb') as f:
+            classifier = pickle.load(f)
+        log_time(f"[{config_tag}] Model loaded from disk.")
+    else:
+        log_time(f"[{config_tag}] No saved model found at '{pkl_path}', training from scratch...")
+        X_train_final, X_test_final, y_train_full, y_test_full, test_labels, _ = \
+            load_and_preprocess(n_components_svd)
 
-    log_time(f"[{config_tag}] Training sklearn RandomForest ({estimators} estimators, depth={depth})...")
-    t_train_start = _time.time()
-    classifier = RandomForestSklearn(
-        n_estimators=estimators,
-        max_depth=depth,
-        random_state=42
-    )
-    classifier.fit(X_train_final, y_train_full)
-    train_dur = _time.time() - t_train_start
-    log_time(f"[{config_tag}] Training completed in {train_dur:,.1f}s")
+        log_time(f"[{config_tag}] Training sklearn RandomForest ({estimators} estimators, depth={depth})...")
+        t_train_start = _time.time()
+        classifier = RandomForestSklearn(
+            n_estimators=estimators,
+            max_depth=depth,
+            random_state=42
+        )
+        classifier.fit(X_train_final, y_train_full)
+        train_dur = _time.time() - t_train_start
+        log_time(f"[{config_tag}] Training completed in {train_dur:,.1f}s")
+
+    X_test_final, y_test_full, _ = prepare_test_data_with_saved_artifacts(n_components_svd)
 
     t0 = _time.time()
     log_time(f"[{config_tag}] Starting clear (plaintext) prediction on {X_test_final.shape[0]} samples...")
@@ -204,7 +214,6 @@ def predict_single_record_plaintext(estimators, depth, n_components_svd=100):
     pred_dur = _time.time() - t0
     log_time(f"[{config_tag}] Clear prediction completed in {pred_dur:,.1f}s")
 
-    log_time(f"[{config_tag}] Plaintext metrics:")
     log_model_metrics(y_test_full, y_pred)
 
     log_time(f"[{config_tag}] Running single-record inference on 1000 records...")
@@ -237,7 +246,7 @@ def predict_single_record_plaintext(estimators, depth, n_components_svd=100):
     print(f"Mean inference time/record: {mean_inference_time:.6f} seconds")
     print("="*61 + "\n")
 
-    return {'config_tag': config_tag, 'train_dur': train_dur, 'pred_dur': pred_dur}
+    return {'config_tag': config_tag, 'pred_dur': pred_dur}
 
 
 def prepare_test_data_with_saved_artifacts(n_components_svd=100):
@@ -431,10 +440,10 @@ if __name__ == "__main__":
         print("\n" + "=" * 70)
         print("  PLAINTEXT SUMMARY")
         print("=" * 70)
-        print(f"{'Config':>20s} | {'Train (s)':>10s} | {'Predict (s)':>12s}")
-        print("-" * 50)
+        print(f"{'Config':>20s} | {'Predict (s)':>12s}")
+        print("-" * 40)
         for r in plaintext_results:
-            print(f"{r['config_tag']:>20s} | {r['train_dur']:>10.1f} | {r['pred_dur']:>12.1f}")
+            print(f"{r['config_tag']:>20s} | {r['pred_dur']:>12.1f}")
         print()
 
     log_time("Phase 1 complete — all plaintext variants evaluated.")

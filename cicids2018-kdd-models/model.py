@@ -218,6 +218,11 @@ for idx, (n_estimators, max_depth) in enumerate(zip(n_estimators_list, max_depth
     log_time(f"[{config_tag}] Plaintext metrics:")
     log_model_metrics(y_test_final, y_pred)
 
+    pkl_path = f"plaintext_model_{n_estimators}_estimators_{max_depth}_depth.pkl"
+    with open(pkl_path, 'wb') as f:
+        pickle.dump(classifier, f)
+    log_time(f"[{config_tag}] Plaintext model saved to '{pkl_path}'.")
+
     trained_configs.append({
         'idx': idx,
         'n_estimators': n_estimators,
