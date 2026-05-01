@@ -165,9 +165,10 @@ def load_and_preprocess(n_components_svd=100):
     X_test_final = svd.transform(X_test_sparse)
     log_time(f"SVD done. X_train: {X_train_final.shape}, X_test: {X_test_final.shape}. Explained variance ratio sum: {svd.explained_variance_ratio_.sum():.4f}")
 
-    with open('svd_cic_ids_2018.pkl', 'wb') as f:
+    svd_pkl_path = f'svd_cic_ids_2018_{n_components_svd}.pkl'
+    with open(svd_pkl_path, 'wb') as f:
         pickle.dump(svd, f)
-    log_time("SVD saved to 'svd_cic_ids_2018.pkl'.")
+    log_time(f"SVD saved to '{svd_pkl_path}'.")
 
     del X_train_sparse
     del X_test_sparse
@@ -177,14 +178,14 @@ def load_and_preprocess(n_components_svd=100):
 
 
 def predict_single_record_plaintext(estimators, depth, n_components_svd=100):
-    config_tag = f"n={estimators}, d={depth}"
+    config_tag = f"n={estimators}, d={depth}, svd={n_components_svd}"
     print(f"\n{'='*60}")
-    print(f"  PLAINTEXT CONFIG: n_estimators={estimators}, max_depth={depth}")
+    print(f"  PLAINTEXT CONFIG: n_estimators={estimators}, max_depth={depth}, svd={n_components_svd}")
     print(f"{'='*60}")
     sys.stdout.flush()
     log_time(f"[{config_tag}] Starting plaintext inference benchmark")
 
-    pkl_path = f"plaintext_model_{estimators}_estimators_{depth}_depth.pkl"
+    pkl_path = f"plaintext_model_{estimators}_estimators_{depth}_depth_svd_{n_components_svd}.pkl"
     if os.path.exists(pkl_path):
         log_time(f"[{config_tag}] Loading saved plaintext model from '{pkl_path}'...")
         with open(pkl_path, 'rb') as f:
@@ -249,16 +250,17 @@ def predict_single_record_plaintext(estimators, depth, n_components_svd=100):
     return {'config_tag': config_tag, 'pred_dur': pred_dur}
 
 
-def prepare_test_data_with_saved_artifacts():
-    log_time("Loading test data using saved preprocessor and SVD artifacts...")
+def prepare_test_data_with_saved_artifacts(n_components_svd=100):
+    log_time(f"Loading test data using saved preprocessor and SVD artifacts (svd={n_components_svd})...")
 
     with open('preprocessor_cic_ids_2018.pkl', 'rb') as f:
         preprocessor = pickle.load(f)
     log_time("Loaded saved preprocessor.")
 
-    with open('svd_cic_ids_2018.pkl', 'rb') as f:
+    svd_pkl_path = f'svd_cic_ids_2018_{n_components_svd}.pkl'
+    with open(svd_pkl_path, 'rb') as f:
         svd = pickle.load(f)
-    log_time("Loaded saved SVD.")
+    log_time(f"Loaded saved SVD from '{svd_pkl_path}'.")
 
     combined_csv_path = 'CIC-IDS-2018-Combined.csv'
     data_folder = 'CIC-IDS-2018'
@@ -325,9 +327,9 @@ def prepare_test_data_with_saved_artifacts():
 
 
 def predict_single_record_with_comparison(estimators, depth, records=1000, n_components_svd=100):
-    config_tag = f"n={estimators}, d={depth}"
+    config_tag = f"n={estimators}, d={depth}, svd={n_components_svd}"
     print(f"\n{'='*60}")
-    print(f"  FHE CONFIG: n_estimators={estimators}, max_depth={depth}")
+    print(f"  FHE CONFIG: n_estimators={estimators}, max_depth={depth}, svd={n_components_svd}")
     print(f"{'='*60}")
     sys.stdout.flush()
     log_time(f"[{config_tag}] Starting FHE inference benchmark")
@@ -346,7 +348,7 @@ def predict_single_record_with_comparison(estimators, depth, records=1000, n_com
         return
 
     log_time(f"[{config_tag}] [STEP 2/4] Preparing data using saved artifacts...")
-    X_test_final, y_test_full, test_labels = prepare_test_data_with_saved_artifacts()
+    X_test_final, y_test_full, test_labels = prepare_test_data_with_saved_artifacts(n_components_svd)
     log_time(f"[{config_tag}] {len(test_labels)} test records available, processing {records}.")
 
     log_time(f"[{config_tag}] [STEP 3/4] Running FHE inference on {records} records...")
@@ -414,14 +416,22 @@ if __name__ == "__main__":
     log_time(f"Starting best_model_single_record.py — scikit-learn {sklearn.__version__}")
 
     configs = [
-        ("plaintext", 2, 2),
-        ("plaintext", 2, 4),
-        ("plaintext", 4, 2),
-        ("plaintext", 4, 4),
-        ("fhe", 2, 2, 1000),
-        ("fhe", 2, 4, 1000),
-        ("fhe", 4, 2, 1000),
-        ("fhe", 4, 4, 1000),
+        ("plaintext", 2, 2, 100),
+        ("plaintext", 2, 4, 100),
+        ("plaintext", 4, 2, 100),
+        ("plaintext", 4, 4, 100),
+        ("plaintext", 2, 2, 200),
+        ("plaintext", 2, 4, 200),
+        ("plaintext", 4, 2, 200),
+        ("plaintext", 4, 4, 200),
+        ("fhe", 2, 2, 1000, 100),
+        ("fhe", 2, 4, 1000, 100),
+        ("fhe", 4, 2, 1000, 100),
+        ("fhe", 4, 4, 1000, 100),
+        ("fhe", 2, 2, 1000, 200),
+        ("fhe", 2, 4, 1000, 200),
+        ("fhe", 4, 2, 1000, 200),
+        ("fhe", 4, 4, 1000, 200),
     ]
     total = len(configs)
     log_time(f"Starting benchmark suite — {total} configurations to run")
@@ -434,7 +444,7 @@ if __name__ == "__main__":
     for idx, cfg in enumerate(configs, 1):
         log_time(f"=== Configuration {idx}/{total} ===")
         if cfg[0] == "plaintext":
-            result = predict_single_record_plaintext(cfg[1], cfg[2])
+            result = predict_single_record_plaintext(cfg[1], cfg[2], n_components_svd=cfg[3])
             if result:
                 plaintext_results.append(result)
 
@@ -442,10 +452,10 @@ if __name__ == "__main__":
         print("\n" + "=" * 70)
         print("  PLAINTEXT SUMMARY")
         print("=" * 70)
-        print(f"{'Config':>20s} | {'Predict (s)':>12s}")
-        print("-" * 40)
+        print(f"{'Config':>30s} | {'Predict (s)':>12s}")
+        print("-" * 50)
         for r in plaintext_results:
-            print(f"{r['config_tag']:>20s} | {r['pred_dur']:>12.1f}")
+            print(f"{r['config_tag']:>30s} | {r['pred_dur']:>12.1f}")
         print()
 
     log_time("Phase 1 complete — all plaintext variants evaluated.")
@@ -458,7 +468,7 @@ if __name__ == "__main__":
     for idx, cfg in enumerate(configs, 1):
         if cfg[0] == "fhe":
             log_time(f"=== FHE Configuration ===")
-            result = predict_single_record_with_comparison(cfg[1], cfg[2], cfg[3])
+            result = predict_single_record_with_comparison(cfg[1], cfg[2], cfg[3], n_components_svd=cfg[4])
             if result:
                 fhe_results.append(result)
 
@@ -466,10 +476,10 @@ if __name__ == "__main__":
         print("\n" + "=" * 70)
         print("  FHE SUMMARY")
         print("=" * 70)
-        print(f"{'Config':>20s} | {'Total Inf (s)':>14s} | {'Mean Inf (s)':>12s} | {'Mean Prep (s)':>13s}")
-        print("-" * 70)
+        print(f"{'Config':>30s} | {'Total Inf (s)':>14s} | {'Mean Inf (s)':>12s} | {'Mean Prep (s)':>13s}")
+        print("-" * 80)
         for r in fhe_results:
-            print(f"{r['config_tag']:>20s} | {r['total_inf']:>14.1f} | {r['mean_inf']:>12.6f} | {r['mean_prep']:>13.6f}")
+            print(f"{r['config_tag']:>30s} | {r['total_inf']:>14.1f} | {r['mean_inf']:>12.6f} | {r['mean_prep']:>13.6f}")
         print()
 
     log_time(f"All {total} configurations complete.")

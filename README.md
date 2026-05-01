@@ -53,9 +53,9 @@ the relevant starting point — but no labeled attack benchmark exists for those
 | **Label column** | `label` (after `clean_col_names`); benign value = `'benign'` |
 | **Numerical features** | `syn_cnt`, `ack_cnt`, `fin_cnt`, `rst_cnt`, `tot_l_fw_pkt` |
 | **Categorical features** | `protocol`, `dst_port` |
-| **Preprocessor** | `MinMaxScaler` + `OneHotEncoder` → `TruncatedSVD(100)` |
+| **Preprocessor** | `MinMaxScaler` + `OneHotEncoder` → `TruncatedSVD(100)` and `TruncatedSVD(200)` |
 | **Saved preprocessor** | `preprocessor_cic_ids_2018.pkl` |
-| **FHE model dirs** | `fhe_model_{n}_estimators_{d}_depth_svd_100_components/` |
+| **FHE model dirs** | `fhe_model_{n}_estimators_{d}_depth_svd_{100|200}_components/` |
 | **Attack types** | FTP/SSH BruteForce, DoS (GoldenEye/Slowloris/Hulk), DDoS (LOIC/HOIC), Botnet, Web attacks, Infiltration |
 
 **Download:**
@@ -65,37 +65,7 @@ aws s3 sync --no-sign-request s3://cse-cic-ids2018/ CIC-IDS-2018/
 
 ---
 
-### 2. `cicids2018-models/` — Binary Classification
-
-| Property | Value |
-|---|---|
-| **Dataset** | CSE-CIC-IDS-2018 |
-| **Replaces** | CIC-IDS-2017 (superseded; IDS-2018 uses the same CICFlowMeter schema at larger scale) |
-| **Year** | 2018 |
-| **Source** | Canadian Institute for Cybersecurity, hosted on AWS S3 |
-| **Info page** | https://www.unb.ca/cic/datasets/ids-2018.html |
-| **Task** | Binary classification: `0` = Benign, `1` = Attack |
-| **Label column** | `label` (after `clean_col_names`); benign value = `'benign'` |
-| **Numerical features** | `syn_cnt`, `ack_cnt`, `fin_cnt`, `rst_cnt`, `tot_l_fw_pkt` |
-| **Categorical features** | `protocol`, `dst_port` |
-| **Preprocessor** | `MinMaxScaler` + `OneHotEncoder` → `TruncatedSVD(100)` |
-| **Saved preprocessor** | `preprocessor_cic_ids_2018.pkl` |
-| **FHE model dirs** | `fhe_model_{n}_estimators_{d}_depth_svd_100_components/` |
-| **Combined cache** | `CIC-IDS-2018-Combined.csv` |
-
-> **Note on feature changes from IDS-2017:** The IDS-2017 feature `total_length_of_bwd_packets`
-> has no direct equivalent in IDS-2018 (IDS-2018 exposes backward stats as avg/max/min/std
-> separately). It was dropped in favour of a clean 5-feature numerical set consistent across all
-> model families.
-
-**Download:**
-```bash
-aws s3 sync --no-sign-request s3://cse-cic-ids2018/ CIC-IDS-2018/
-```
-
----
-
-### 3. `cicunswnb15-models/` — Multi-class Classification
+### 2. `cicunswnb15-models/` — Multi-class Classification
 
 | Property | Value |
 |---|---|
@@ -129,9 +99,9 @@ wget -r -np -nd -A "*.csv" http://cicresearch.ca/CICDataset/CIC-UNSW/
 
 ---
 
-## Shared Feature Schema (all three model families)
+## Shared Feature Schema (both model families)
 
-All three model families now use the same CICFlowMeter-V3 feature set after migration to
+Both model families now use the same CICFlowMeter-V3 feature set after migration to
 CSE-CIC-IDS-2018 / CIC-UNSW-NB15:
 
 | Feature | Type | Description |
@@ -163,7 +133,6 @@ pip install -r macos_requirements.txt
 ```bash
 # From the repo root:
 python cicids2018-kdd-models/model.py
-python cicids2018-models/cicids2018-modelv3.py
 python cicunswnb15-models/model.py
 ```
 
@@ -174,7 +143,6 @@ a combined CSV cache before re-reading the folder.
 
 ```bash
 python cicids2018-kdd-models/best_model_single_record.py
-python cicids2018-models/single_record_inference.py
 python cicunswnb15-models/single_record_inference.py
 ```
 
@@ -187,7 +155,6 @@ These scripts measure per-record plaintext and FHE inference latency over 1000 r
 | Folder | Original Dataset | Year | Status | Current Dataset | Notes |
 |---|---|---|---|---|---|
 | `cicids2018-kdd-models/` | KDD Cup 1999 / NSL-KDD | 1999/2009 | Removed from CIC servers | CSE-CIC-IDS-2018 | Named for historical origin; now uses IDS-2018 |
-| `cicids2018-models/` | CIC-IDS-2017 | 2017 | Still available; superseded | CSE-CIC-IDS-2018 | Renamed from `cicids2017-models/` |
 | `cicunswnb15-models/` | NF-UNSW-NB15-v3 | 2021 | UQ hosting unavailable (502) | CIC-UNSW-NB15 (2024) | Renamed from `netflow-models/`; uses CICFlowMeter schema |
 
 ---
@@ -199,26 +166,26 @@ These scripts measure per-record plaintext and FHE inference latency over 1000 r
 <!-- TODO: save processed train/test arrays to avoid re-preprocessing on every inference run -->
 <!--
   Problem:
-  cicids2018-models/single_record_inference.py and cicunswnb15-models/single_record_inference.py
+  cicids2018-kdd-models/best_model_single_record.py and cicunswnb15-models/single_record_inference.py
   both call load_and_preprocess(), which reads the full CSV, splits it, and applies the saved
   preprocessor + SVD on every run. This means inference startup time is as slow as training.
 
   Fix:
-  After training (in model.py / cicids2018-modelv3.py), serialize the final arrays:
+  After training (in model.py), serialize the final arrays:
     np.save('X_train_final_cic_ids_2018.npy', X_train_final)
     np.save('X_test_final_cic_ids_2018.npy', X_test_final)
     y_train_full.to_pickle('y_train_cic_ids_2018.pkl')
     y_test_full.to_pickle('y_test_cic_ids_2018.pkl')
     pd.Series(test_labels).to_pickle('test_labels_cic_ids_2018.pkl')  # string labels for printing
 
-  Then in single_record_inference.py, load_and_preprocess() should just np.load() those files
+  Then in best_model_single_record.py, load_and_preprocess() should just np.load() those files
   instead of re-reading and re-splitting the CSV. Fall back to the full pipeline only if the
   .npy files are missing (first run).
 
   Same pattern applies to cicunswnb15-models/ with filenames *_cicunsw.npy / *.pkl.
 -->
 
-1. **Inference startup time** — `load_and_preprocess()` in both `cicids2018-models/single_record_inference.py`
+1. **Inference startup time** — `load_and_preprocess()` in both `cicids2018-kdd-models/best_model_single_record.py`
    and `cicunswnb15-models/single_record_inference.py` re-reads and re-splits the full CSV on every run.
    Training scripts should serialize the final `X_train`, `X_test`, `y_train`, `y_test` arrays
    (e.g. `np.save` / `pd.Series.to_pickle`) so inference scripts can load them directly instead of
