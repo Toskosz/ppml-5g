@@ -219,6 +219,11 @@ for svd_idx, n_components_svd in enumerate(svd_groups, 1):
         train_dur = _time.time() - t0
         log_time(f"[{config_tag}] Training completed in {train_dur:,.1f}s")
 
+        pkl_path = f"plaintext_model_{n_estimators}_estimators_{max_depth}_depth_svd_{n_components_svd}.pkl"
+        with open(pkl_path, 'wb') as f:
+            pickle.dump(classifier, f)
+        log_time(f"[{config_tag}] Plaintext model saved to '{pkl_path}'.")
+
         t0 = _time.time()
         log_time(f"[{config_tag}] Starting clear (plaintext) prediction on {X_test_final.shape[0]} samples...")
         y_pred = classifier.predict(X_test_final)
@@ -227,11 +232,6 @@ for svd_idx, n_components_svd in enumerate(svd_groups, 1):
 
         log_time(f"[{config_tag}] Plaintext metrics:")
         log_model_metrics(y_test_final, y_pred)
-
-        pkl_path = f"plaintext_model_{n_estimators}_estimators_{max_depth}_depth_svd_{n_components_svd}.pkl"
-        with open(pkl_path, 'wb') as f:
-            pickle.dump(classifier, f)
-        log_time(f"[{config_tag}] Plaintext model saved to '{pkl_path}'.")
 
         trained_configs.append({
             'idx': idx,
