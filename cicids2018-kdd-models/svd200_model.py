@@ -179,8 +179,39 @@ n_components_svd = 200
 
 log_time(f"Applying TruncatedSVD: {X_train_sparse.shape[1]} → {n_components_svd} components...")
 svd = TruncatedSVD(n_components=n_components_svd, random_state=42)
-X_train_final = svd.fit_transform(X_train_sparse)
-X_test_final = svd.transform(X_test_sparse)
+
+svd_sample_size = 500_000
+n_rows = X_train_sparse.shape[0]
+if n_rows <= svd_sample_size:
+    X_svd_fit = X_train_sparse
+else:
+    log_time(f"Subsampling {svd_sample_size:,} rows from {n_rows:,} for SVD fitting...")
+    sample_idx = np.random.choice(n_rows, svd_sample_size, replace=False)
+    X_svd_fit = X_train_sparse[sample_idx]
+
+svd.fit(X_svd_fit)
+del X_svd_fit
+log_time("SVD fitted on subsample.")
+
+chunk_size = 2_000_000
+log_time(f"Transforming training data in chunks of {chunk_size:,}...")
+chunks = []
+for start in range(0, X_train_sparse.shape[0], chunk_size):
+    end = min(start + chunk_size, X_train_sparse.shape[0])
+    chunks.append(svd.transform(X_train_sparse[start:end]))
+X_train_final = np.vstack(chunks)
+del chunks
+log_time(f"Train transform done. Shape: {X_train_final.shape}")
+
+log_time(f"Transforming test data in chunks of {chunk_size:,}...")
+chunks = []
+for start in range(0, X_test_sparse.shape[0], chunk_size):
+    end = min(start + chunk_size, X_test_sparse.shape[0])
+    chunks.append(svd.transform(X_test_sparse[start:end]))
+X_test_final = np.vstack(chunks)
+del chunks
+log_time(f"Test transform done. Shape: {X_test_final.shape}")
+
 log_time(f"SVD done. X_train: {X_train_final.shape}, X_test: {X_test_final.shape}. Explained variance ratio sum: {svd.explained_variance_ratio_.sum():.4f}")
 
 svd_pkl_path = f'svd_cic_ids_2018_{n_components_svd}.pkl'
