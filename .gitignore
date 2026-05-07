@@ -1,6 +1,7 @@
 *.zip
 *.pkl
 *.csv
+*.json
 *:Zone.Identifier
 venv/
 dataset/

@@ -6,6 +6,7 @@
 
 from concrete.ml.deployment import FHEModelDev
 from concrete.ml.sklearn.rf import RandomForestClassifier
+from concrete.ml.common.serialization.dumpers import dump
 import datetime
 import glob
 import numpy as np
@@ -265,6 +266,11 @@ for n_estimators, max_depth, _ in configs:
         'train_dur': train_dur,
         'pred_dur': pred_dur,
     })
+
+    json_path = f"plaintext_model_{n_estimators}_estimators_{max_depth}_depth_svd_{n_components_svd}.json"
+    with open(json_path, "w") as f:
+        dump(classifier, f)
+    log_time(f"[{config_tag}] Plaintext model saved to '{json_path}'.")
 
 print("\n" + "=" * 70)
 print(f"  PLAINTEXT SUMMARY  (SVD {n_components_svd})")

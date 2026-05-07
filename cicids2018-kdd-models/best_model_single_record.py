@@ -4,6 +4,7 @@
 # Features: CICFlowMeter-V3; model uses 5 numerical + 2 categorical
 
 from concrete.ml.deployment import FHEModelClient, FHEModelServer
+from concrete.ml.common.serialization.loaders import load
 import datetime
 import glob
 import numpy as np
@@ -14,10 +15,6 @@ import sklearn
 import sys
 import time as _time
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import OneHotEncoder, MinMaxScaler
-from sklearn.compose import ColumnTransformer
-from sklearn.decomposition import TruncatedSVD
-from sklearn.ensemble import RandomForestClassifier as RandomForestSklearn
 from sklearn.metrics import (
     accuracy_score,
     classification_report,
@@ -78,105 +75,6 @@ NUMERICAL_FEATURES = ['syn_flag_cnt', 'ack_flag_cnt', 'fin_flag_cnt', 'rst_flag_
 CATEGORICAL_FEATURES = ['protocol', 'dst_port']
 
 
-def load_and_preprocess(n_components_svd=100):
-    log_time(f"Loading and preprocessing data (SVD components={n_components_svd})...")
-    combined_csv_path = 'CIC-IDS-2018-Combined.csv'
-    data_folder = 'CIC-IDS-2018'
-
-    if os.path.exists(combined_csv_path):
-        log_time(f"Loading existing combined file '{combined_csv_path}'...")
-        df = pd.read_csv(combined_csv_path)
-        log_time(f"Loaded {len(df)} rows from '{combined_csv_path}'.")
-    else:
-        all_files = sorted(glob.glob(os.path.join(data_folder, "*.csv")))
-        if not all_files:
-            raise FileNotFoundError(
-                f"No CSV files found in '{data_folder}'. "
-                f"Download with: aws s3 sync --no-sign-request s3://cse-cic-ids2018/ {data_folder}/"
-            )
-        log_time(f"Found {len(all_files)} CSV files. Reading one at a time...")
-        chunks = []
-        for i, f in enumerate(all_files):
-            log_time(f"  Reading file {i+1}/{len(all_files)}: {os.path.basename(f)}...")
-            chunk = pd.read_csv(f, low_memory=False)
-            chunk = clean_col_names(chunk)
-            for col in NUMERICAL_FEATURES:
-                chunk[col] = pd.to_numeric(chunk[col], errors='coerce')
-            chunk.replace([np.inf, -np.inf], np.nan, inplace=True)
-            needed = NUMERICAL_FEATURES + CATEGORICAL_FEATURES + ['label']
-            chunk.dropna(subset=needed, inplace=True)
-            for col in CATEGORICAL_FEATURES:
-                chunk[col] = chunk[col].astype(str)
-            chunks.append(chunk[needed])
-        df = pd.concat(chunks, ignore_index=True)
-        del chunks
-        log_time(f"Combined {len(all_files)} files → {len(df)} rows.")
-        df.to_csv(combined_csv_path, index=False)
-        log_time(f"Saved combined data to '{combined_csv_path}'.")
-
-    log_time("Cleaning column names and dropping NaN/Inf rows...")
-    df = clean_col_names(df)
-    rows_before = len(df)
-    df.replace([np.inf, -np.inf], np.nan, inplace=True)
-    df.dropna(inplace=True)
-    for col in NUMERICAL_FEATURES:
-        df[col] = pd.to_numeric(df[col], errors='coerce')
-    df.dropna(subset=NUMERICAL_FEATURES, inplace=True)
-    for col in CATEGORICAL_FEATURES:
-        df[col] = df[col].astype(str)
-    log_time(f"Dropped {rows_before - len(df)} rows with NaN/Inf. Remaining: {len(df)} rows.")
-
-    df['label'] = df['label'].str.strip().str.lower()
-    df['binary_label'] = (df['label'] != 'benign').astype(int)
-    log_time(f"Label distribution — benign: {(df['binary_label']==0).sum()}, attack: {(df['binary_label']==1).sum()}")
-
-    log_time("Splitting data 80/20 (stratified)...")
-    train_df, test_df = train_test_split(df, test_size=0.2, random_state=42, stratify=df['label'])
-    log_time(f"Train: {len(train_df)}, Test: {len(test_df)}.")
-
-    preprocessor = ColumnTransformer(
-        transformers=[
-            ('num', MinMaxScaler(), NUMERICAL_FEATURES),
-            ('cat', OneHotEncoder(handle_unknown='ignore'), CATEGORICAL_FEATURES)
-        ],
-        remainder='drop'
-    )
-
-    log_time("Fitting preprocessor on training data...")
-    X_train_sparse = preprocessor.fit_transform(train_df)
-    X_test_sparse = preprocessor.transform(test_df)
-    log_time(f"Preprocessing done. X_train: {X_train_sparse.shape}, X_test: {X_test_sparse.shape} (sparse)")
-
-    with open('preprocessor_cic_ids_2018.pkl', 'wb') as f:
-        pickle.dump(preprocessor, f)
-    log_time("Preprocessor saved to 'preprocessor_cic_ids_2018.pkl'.")
-
-    y_train_full = train_df['binary_label']
-    y_test_full = test_df['binary_label']
-    test_labels = test_df['label'].reset_index(drop=True)
-
-    del train_df
-    del test_df
-    del df
-
-    log_time(f"Applying TruncatedSVD: {X_train_sparse.shape[1]} → {n_components_svd} components...")
-    svd = TruncatedSVD(n_components=n_components_svd, random_state=42)
-    X_train_final = svd.fit_transform(X_train_sparse)
-    X_test_final = svd.transform(X_test_sparse)
-    log_time(f"SVD done. X_train: {X_train_final.shape}, X_test: {X_test_final.shape}. Explained variance ratio sum: {svd.explained_variance_ratio_.sum():.4f}")
-
-    svd_pkl_path = f'svd_cic_ids_2018_{n_components_svd}.pkl'
-    with open(svd_pkl_path, 'wb') as f:
-        pickle.dump(svd, f)
-    log_time(f"SVD saved to '{svd_pkl_path}'.")
-
-    del X_train_sparse
-    del X_test_sparse
-
-    log_time(f"Final training data: {X_train_final.shape}, testing data: {X_test_final.shape}")
-    return X_train_final, X_test_final, y_train_full, y_test_full, test_labels, preprocessor
-
-
 def predict_single_record_plaintext(estimators, depth, n_components_svd=100):
     config_tag = f"n={estimators}, d={depth}, svd={n_components_svd}"
     print(f"\n{'='*60}")
@@ -185,27 +83,16 @@ def predict_single_record_plaintext(estimators, depth, n_components_svd=100):
     sys.stdout.flush()
     log_time(f"[{config_tag}] Starting plaintext inference benchmark")
 
-    pkl_path = f"plaintext_model_{estimators}_estimators_{depth}_depth_svd_{n_components_svd}.pkl"
-    if os.path.exists(pkl_path):
-        log_time(f"[{config_tag}] Loading saved plaintext model from '{pkl_path}'...")
-        with open(pkl_path, 'rb') as f:
-            classifier = pickle.load(f)
-        log_time(f"[{config_tag}] Model loaded from disk.")
-    else:
-        log_time(f"[{config_tag}] No saved model found at '{pkl_path}', training from scratch...")
-        X_train_final, X_test_final, y_train_full, y_test_full, test_labels, _ = \
-            load_and_preprocess(n_components_svd)
+    json_path = f"plaintext_model_{estimators}_estimators_{depth}_depth_svd_{n_components_svd}.json"
+    if not os.path.exists(json_path):
+        log_time(f"[{config_tag}] ERROR: Serialized model not found at '{json_path}'.")
+        print(f"Please run model.py (or svd200_model.py) first to generate the model artifacts.")
+        return None
 
-        log_time(f"[{config_tag}] Training sklearn RandomForest ({estimators} estimators, depth={depth})...")
-        t_train_start = _time.time()
-        classifier = RandomForestSklearn(
-            n_estimators=estimators,
-            max_depth=depth,
-            random_state=42
-        )
-        classifier.fit(X_train_final, y_train_full)
-        train_dur = _time.time() - t_train_start
-        log_time(f"[{config_tag}] Training completed in {train_dur:,.1f}s")
+    log_time(f"[{config_tag}] Loading Concrete ML model from '{json_path}'...")
+    with open(json_path, "r") as f:
+        classifier = load(f)
+    log_time(f"[{config_tag}] Model loaded.")
 
     X_test_final, y_test_full, _ = prepare_test_data_with_saved_artifacts(n_components_svd)
 
