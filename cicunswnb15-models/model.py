@@ -56,9 +56,15 @@ print(f"Scikit-learn version: {sklearn.__version__}")
 
 csv_path = 'CICFlowMeter_out.csv'
 
+cols_needed = [
+    'SYN Flag Count', 'ACK Flag Count', 'FIN Flag Count',
+    'RST Flag Count', 'Total Length of Fwd Packet',
+    'Protocol', 'Dst Port', 'Label'
+]
+
 if os.path.exists(csv_path):
     print(f"Loading data from '{csv_path}'...")
-    df = pd.read_csv(csv_path, low_memory=False)
+    df = pd.read_csv(csv_path, usecols=cols_needed, low_memory=False)
 else:
     raise FileNotFoundError(
         f"Dataset file not found: '{csv_path}'. "
@@ -76,6 +82,14 @@ df = clean_col_names(df)
 df.replace([np.inf, -np.inf], np.nan, inplace=True)
 df.dropna(inplace=True)
 
+num_cols_to_downcast = [
+    'syn_flag_count', 'ack_flag_count', 'fin_flag_count',
+    'rst_flag_count', 'total_length_of_fwd_packet'
+]
+for col in num_cols_to_downcast:
+    df[col] = pd.to_numeric(df[col], errors='coerce').astype(np.float32)
+df.dropna(subset=num_cols_to_downcast, inplace=True)
+
 # Initial split into full train and test sets
 train_df, test_df = train_test_split(df, test_size=0.2, random_state=42, stratify=df['label'])
 print(f"Data split into {len(train_df)} training samples and {len(test_df)} testing samples.")
@@ -83,7 +97,7 @@ print(f"Data split into {len(train_df)} training samples and {len(test_df)} test
 # CICFlowMeter features available in CIC-UNSW-NB15 (2024)
 # Switched from NetFlow schema (in_bytes, out_bytes, protocol, l7_proto) which was specific to
 # NF-UNSW-NB15; l7_proto is not produced by CICFlowMeter.
-numerical_features_selected = ['syn_cnt', 'ack_cnt', 'fin_cnt', 'rst_cnt', 'tot_l_fw_pkt']
+numerical_features_selected = ['syn_flag_count', 'ack_flag_count', 'fin_flag_count', 'rst_flag_count', 'total_length_of_fwd_packet']
 categorical_features_selected = ['protocol', 'dst_port']
 
 preprocessor = ColumnTransformer(
