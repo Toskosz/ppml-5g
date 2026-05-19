@@ -1,17 +1,297 @@
 nohup: ignoring input
-[LOG 2026-05-05 23:50:31 -03-0300] (elapsed 0.0s) Starting model.py — scikit-learn 1.5.0
-[LOG 2026-05-05 23:50:31 -03-0300] (elapsed 0.0s) Loading existing combined file 'CIC-IDS-2018-Combined.csv'...
-[LOG 2026-05-05 23:50:35 -03-0300] (elapsed 3.5s) Loaded 16232943 rows from 'CIC-IDS-2018-Combined.csv'.
-[LOG 2026-05-05 23:50:35 -03-0300] (elapsed 3.5s) Cleaning column names and dropping NaN/Inf rows...
-[LOG 2026-05-05 23:50:39 -03-0300] (elapsed 7.5s) Dropped 0 rows with NaN/Inf. Remaining: 16232943 rows.
-[LOG 2026-05-05 23:50:41 -03-0300] (elapsed 10.2s) Label distribution — benign: 13484708, attack: 2748235
-[LOG 2026-05-05 23:50:41 -03-0300] (elapsed 10.2s) Splitting data 80/20 (stratified)...
-[LOG 2026-05-05 23:50:53 -03-0300] (elapsed 22.1s) Train: 12986354, Test: 3246589.
+[LOG 2026-05-07 16:47:46 -03-0300] (elapsed 0.0s) Starting model.py — scikit-learn 1.5.0
+[LOG 2026-05-07 16:47:46 -03-0300] (elapsed 0.0s) Loading existing combined file 'CIC-IDS-2018-Combined.csv'...
+[LOG 2026-05-07 16:47:49 -03-0300] (elapsed 3.6s) Loaded 16232943 rows from 'CIC-IDS-2018-Combined.csv'.
+[LOG 2026-05-07 16:47:49 -03-0300] (elapsed 3.6s) Cleaning column names and dropping NaN/Inf rows...
+[LOG 2026-05-07 16:47:53 -03-0300] (elapsed 7.5s) Dropped 0 rows with NaN/Inf. Remaining: 16232943 rows.
+[LOG 2026-05-07 16:47:56 -03-0300] (elapsed 10.1s) Label distribution — benign: 13484708, attack: 2748235
+[LOG 2026-05-07 16:47:56 -03-0300] (elapsed 10.1s) Splitting data 80/20 (stratified)...
+[LOG 2026-05-07 16:48:08 -03-0300] (elapsed 22.1s) Train: 12986354, Test: 3246589.
 Applying preprocessing (MinMaxScaler and OneHotEncoder)...
-[LOG 2026-05-05 23:50:53 -03-0300] (elapsed 22.1s) Fitting preprocessor on training data...
-[LOG 2026-05-05 23:51:07 -03-0300] (elapsed 35.6s) Preprocessing done. X_train: (12986354, 64539), X_test: (3246589, 64539) (sparse)
-[LOG 2026-05-05 23:51:08 -03-0300] (elapsed 36.3s) Preprocessor saved to 'preprocessor_cic_ids_2018.pkl'.
+[LOG 2026-05-07 16:48:08 -03-0300] (elapsed 22.1s) Fitting preprocessor on training data...
+[LOG 2026-05-07 16:48:21 -03-0300] (elapsed 35.6s) Preprocessing done. X_train: (12986354, 64539), X_test: (3246589, 64539) (sparse)
+[LOG 2026-05-07 16:48:22 -03-0300] (elapsed 36.3s) Preprocessor saved to 'preprocessor_cic_ids_2018.pkl'.
 
                         Config |                Phase |    Wall Time
 ----------------------------------------------------------------------
-[LOG 2026-05-05 23:51:08 -03-0300] (elapsed 36.3s) Applying TruncatedSVD: 64539 → 100 components  [SVD group 1/2]...
+[LOG 2026-05-07 16:48:22 -03-0300] (elapsed 36.3s) Applying TruncatedSVD: 64539 → 100 components  [SVD group 1/2]...
+[LOG 2026-05-07 16:54:07 -03-0300] (elapsed 381.9s) SVD done. X_train: (12986354, 100), X_test: (3246589, 100). Explained variance ratio sum: 0.8956
+[LOG 2026-05-07 16:54:08 -03-0300] (elapsed 381.9s) SVD saved to 'svd_cic_ids_2018_100.pkl'.
+[LOG 2026-05-07 16:54:08 -03-0300] (elapsed 381.9s) Final training data: (12986354, 100), testing data: (3246589, 100)
+
+######################################################################
+#  PHASE 1: PLAINTEXT TRAINING & EVALUATION  (SVD 100)
+######################################################################
+
+============================================================
+  CONFIG 1/8: n_estimators=2, max_depth=2, svd=100
+============================================================
+[LOG 2026-05-07 16:54:08 -03-0300] (elapsed 381.9s) [n=2, d=2, svd=100] Training RandomForestClassifier...
+[LOG 2026-05-07 16:54:50 -03-0300] (elapsed 424.1s) [n=2, d=2, svd=100] Training completed in 42.2s
+[LOG 2026-05-07 16:54:50 -03-0300] (elapsed 424.1s) [n=2, d=2, svd=100] Starting clear (plaintext) prediction on 3246589 samples...
+[LOG 2026-05-07 16:54:55 -03-0300] (elapsed 429.8s) [n=2, d=2, svd=100] Clear prediction completed in 5.7s
+[LOG 2026-05-07 16:54:55 -03-0300] (elapsed 429.8s) [n=2, d=2, svd=100] Plaintext metrics:
+--- Model Evaluation ---
+Accuracy: 0.8775
+Precision: 0.6679
+Recall: 0.5502
+F1-Score: 0.6033
+
+--- Confusion Matrix ---
+[[2546580  150362]
+ [ 247250  302397]]
+
+--- Classification Report ---
+              precision    recall  f1-score   support
+
+           0       0.91      0.94      0.93   2696942
+           1       0.67      0.55      0.60    549647
+
+    accuracy                           0.88   3246589
+   macro avg       0.79      0.75      0.77   3246589
+weighted avg       0.87      0.88      0.87   3246589
+
+[LOG 2026-05-07 16:55:52 -03-0300] (elapsed 486.1s) [n=2, d=2, svd=100] Plaintext model saved to 'plaintext_model_2_estimators_2_depth_svd_100.json'.
+
+============================================================
+  CONFIG 2/8: n_estimators=2, max_depth=4, svd=100
+============================================================
+[LOG 2026-05-07 16:55:52 -03-0300] (elapsed 486.1s) [n=2, d=4, svd=100] Training RandomForestClassifier...
+[LOG 2026-05-07 16:56:38 -03-0300] (elapsed 532.5s) [n=2, d=4, svd=100] Training completed in 46.4s
+[LOG 2026-05-07 16:56:38 -03-0300] (elapsed 532.5s) [n=2, d=4, svd=100] Starting clear (plaintext) prediction on 3246589 samples...
+[LOG 2026-05-07 16:56:48 -03-0300] (elapsed 542.7s) [n=2, d=4, svd=100] Clear prediction completed in 10.2s
+[LOG 2026-05-07 16:56:48 -03-0300] (elapsed 542.7s) [n=2, d=4, svd=100] Plaintext metrics:
+--- Model Evaluation ---
+Accuracy: 0.9172
+Precision: 0.7019
+Recall: 0.8879
+F1-Score: 0.7840
+
+--- Confusion Matrix ---
+[[2489668  207274]
+ [  61603  488044]]
+
+--- Classification Report ---
+              precision    recall  f1-score   support
+
+           0       0.98      0.92      0.95   2696942
+           1       0.70      0.89      0.78    549647
+
+    accuracy                           0.92   3246589
+   macro avg       0.84      0.91      0.87   3246589
+weighted avg       0.93      0.92      0.92   3246589
+
+[LOG 2026-05-07 16:57:44 -03-0300] (elapsed 598.9s) [n=2, d=4, svd=100] Plaintext model saved to 'plaintext_model_2_estimators_4_depth_svd_100.json'.
+
+============================================================
+  CONFIG 3/8: n_estimators=4, max_depth=2, svd=100
+============================================================
+[LOG 2026-05-07 16:57:44 -03-0300] (elapsed 598.9s) [n=4, d=2, svd=100] Training RandomForestClassifier...
+[LOG 2026-05-07 16:58:32 -03-0300] (elapsed 646.8s) [n=4, d=2, svd=100] Training completed in 47.9s
+[LOG 2026-05-07 16:58:32 -03-0300] (elapsed 646.8s) [n=4, d=2, svd=100] Starting clear (plaintext) prediction on 3246589 samples...
+[LOG 2026-05-07 16:58:39 -03-0300] (elapsed 653.4s) [n=4, d=2, svd=100] Clear prediction completed in 6.6s
+[LOG 2026-05-07 16:58:39 -03-0300] (elapsed 653.4s) [n=4, d=2, svd=100] Plaintext metrics:
+--- Model Evaluation ---
+Accuracy: 0.8974
+Precision: 0.7076
+Recall: 0.6710
+F1-Score: 0.6889
+
+--- Confusion Matrix ---
+[[2544554  152388]
+ [ 180810  368837]]
+
+--- Classification Report ---
+              precision    recall  f1-score   support
+
+           0       0.93      0.94      0.94   2696942
+           1       0.71      0.67      0.69    549647
+
+    accuracy                           0.90   3246589
+   macro avg       0.82      0.81      0.81   3246589
+weighted avg       0.90      0.90      0.90   3246589
+
+[LOG 2026-05-07 16:59:38 -03-0300] (elapsed 712.3s) [n=4, d=2, svd=100] Plaintext model saved to 'plaintext_model_4_estimators_2_depth_svd_100.json'.
+
+============================================================
+  CONFIG 4/8: n_estimators=4, max_depth=4, svd=100
+============================================================
+[LOG 2026-05-07 16:59:38 -03-0300] (elapsed 712.3s) [n=4, d=4, svd=100] Training RandomForestClassifier...
+[LOG 2026-05-07 17:00:43 -03-0300] (elapsed 777.6s) [n=4, d=4, svd=100] Training completed in 65.3s
+[LOG 2026-05-07 17:00:43 -03-0300] (elapsed 777.6s) [n=4, d=4, svd=100] Starting clear (plaintext) prediction on 3246589 samples...
+[LOG 2026-05-07 17:00:59 -03-0300] (elapsed 793.9s) [n=4, d=4, svd=100] Clear prediction completed in 16.3s
+[LOG 2026-05-07 17:00:59 -03-0300] (elapsed 793.9s) [n=4, d=4, svd=100] Plaintext metrics:
+--- Model Evaluation ---
+Accuracy: 0.9136
+Precision: 0.7390
+Recall: 0.7572
+F1-Score: 0.7480
+
+--- Confusion Matrix ---
+[[2549919  147023]
+ [ 133450  416197]]
+
+--- Classification Report ---
+              precision    recall  f1-score   support
+
+           0       0.95      0.95      0.95   2696942
+           1       0.74      0.76      0.75    549647
+
+    accuracy                           0.91   3246589
+   macro avg       0.84      0.85      0.85   3246589
+weighted avg       0.91      0.91      0.91   3246589
+
+[LOG 2026-05-07 17:02:01 -03-0300] (elapsed 854.9s) [n=4, d=4, svd=100] Plaintext model saved to 'plaintext_model_4_estimators_4_depth_svd_100.json'.
+
+======================================================================
+  PLAINTEXT SUMMARY  (SVD 100)
+======================================================================
+                        Config |  Train (s) |  Predict (s)
+------------------------------------------------------------
+             n=2, d=2, svd=100 |       42.2 |          5.7
+             n=2, d=4, svd=100 |       46.4 |         10.2
+             n=4, d=2, svd=100 |       47.9 |          6.6
+             n=4, d=4, svd=100 |       65.3 |         16.3
+
+[LOG 2026-05-07 17:02:01 -03-0300] (elapsed 854.9s) Phase 1 complete for SVD 100 — all plaintext variants trained and evaluated.
+
+######################################################################
+#  PHASE 2: FHE COMPILATION & SIMULATION  (SVD 100)
+######################################################################
+
+============================================================
+  FHE for CONFIG 1/8: n_estimators=2, max_depth=2, svd=100
+============================================================
+[LOG 2026-05-07 17:02:01 -03-0300] (elapsed 854.9s) [n=2, d=2, svd=100] Compiling FHE circuit (this may take a long time)...
+[LOG 2026-05-07 17:59:31 -03-0300] (elapsed 4,305.3s) [n=2, d=2, svd=100] FHE compilation completed in 3,450.3s
+[LOG 2026-05-07 17:59:31 -03-0300] (elapsed 4,305.3s) [n=2, d=2, svd=100] Starting FHE simulation prediction on 3246589 samples...
+[LOG 2026-05-07 21:02:20 -03-0300] (elapsed 15,274.4s) [n=2, d=2, svd=100] FHE simulation completed in 10,969.1s
+[LOG 2026-05-07 21:02:20 -03-0300] (elapsed 15,274.4s) [n=2, d=2, svd=100] FHE metrics:
+--- Model Evaluation ---
+Accuracy: 0.8775
+Precision: 0.6679
+Recall: 0.5502
+F1-Score: 0.6033
+
+--- Confusion Matrix ---
+[[2546580  150362]
+ [ 247250  302397]]
+
+--- Classification Report ---
+              precision    recall  f1-score   support
+
+           0       0.91      0.94      0.93   2696942
+           1       0.67      0.55      0.60    549647
+
+    accuracy                           0.88   3246589
+   macro avg       0.79      0.75      0.77   3246589
+weighted avg       0.87      0.88      0.87   3246589
+
+[LOG 2026-05-07 21:03:15 -03-0300] (elapsed 15,329.4s) [n=2, d=2, svd=100] Saving compiled FHE circuit to './fhe_model_2_estimators_2_depth_svd_100_components/'...
+[LOG 2026-05-07 21:03:15 -03-0300] (elapsed 15,329.5s) [n=2, d=2, svd=100] FHE assets saved. Summary — train: 42.2s, predict: 5.7s, compile: 3,450.3s, fhe_sim: 10,969.1s
+
+============================================================
+  FHE for CONFIG 2/8: n_estimators=2, max_depth=4, svd=100
+============================================================
+[LOG 2026-05-07 21:03:15 -03-0300] (elapsed 15,329.5s) [n=2, d=4, svd=100] Compiling FHE circuit (this may take a long time)...
+[LOG 2026-05-07 22:02:45 -03-0300] (elapsed 18,899.9s) [n=2, d=4, svd=100] FHE compilation completed in 3,570.3s
+[LOG 2026-05-07 22:02:45 -03-0300] (elapsed 18,899.9s) [n=2, d=4, svd=100] Starting FHE simulation prediction on 3246589 samples...
+[LOG 2026-05-08 01:06:02 -03-0300] (elapsed 29,896.5s) [n=2, d=4, svd=100] FHE simulation completed in 10,996.6s
+[LOG 2026-05-08 01:06:02 -03-0300] (elapsed 29,896.5s) [n=2, d=4, svd=100] FHE metrics:
+--- Model Evaluation ---
+Accuracy: 0.9172
+Precision: 0.7019
+Recall: 0.8879
+F1-Score: 0.7840
+
+--- Confusion Matrix ---
+[[2489668  207274]
+ [  61603  488044]]
+
+--- Classification Report ---
+              precision    recall  f1-score   support
+
+           0       0.98      0.92      0.95   2696942
+           1       0.70      0.89      0.78    549647
+
+    accuracy                           0.92   3246589
+   macro avg       0.84      0.91      0.87   3246589
+weighted avg       0.93      0.92      0.92   3246589
+
+[LOG 2026-05-08 01:06:59 -03-0300] (elapsed 29,953.4s) [n=2, d=4, svd=100] Saving compiled FHE circuit to './fhe_model_2_estimators_4_depth_svd_100_components/'...
+[LOG 2026-05-08 01:06:59 -03-0300] (elapsed 29,953.5s) [n=2, d=4, svd=100] FHE assets saved. Summary — train: 46.4s, predict: 10.2s, compile: 3,570.3s, fhe_sim: 10,996.6s
+
+============================================================
+  FHE for CONFIG 3/8: n_estimators=4, max_depth=2, svd=100
+============================================================
+[LOG 2026-05-08 01:06:59 -03-0300] (elapsed 29,953.5s) [n=4, d=2, svd=100] Compiling FHE circuit (this may take a long time)...
+[LOG 2026-05-08 02:06:06 -03-0300] (elapsed 33,500.3s) [n=4, d=2, svd=100] FHE compilation completed in 3,546.8s
+[LOG 2026-05-08 02:06:06 -03-0300] (elapsed 33,500.3s) [n=4, d=2, svd=100] Starting FHE simulation prediction on 3246589 samples...
+[LOG 2026-05-08 05:09:59 -03-0300] (elapsed 44,533.0s) [n=4, d=2, svd=100] FHE simulation completed in 11,032.7s
+[LOG 2026-05-08 05:09:59 -03-0300] (elapsed 44,533.0s) [n=4, d=2, svd=100] FHE metrics:
+--- Model Evaluation ---
+Accuracy: 0.8974
+Precision: 0.7076
+Recall: 0.6710
+F1-Score: 0.6889
+
+--- Confusion Matrix ---
+[[2544554  152388]
+ [ 180810  368837]]
+
+--- Classification Report ---
+              precision    recall  f1-score   support
+
+           0       0.93      0.94      0.94   2696942
+           1       0.71      0.67      0.69    549647
+
+    accuracy                           0.90   3246589
+   macro avg       0.82      0.81      0.81   3246589
+weighted avg       0.90      0.90      0.90   3246589
+
+[LOG 2026-05-08 05:11:00 -03-0300] (elapsed 44,594.2s) [n=4, d=2, svd=100] Saving compiled FHE circuit to './fhe_model_4_estimators_2_depth_svd_100_components/'...
+[LOG 2026-05-08 05:11:00 -03-0300] (elapsed 44,594.3s) [n=4, d=2, svd=100] FHE assets saved. Summary — train: 47.9s, predict: 6.6s, compile: 3,546.8s, fhe_sim: 11,032.7s
+
+============================================================
+  FHE for CONFIG 4/8: n_estimators=4, max_depth=4, svd=100
+============================================================
+[LOG 2026-05-08 05:11:00 -03-0300] (elapsed 44,594.3s) [n=4, d=4, svd=100] Compiling FHE circuit (this may take a long time)...
+[LOG 2026-05-08 06:11:52 -03-0300] (elapsed 48,246.3s) [n=4, d=4, svd=100] FHE compilation completed in 3,652.0s
+[LOG 2026-05-08 06:11:52 -03-0300] (elapsed 48,246.3s) [n=4, d=4, svd=100] Starting FHE simulation prediction on 3246589 samples...
+[LOG 2026-05-08 09:15:30 -03-0300] (elapsed 59,264.8s) [n=4, d=4, svd=100] FHE simulation completed in 11,018.5s
+[LOG 2026-05-08 09:15:30 -03-0300] (elapsed 59,264.8s) [n=4, d=4, svd=100] FHE metrics:
+--- Model Evaluation ---
+Accuracy: 0.9136
+Precision: 0.7390
+Recall: 0.7572
+F1-Score: 0.7480
+
+--- Confusion Matrix ---
+[[2549919  147023]
+ [ 133450  416197]]
+
+--- Classification Report ---
+              precision    recall  f1-score   support
+
+           0       0.95      0.95      0.95   2696942
+           1       0.74      0.76      0.75    549647
+
+    accuracy                           0.91   3246589
+   macro avg       0.84      0.85      0.85   3246589
+weighted avg       0.91      0.91      0.91   3246589
+
+[LOG 2026-05-08 09:16:30 -03-0300] (elapsed 59,324.0s) [n=4, d=4, svd=100] Saving compiled FHE circuit to './fhe_model_4_estimators_4_depth_svd_100_components/'...
+[LOG 2026-05-08 09:16:30 -03-0300] (elapsed 59,324.0s) [n=4, d=4, svd=100] FHE assets saved. Summary — train: 65.3s, predict: 16.3s, compile: 3,652.0s, fhe_sim: 11,018.5s
+
+======================================================================
+  FHE SUMMARY  (SVD 100)
+======================================================================
+                        Config |  Train (s) |  Predict (s) |  Compile (s) |  FHE Sim (s)
+------------------------------------------------------------------------------------------
+             n=2, d=2, svd=100 |       42.2 |          5.7 |       3450.3 |      10969.1
+             n=2, d=4, svd=100 |       46.4 |         10.2 |       3570.3 |      10996.6
+             n=4, d=2, svd=100 |       47.9 |          6.6 |       3546.8 |      11032.7
+             n=4, d=4, svd=100 |       65.3 |         16.3 |       3652.0 |      11018.5
+
+[LOG 2026-05-08 09:16:30 -03-0300] (elapsed 59,324.0s) FHE phase complete for SVD 100.
+[LOG 2026-05-08 09:16:30 -03-0300] (elapsed 59,324.8s) Applying TruncatedSVD: 64539 → 200 components  [SVD group 2/2]...
