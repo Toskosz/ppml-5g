@@ -1,9 +1,9 @@
 # Dataset: CIC-UNSW-NB15 (2024)
-# Task: multi-class classification (9 attack categories + benign)
-# Prerequisite: run cicunswnb15-models/model.py first to produce:
+# Task: binary classification (benign vs attack)
+# Prerequisite: run cicunswnb15-models/svd100_model.py or svd200_model.py first to produce:
 #   - preprocessor_cicunsw.pkl
-#   - svd_cicunsw.pkl
-#   - cicunswnb15-models/fhe_model_<n>_estimators_<d>_depth_svd_100_components/
+#   - svd_cicunsw_100.pkl or svd_cicunsw_200.pkl
+#   - cicunswnb15-models/fhe_model_<n>_estimators_<d>_depth_svd_<100|200>_components/
 
 from concrete.ml.deployment import FHEModelClient, FHEModelServer
 from concrete.ml.sklearn.rf import RandomForestClassifier
@@ -34,14 +34,23 @@ def clean_col_names(df):
     return df
 
 
-def load_and_preprocess():
+def load_and_preprocess(n_components_svd=100):
     """
     Loads CIC-UNSW-NB15 data and applies the saved preprocessor + SVD.
     Returns X_train_final, X_test_final, y_train_full, y_test_full, test_labels.
-    Requires preprocessor_cicunsw.pkl and svd_cicunsw.pkl to exist
-     (produced by cicunswnb15-models/model.py).
+    Requires preprocessor_cicunsw.pkl and svd_cicunsw_<n>.pkl to exist
+    (produced by cicunswnb15-models/svd100_model.py or svd200_model.py).
     """
     csv_path = 'CICFlowMeter_out.csv'
+    cols_needed = [
+        'SYN Flag Count', 'ACK Flag Count', 'FIN Flag Count',
+        'RST Flag Count', 'Total Length of Fwd Packet',
+        'Protocol', 'Dst Port', 'Label'
+    ]
+    numerical_features = [
+        'syn_flag_count', 'ack_flag_count', 'fin_flag_count',
+        'rst_flag_count', 'total_length_of_fwd_packet'
+    ]
 
     if not os.path.exists(csv_path):
         raise FileNotFoundError(
@@ -50,18 +59,23 @@ def load_and_preprocess():
         )
 
     print(f"Loading data from '{csv_path}'...")
-    df = pd.read_csv(csv_path, low_memory=False)
+    df = pd.read_csv(csv_path, usecols=cols_needed, low_memory=False)
 
     df = clean_col_names(df)
     df.replace([np.inf, -np.inf], np.nan, inplace=True)
     df.dropna(inplace=True)
+    for col in numerical_features:
+        df[col] = pd.to_numeric(df[col], errors='coerce').astype(np.float32)
+    df.dropna(subset=numerical_features, inplace=True)
+    df['label'] = df['label'].astype(str).str.strip().str.lower()
+    df['binary_label'] = (df['label'] != 'benign').astype(int)
 
     train_df, test_df = train_test_split(df, test_size=0.2, random_state=42, stratify=df['label'])
     print(f"Data split: {len(train_df)} train / {len(test_df)} test samples.")
 
-    y_train_full = train_df['label']
-    y_test_full = test_df['label']
-    test_labels = test_df['label'].reset_index(drop=True)
+    y_train_full = train_df['binary_label']
+    y_test_full = test_df['binary_label']
+    test_labels = test_df['binary_label'].reset_index(drop=True)
 
     del df
 
@@ -76,7 +90,7 @@ def load_and_preprocess():
     del test_df
 
     print("Loading saved SVD...")
-    with open('svd_cicunsw.pkl', 'rb') as f:
+    with open(f'svd_cicunsw_{n_components_svd}.pkl', 'rb') as f:
         svd = pickle.load(f)
 
     X_train_final = svd.transform(X_train_sparse)
@@ -91,7 +105,7 @@ def predict_single_record_plain_text(estimators, depth, n_components_svd=100):
     log_time()
     print(f"\n--- Plaintext Inference | estimators={estimators}, depth={depth} ---")
 
-    X_train_final, X_test_final, y_train_full, _, test_labels = load_and_preprocess()
+    X_train_final, X_test_final, y_train_full, _, test_labels = load_and_preprocess(n_components_svd)
 
     classifier = RandomForestClassifier(
         n_estimators=estimators,
@@ -131,14 +145,11 @@ def predict_single_record_plain_text(estimators, depth, n_components_svd=100):
 
 
 def predict_single_record_with_comparison(estimators, depth, records=1000, n_components_svd=100):
-    """
-    Loads a pre-compiled FHE model and runs encrypted inference on individual records.
-    Uses argmax over the 9-class output vector to determine the predicted class.
-    """
+    """Loads a pre-compiled FHE model and runs encrypted inference on individual records."""
     log_time()
     print(f"\n--- FHE Inference | estimators={estimators}, depth={depth} ---")
 
-     model_dir = f"./cicunswnb15-models/fhe_model_{estimators}_estimators_{depth}_depth_svd_{n_components_svd}_components/"
+    model_dir = f"./cicunswnb15-models/fhe_model_{estimators}_estimators_{depth}_depth_svd_{n_components_svd}_components/"
 
     print("\n[STEP 1] Loading pre-compiled FHE circuit...")
     try:
@@ -147,11 +158,11 @@ def predict_single_record_with_comparison(estimators, depth, records=1000, n_com
         fhe_model_client = FHEModelClient(model_dir)
     except FileNotFoundError as e:
         print(f"Error loading model files: {e}")
-         print("Please run cicunswnb15-models/model.py first to generate the FHE assets.")
+        print("Please run cicunswnb15-models/svd100_model.py or svd200_model.py first to generate the FHE assets.")
         return
 
     print("\n[STEP 2] Preparing data on the CLIENT-SIDE before encryption...")
-    _, X_test_final, _, _, test_labels = load_and_preprocess()
+    _, X_test_final, _, _, test_labels = load_and_preprocess(n_components_svd)
     print(f"Found {len(test_labels)} records to process.")
 
     print("\n[STEP 3] Processing records...")
@@ -173,8 +184,7 @@ def predict_single_record_with_comparison(estimators, depth, records=1000, n_com
         end_time = time.time()
 
         result = fhe_model_client.deserialize_decrypt_dequantize(encrypted_output)
-        # Multi-class: pick the class with the highest probability
-        predicted_label = int(np.argmax(result[0]))
+        predicted_label = int(np.ravel(result)[0])
 
         duration = end_time - start_time
         inference_times.append(duration)
@@ -200,6 +210,7 @@ def predict_single_record_with_comparison(estimators, depth, records=1000, n_com
 
 
 if __name__ == "__main__":
+    n_components_svd = 100
     models_to_test = [
         {'estimators': 2, 'depth': 2},
         {'estimators': 4, 'depth': 2},
@@ -211,5 +222,5 @@ if __name__ == "__main__":
         estimators = model_params['estimators']
         depth = model_params['depth']
         print(f"\n{'='*20} TESTING MODEL: estimators={estimators}, depth={depth} {'='*20}")
-        predict_single_record_plain_text(estimators, depth)
-        predict_single_record_with_comparison(estimators, depth, records=1000)
+        predict_single_record_plain_text(estimators, depth, n_components_svd=n_components_svd)
+        predict_single_record_with_comparison(estimators, depth, records=1000, n_components_svd=n_components_svd)

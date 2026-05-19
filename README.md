@@ -133,7 +133,8 @@ pip install -r macos_requirements.txt
 ```bash
 # From the repo root:
 python cicids2018-kdd-models/model.py
-python cicunswnb15-models/model.py
+python cicunswnb15-models/svd100_model.py
+python cicunswnb15-models/svd200_model.py
 ```
 
 Data files must be in the working directory as listed above. Each script will look for
@@ -171,7 +172,7 @@ These scripts measure per-record plaintext and FHE inference latency over 1000 r
   preprocessor + SVD on every run. This means inference startup time is as slow as training.
 
   Fix:
-  After training (in model.py), serialize the final arrays:
+  After training (in the model training scripts), serialize the final arrays:
     np.save('X_train_final_cic_ids_2018.npy', X_train_final)
     np.save('X_test_final_cic_ids_2018.npy', X_test_final)
     y_train_full.to_pickle('y_train_cic_ids_2018.pkl')
@@ -214,7 +215,7 @@ These scripts measure per-record plaintext and FHE inference latency over 1000 r
   Implementation plan for fivegnidd-models/:
   1. Download dataset from IEEE DataPort (requires free account)
   2. Inspect column schema — likely compatible with CICFlowMeter feature names
-  3. Create model.py mirroring cicunswnb15-models/model.py structure
+  3. Create a training script mirroring cicunswnb15-models/svd100_model.py structure
   4. Create single_record_inference.py
   5. Document fit within O-RAN N6-interface context (same as other models)
   6. Note that this is the only dataset in the project collected from a real 5G testbed

@@ -19,7 +19,8 @@ Pinned versions matter: `concrete-ml==1.9.0`, `numpy==1.26.4`. Do not upgrade th
 
 ```bash
 python cicids2018-kdd-models/model.py
-python cicunswnb15-models/model.py
+python cicunswnb15-models/svd100_model.py
+python cicunswnb15-models/svd200_model.py
 ```
 
 **Single-record inference timing:**
@@ -46,13 +47,13 @@ Training scripts expect data at the working directory (e.g. `CIC-IDS-2018/` fold
 
 - No package structure, no tests, no CI, no linter/formatter — each directory is a standalone experiment.
 - `cicids2018-kdd-models/` is a **binary** classifier (benign/attack), training with both `TruncatedSVD(100)` and `TruncatedSVD(200)`.
-- `cicunswnb15-models/` is **multi-class** (9 categories); its metrics use `average='weighted'`.
+- `cicunswnb15-models/` is a **binary** classifier (benign/attack), with separate `svd100_model.py` and `svd200_model.py` trainers.
 - Both share the same 7-feature CICFlowMeter schema: `syn_flag_cnt`, `ack_flag_cnt`, `fin_flag_cnt`, `rst_flag_cnt`, `totlen_fwd_pkts` (numerical) + `protocol`, `dst_port` (categorical).
 - Preprocessing pipeline: `MinMaxScaler` + `OneHotEncoder` → `TruncatedSVD(n_components)` → saved as `.pkl`.
 
 ## Gotchas
 
-- **CWD matters.** All scripts use relative paths. Run `python model.py` from inside the model directory.
+- **CWD matters.** All scripts use relative paths. Run the selected trainer from inside the model directory.
 - **`*.pkl` is gitignored**, but some legacy `.pkl` files were committed before the gitignore rule. Do not assume all preprocessors are in the repo.
 - **`cicids2018-kdd-models/`** trains with both `TruncatedSVD(100)` and `TruncatedSVD(200)`.
 - Inference scripts (`best_model_single_record.py`, `single_record_inference.py`) re-run the full preprocessing pipeline on every invocation (they call `load_and_preprocess()` which re-reads the CSV). This is a known performance issue documented in README TODOs.
