@@ -143,19 +143,16 @@ Both should print `True` after installing `requirements-gpu.txt` on a machine wi
 ### Training (compiles FHE circuits)
 
 ```bash
-# From cicids2018-kdd-models/ (CWD matters):
+# From cicids2018-kdd-models/ or cicunswnb15-models/ (CWD matters):
 PPML_FHE_DEVICE=auto python svd100_model_fast.py   # auto|cpu|cuda
 PPML_FHE_DEVICE=cuda python svd200_model_fast.py
 
-# Or run the full suite + report.txt:
+# Full suite + report.txt (either model directory):
 python run_all_and_report.py --device cuda --only-fast
-
-python ../cicunswnb15-models/svd100_model.py
-python ../cicunswnb15-models/svd200_model.py
 ```
 
-Data files must be in the working directory as listed above. Each script will look for
-a combined CSV cache before re-reading the folder.
+Data files must be in the working directory as listed above
+(`CIC-IDS-2018/` / `CIC-IDS-2018-Combined.csv`, or `CICFlowMeter_out.csv`).
 
 FHE circuits compiled with `device='cuda'` require the GPU Concrete runtime at inference time.
 Each saved model directory gets an `fhe_device.txt` marker (`cpu` or `cuda`).
@@ -163,11 +160,12 @@ Each saved model directory gets an `fhe_device.txt` marker (`cpu` or `cuda`).
 ### Single-record inference timing
 
 ```bash
-python cicids2018-kdd-models/best_model_single_record.py
-python cicunswnb15-models/single_record_inference.py
+# From each model directory:
+python best_model_single_record.py      # cicids2018-kdd-models/
+python single_record_inference.py       # cicunswnb15-models/
 ```
 
-These scripts measure per-record plaintext and FHE inference latency over 1000 records.
+These scripts measure per-record plaintext and FHE encrypt/inference/decrypt latency.
 
 ---
 

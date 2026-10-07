@@ -1,226 +1,342 @@
 # Dataset: CIC-UNSW-NB15 (2024)
 # Task: binary classification (benign vs attack)
-# Prerequisite: run cicunswnb15-models/svd100_model.py or svd200_model.py first to produce:
-#   - preprocessor_cicunsw.pkl
-#   - svd_cicunsw_100.pkl or svd_cicunsw_200.pkl
-#   - cicunswnb15-models/fhe_model_<n>_estimators_<d>_depth_svd_<100|200>_components/
+# Prerequisite: run svd100_model.py / svd200_model.py (or *_fast.py) first
 
-from concrete.ml.deployment import FHEModelClient, FHEModelServer
-from concrete.ml.sklearn.rf import RandomForestClassifier
+from concrete.ml.common.serialization.loaders import load
 import datetime
 import numpy as np
 import os
 import pandas as pd
 import pickle
+import sklearn
+import sys
+import time as _time
 from sklearn.model_selection import train_test_split
+from sklearn.metrics import (
+    accuracy_score,
+    classification_report,
+    confusion_matrix,
+    f1_score,
+    precision_score,
+    recall_score
+)
 from zoneinfo import ZoneInfo
-import time
+
+from fhe_latency import measure_fhe_roundtrip, print_latency_summary
+
+_wall_start = _time.time()
+
+NUMERICAL_FEATURES = [
+    'syn_flag_count', 'ack_flag_count', 'fin_flag_count',
+    'rst_flag_count', 'total_length_of_fwd_packet'
+]
+CATEGORICAL_FEATURES = ['protocol', 'dst_port']
+COLS_NEEDED = [
+    'SYN Flag Count', 'ACK Flag Count', 'FIN Flag Count',
+    'RST Flag Count', 'Total Length of Fwd Packet',
+    'Protocol', 'Dst Port', 'Label'
+]
 
 
-def log_time():
-    """Prints the current time in Brasília timezone."""
+def log_time(msg=None):
     brasilia_tz = ZoneInfo("America/Sao_Paulo")
     utc_now = datetime.datetime.now(datetime.timezone.utc)
     brasilia_now = utc_now.astimezone(brasilia_tz)
     formatted_time = brasilia_now.strftime("%Y-%m-%d %H:%M:%S %Z%z")
-    print(f"[LOG] Current time: {formatted_time}")
+    elapsed = _time.time() - _wall_start
+    if msg:
+        print(f"[LOG {formatted_time}] (elapsed {elapsed:,.1f}s) {msg}")
+    else:
+        print(f"[LOG {formatted_time}] (elapsed {elapsed:,.1f}s)")
+    sys.stdout.flush()
+
+
+def log_model_metrics(y_test, y_pred):
+    print("--- Model Evaluation ---")
+    accuracy = accuracy_score(y_test, y_pred)
+    print(f"Accuracy: {accuracy:.4f}")
+
+    precision = precision_score(y_test, y_pred)
+    print(f"Precision: {precision:.4f}")
+
+    recall = recall_score(y_test, y_pred)
+    print(f"Recall: {recall:.4f}")
+
+    f1 = f1_score(y_test, y_pred)
+    print(f"F1-Score: {f1:.4f}")
+
+    print("\n--- Confusion Matrix ---")
+    cm = confusion_matrix(y_test, y_pred)
+    print(cm)
+
+    print("\n--- Classification Report ---")
+    report = classification_report(y_test, y_pred)
+    print(report)
 
 
 def clean_col_names(df):
-    """Cleans column names to be Python-friendly."""
     cols = df.columns
     new_cols = [col.strip().replace(' ', '_').replace('/', '_').lower() for col in cols]
     df.columns = new_cols
     return df
 
 
-def load_and_preprocess(n_components_svd=100):
-    """
-    Loads CIC-UNSW-NB15 data and applies the saved preprocessor + SVD.
-    Returns X_train_final, X_test_final, y_train_full, y_test_full, test_labels.
-    Requires preprocessor_cicunsw.pkl and svd_cicunsw_<n>.pkl to exist
-    (produced by cicunswnb15-models/svd100_model.py or svd200_model.py).
-    """
-    csv_path = 'CICFlowMeter_out.csv'
-    cols_needed = [
-        'SYN Flag Count', 'ACK Flag Count', 'FIN Flag Count',
-        'RST Flag Count', 'Total Length of Fwd Packet',
-        'Protocol', 'Dst Port', 'Label'
-    ]
-    numerical_features = [
-        'syn_flag_count', 'ack_flag_count', 'fin_flag_count',
-        'rst_flag_count', 'total_length_of_fwd_packet'
-    ]
+def prepare_test_data_with_saved_artifacts(n_components_svd=100):
+    log_time(f"Loading test data using saved preprocessor and SVD artifacts (svd={n_components_svd})...")
 
+    with open('preprocessor_cicunsw.pkl', 'rb') as f:
+        preprocessor = pickle.load(f)
+    log_time("Loaded saved preprocessor.")
+
+    svd_pkl_path = f'svd_cicunsw_{n_components_svd}.pkl'
+    with open(svd_pkl_path, 'rb') as f:
+        svd = pickle.load(f)
+    log_time(f"Loaded saved SVD from '{svd_pkl_path}'.")
+
+    csv_path = 'CICFlowMeter_out.csv'
     if not os.path.exists(csv_path):
         raise FileNotFoundError(
             f"Dataset file not found: '{csv_path}'. "
             "Download CIC-UNSW-NB15 from http://cicresearch.ca/CICDataset/CIC-UNSW/"
         )
 
-    print(f"Loading data from '{csv_path}'...")
-    df = pd.read_csv(csv_path, usecols=cols_needed, low_memory=False)
-
+    log_time(f"Loading data from '{csv_path}'...")
+    df = pd.read_csv(csv_path, usecols=COLS_NEEDED, low_memory=False)
     df = clean_col_names(df)
+    rows_before = len(df)
     df.replace([np.inf, -np.inf], np.nan, inplace=True)
     df.dropna(inplace=True)
-    for col in numerical_features:
+    for col in NUMERICAL_FEATURES:
         df[col] = pd.to_numeric(df[col], errors='coerce').astype(np.float32)
-    df.dropna(subset=numerical_features, inplace=True)
+    df.dropna(subset=NUMERICAL_FEATURES, inplace=True)
+    for col in CATEGORICAL_FEATURES:
+        df[col] = df[col].astype(str)
+    log_time(f"Dropped {rows_before - len(df)} rows with NaN/Inf. Remaining: {len(df)} rows.")
+
     df['label'] = df['label'].astype(str).str.strip().str.lower()
     df['binary_label'] = (df['label'] != 'benign').astype(int)
+    log_time(f"Label distribution — benign: {(df['binary_label']==0).sum()}, attack: {(df['binary_label']==1).sum()}")
 
-    train_df, test_df = train_test_split(df, test_size=0.2, random_state=42, stratify=df['label'])
-    print(f"Data split: {len(train_df)} train / {len(test_df)} test samples.")
-
-    y_train_full = train_df['binary_label']
+    log_time("Splitting data 80/20 (stratified)...")
+    _, test_df = train_test_split(df, test_size=0.2, random_state=42, stratify=df['label'])
+    log_time(f"Test: {len(test_df)}.")
+    test_labels = test_df['label'].reset_index(drop=True)
     y_test_full = test_df['binary_label']
-    test_labels = test_df['binary_label'].reset_index(drop=True)
+
+    X_test_sparse = preprocessor.transform(test_df)
+    X_test_final = svd.transform(X_test_sparse)
+    log_time(f"Test data ready — {X_test_final.shape}, using saved preprocessor and SVD.")
 
     del df
-
-    print("Loading saved preprocessor...")
-    with open('preprocessor_cicunsw.pkl', 'rb') as f:
-        preprocessor = pickle.load(f)
-
-    X_train_sparse = preprocessor.transform(train_df)
-    X_test_sparse = preprocessor.transform(test_df)
-
-    del train_df
-    del test_df
-
-    print("Loading saved SVD...")
-    with open(f'svd_cicunsw_{n_components_svd}.pkl', 'rb') as f:
-        svd = pickle.load(f)
-
-    X_train_final = svd.transform(X_train_sparse)
-    X_test_final = svd.transform(X_test_sparse)
-
-    print(f"Final shapes — X_train: {X_train_final.shape}, X_test: {X_test_final.shape}")
-
-    return X_train_final, X_test_final, y_train_full, y_test_full, test_labels
+    return X_test_final, y_test_full, test_labels
 
 
-def predict_single_record_plain_text(estimators, depth, n_components_svd=100):
-    log_time()
-    print(f"\n--- Plaintext Inference | estimators={estimators}, depth={depth} ---")
+def predict_single_record_plaintext(estimators, depth, n_components_svd=100):
+    config_tag = f"n={estimators}, d={depth}, svd={n_components_svd}"
+    print(f"\n{'='*60}")
+    print(f"  PLAINTEXT CONFIG: n_estimators={estimators}, max_depth={depth}, svd={n_components_svd}")
+    print(f"{'='*60}")
+    sys.stdout.flush()
+    log_time(f"[{config_tag}] Starting plaintext inference benchmark")
 
-    X_train_final, X_test_final, y_train_full, _, test_labels = load_and_preprocess(n_components_svd)
+    json_path = f"plaintext_model_{estimators}_estimators_{depth}_depth_svd_{n_components_svd}.json"
+    if not os.path.exists(json_path):
+        log_time(f"[{config_tag}] ERROR: Serialized model not found at '{json_path}'.")
+        print("Please run svd100_model.py / svd200_model.py (or *_fast.py) first.")
+        return None
 
-    classifier = RandomForestClassifier(
-        n_estimators=estimators,
-        max_depth=depth,
-        random_state=42
-    )
-    classifier.fit(X_train_final, y_train_full)
+    log_time(f"[{config_tag}] Loading Concrete ML model from '{json_path}'...")
+    with open(json_path, "r") as f:
+        classifier = load(f)
+    log_time(f"[{config_tag}] Model loaded.")
 
+    X_test_final, y_test_full, _ = prepare_test_data_with_saved_artifacts(n_components_svd)
+
+    t0 = _time.time()
+    log_time(f"[{config_tag}] Starting clear (plaintext) prediction on {X_test_final.shape[0]} samples...")
+    y_pred = classifier.predict(X_test_final)
+    pred_dur = _time.time() - t0
+    log_time(f"[{config_tag}] Clear prediction completed in {pred_dur:,.1f}s")
+
+    log_model_metrics(y_test_full, y_pred)
+
+    n_single = min(1000, X_test_final.shape[0])
+    log_time(f"[{config_tag}] Running single-record inference on {n_single} records...")
     inference_times = []
+    report_interval = max(1, n_single // 5)
 
-    for i in range(1000):
-        single_record = X_test_final[i:i+1]
+    for i in range(n_single):
+        single_record = X_test_final[i:i + 1]
+        start_time = _time.time()
+        classifier.predict(single_record)
+        inference_times.append(_time.time() - start_time)
+        if (i + 1) % report_interval == 0:
+            log_time(
+                f"[{config_tag}] Processed {i+1}/{n_single} records "
+                f"(avg {np.mean(inference_times):.6f}s/record)"
+            )
 
-        start_time = time.time()
-        result = classifier.predict(single_record)
-        end_time = time.time()
+    total_inference_time = float(np.sum(inference_times))
+    mean_inference_time = float(np.mean(inference_times))
+    std_inference_time = float(np.std(inference_times))
 
-        duration = end_time - start_time
-        inference_times.append(duration)
+    print("\n" + "=" * 20 + " PLAINTEXT LATENCY SUMMARY " + "=" * 20)
+    print(f"Records measured: {n_single}")
+    print(f"Total inference time: {total_inference_time:.4f} s")
+    print(f"Mean inference time/record: {mean_inference_time:.6f} s")
+    print(f"Std inference time/record:  {std_inference_time:.6f} s")
+    print("=" * 70 + "\n")
 
-        true_label = test_labels.iloc[i]
-
-#        print(f"Record {i+1}/1000 | Predicted: {result[0]} | True: {true_label} | Time: {duration:.4f}s")
-
-    print("\n[STEP 4] Calculating final statistics...")
-    log_time()
-
-    total_records = len(inference_times)
-    total_inference_time = sum(inference_times)
-    mean_inference_time = np.mean(inference_times) if total_records > 0 else 0
-
-    print("\n" + "="*20 + " INFERENCE SUMMARY " + "="*20)
-    print(f"Total records processed: {total_records}")
-    print(f"   Total inference time: {total_inference_time:.4f} seconds")
-    print(f"Mean inference time/record: {mean_inference_time:.6f} seconds")
-    print("="*61 + "\n")
+    return {
+        'config_tag': config_tag,
+        'pred_dur': pred_dur,
+        'mean_inference_s': mean_inference_time,
+        'std_inference_s': std_inference_time,
+        'n_records': n_single,
+    }
 
 
 def predict_single_record_with_comparison(estimators, depth, records=1000, n_components_svd=100):
-    """Loads a pre-compiled FHE model and runs encrypted inference on individual records."""
-    log_time()
-    print(f"\n--- FHE Inference | estimators={estimators}, depth={depth} ---")
+    config_tag = f"n={estimators}, d={depth}, svd={n_components_svd}"
+    print(f"\n{'='*60}")
+    print(f"  FHE CONFIG: n_estimators={estimators}, max_depth={depth}, svd={n_components_svd}")
+    print(f"{'='*60}")
+    sys.stdout.flush()
+    log_time(f"[{config_tag}] Starting FHE inference benchmark")
 
-    model_dir = f"./cicunswnb15-models/fhe_model_{estimators}_estimators_{depth}_depth_svd_{n_components_svd}_components/"
-
-    print("\n[STEP 1] Loading pre-compiled FHE circuit...")
-    try:
-        fhe_model_server = FHEModelServer(model_dir)
-        fhe_model_server.load()
-        fhe_model_client = FHEModelClient(model_dir)
-    except FileNotFoundError as e:
-        print(f"Error loading model files: {e}")
-        print("Please run cicunswnb15-models/svd100_model.py or svd200_model.py first to generate the FHE assets.")
+    model_dir = f"./fhe_model_{estimators}_estimators_{depth}_depth_svd_{n_components_svd}_components/"
+    if not os.path.isdir(model_dir):
+        log_time(f"[{config_tag}] ERROR: FHE model directory not found at '{model_dir}'.")
+        print("Please run a training script first to generate the FHE assets.")
         return
 
-    print("\n[STEP 2] Preparing data on the CLIENT-SIDE before encryption...")
-    _, X_test_final, _, _, test_labels = load_and_preprocess(n_components_svd)
-    print(f"Found {len(test_labels)} records to process.")
+    log_time(f"[{config_tag}] [STEP 1/3] Preparing data using saved artifacts...")
+    X_test_final, y_test_full, test_labels = prepare_test_data_with_saved_artifacts(n_components_svd)
+    n_records = min(records, len(test_labels))
+    log_time(f"[{config_tag}] {len(test_labels)} test records available, processing {n_records}.")
 
-    print("\n[STEP 3] Processing records...")
-    inference_times = []
-    preprocessing_times = []
+    log_time(f"[{config_tag}] [STEP 2/3] Measuring encrypt / inference / decrypt...")
+    try:
+        latency = measure_fhe_roundtrip(
+            model_dir,
+            X_test_final,
+            n_records=n_records,
+            log_fn=lambda msg: log_time(f"[{config_tag}] {msg}"),
+            return_predictions=True,
+        )
+    except FileNotFoundError as e:
+        log_time(f"[{config_tag}] ERROR loading model files: {e}")
+        print("Please run a training script first to generate the FHE assets.")
+        return
 
-    serialized_evaluation_keys = fhe_model_client.get_serialized_evaluation_keys()
+    log_time(f"[{config_tag}] [STEP 3/3] Computing FHE metrics...")
+    true_labels = []
+    for i in range(latency["n_records"]):
+        true_label_text = test_labels.iloc[i]
+        true_labels.append(0 if true_label_text == 'benign' else 1)
 
-    for i in range(records):
-        single_record = X_test_final[i:i+1]
+    log_time(f"[{config_tag}] FHE metrics:")
+    log_model_metrics(np.array(true_labels), np.array(latency["predictions"]))
+    print_latency_summary(latency, title=f"FHE LATENCY ({config_tag})")
 
-        start_preprocessing = time.time()
-        encrypted_input = fhe_model_client.quantize_encrypt_serialize(single_record)
-        end_preprocessing = time.time()
-        preprocessing_times.append(end_preprocessing - start_preprocessing)
-
-        start_time = time.time()
-        encrypted_output = fhe_model_server.run(encrypted_input, serialized_evaluation_keys)
-        end_time = time.time()
-
-        result = fhe_model_client.deserialize_decrypt_dequantize(encrypted_output)
-        predicted_label = int(np.ravel(result)[0])
-
-        duration = end_time - start_time
-        inference_times.append(duration)
-
-        true_label = test_labels.iloc[i]
-
-#        print(f"Record {i+1}/{records} | Predicted: {predicted_label} | True: {true_label} | Time: {duration:.4f}s")
-
-    print("\n[STEP 4] Calculating final statistics...")
-    log_time()
-
-    total_records = len(inference_times)
-    total_inference_time = sum(inference_times)
-    mean_inference_time = np.mean(inference_times) if total_records > 0 else 0
-    mean_preprocessing_time = np.mean(preprocessing_times) if total_records > 0 else 0
-
-    print("\n" + "="*20 + " INFERENCE SUMMARY " + "="*20)
-    print(f"Total records processed: {total_records}")
-    print(f"   Total inference time: {total_inference_time:.4f} seconds")
-    print(f"Mean inference time/record: {mean_inference_time:.6f} seconds")
-    print(f"Mean preprocessing time/record: {mean_preprocessing_time:.6f} seconds")
-    print("="*61 + "\n")
+    return {
+        'config_tag': config_tag,
+        'n_records': latency["n_records"],
+        'keygen_s': latency["keygen_s"],
+        'mean_encrypt_s': latency["mean_encrypt_s"],
+        'mean_inference_s': latency["mean_inference_s"],
+        'mean_decrypt_s': latency["mean_decrypt_s"],
+        'mean_e2e_s': latency["mean_e2e_s"],
+        'std_encrypt_s': latency["std_encrypt_s"],
+        'std_inference_s': latency["std_inference_s"],
+        'std_decrypt_s': latency["std_decrypt_s"],
+        'total_encrypt_s': latency["total_encrypt_s"],
+        'total_inference_s': latency["total_inference_s"],
+        'total_decrypt_s': latency["total_decrypt_s"],
+        'total_e2e_s': latency["total_e2e_s"],
+    }
 
 
 if __name__ == "__main__":
-    n_components_svd = 100
-    models_to_test = [
-        {'estimators': 2, 'depth': 2},
-        {'estimators': 4, 'depth': 2},
-        {'estimators': 2, 'depth': 4},
-        {'estimators': 4, 'depth': 4},
-    ]
+    log_time(f"Starting single_record_inference.py — scikit-learn {sklearn.__version__}")
 
-    for model_params in models_to_test:
-        estimators = model_params['estimators']
-        depth = model_params['depth']
-        print(f"\n{'='*20} TESTING MODEL: estimators={estimators}, depth={depth} {'='*20}")
-        predict_single_record_plain_text(estimators, depth, n_components_svd=n_components_svd)
-        predict_single_record_with_comparison(estimators, depth, records=1000, n_components_svd=n_components_svd)
+    configs = [
+        ("plaintext", 2, 2, 100),
+        ("plaintext", 2, 4, 100),
+        ("plaintext", 4, 2, 100),
+        ("plaintext", 4, 4, 100),
+        ("plaintext", 2, 2, 200),
+        ("plaintext", 2, 4, 200),
+        ("plaintext", 4, 2, 200),
+        ("plaintext", 4, 4, 200),
+        ("fhe", 2, 2, 1000, 100),
+        ("fhe", 2, 4, 1000, 100),
+        ("fhe", 4, 2, 1000, 100),
+        ("fhe", 4, 4, 1000, 100),
+        ("fhe", 2, 2, 1000, 200),
+        ("fhe", 2, 4, 1000, 200),
+        ("fhe", 4, 2, 1000, 200),
+        ("fhe", 4, 4, 1000, 200),
+    ]
+    total = len(configs)
+    log_time(f"Starting benchmark suite — {total} configurations to run")
+
+    print("\n" + "#" * 70)
+    print("#  PHASE 1: PLAINTEXT INFERENCE BENCHMARK")
+    print("#" * 70)
+
+    plaintext_results = []
+    for idx, cfg in enumerate(configs, 1):
+        log_time(f"=== Configuration {idx}/{total} ===")
+        if cfg[0] == "plaintext":
+            result = predict_single_record_plaintext(cfg[1], cfg[2], n_components_svd=cfg[3])
+            if result:
+                plaintext_results.append(result)
+
+    if plaintext_results:
+        print("\n" + "=" * 70)
+        print("  PLAINTEXT SUMMARY")
+        print("=" * 70)
+        print(f"{'Config':>30s} | {'Batch Pred (s)':>14s} | {'Mean Inf (s)':>12s} | {'Std Inf (s)':>12s}")
+        print("-" * 76)
+        for r in plaintext_results:
+            print(
+                f"{r['config_tag']:>30s} | {r['pred_dur']:>14.1f} | "
+                f"{r['mean_inference_s']:>12.6f} | {r['std_inference_s']:>12.6f}"
+            )
+        print()
+
+    log_time("Phase 1 complete — all plaintext variants evaluated.")
+
+    print("\n" + "#" * 70)
+    print("#  PHASE 2: FHE INFERENCE BENCHMARK")
+    print("#" * 70)
+
+    fhe_results = []
+    for cfg in configs:
+        if cfg[0] == "fhe":
+            log_time("=== FHE Configuration ===")
+            result = predict_single_record_with_comparison(
+                cfg[1], cfg[2], cfg[3], n_components_svd=cfg[4]
+            )
+            if result:
+                fhe_results.append(result)
+
+    if fhe_results:
+        print("\n" + "=" * 70)
+        print("  FHE LATENCY SUMMARY (per-record means)")
+        print("=" * 70)
+        print(
+            f"{'Config':>30s} | {'Encrypt (s)':>12s} | {'Infer (s)':>12s} | "
+            f"{'Decrypt (s)':>12s} | {'E2E (s)':>12s}"
+        )
+        print("-" * 90)
+        for r in fhe_results:
+            print(
+                f"{r['config_tag']:>30s} | {r['mean_encrypt_s']:>12.6f} | "
+                f"{r['mean_inference_s']:>12.6f} | {r['mean_decrypt_s']:>12.6f} | "
+                f"{r['mean_e2e_s']:>12.6f}"
+            )
+        print()
+
+    log_time(f"All {total} configurations complete.")

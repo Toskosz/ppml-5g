@@ -17,16 +17,17 @@ pip install -r requirements-gpu.txt
 
 Pinned versions matter: `concrete-ml==1.9.0`, `numpy==1.26.4`. Do not upgrade these independently.
 
-FHE device (`cicids2018-kdd-models/`): `PPML_FHE_DEVICE=auto|cpu|cuda` or `run_all_and_report.py --device ...`. Default `auto` uses CUDA when the GPU Concrete wheel reports available+enabled; otherwise CPU.
+FHE device (both model dirs): `PPML_FHE_DEVICE=auto|cpu|cuda` or `run_all_and_report.py --device ...`. Default `auto` uses CUDA when the GPU Concrete wheel reports available+enabled; otherwise CPU.
 
 ## Running
 
-**Training / FHE circuit compilation** (run from inside each model directory — scripts use relative paths like `CIC-IDS-2018/`):
+**Training / FHE circuit compilation** (run from inside each model directory — scripts use relative paths):
 
 ```bash
 cd cicids2018-kdd-models && PPML_FHE_DEVICE=auto python svd100_model_fast.py
-python cicunswnb15-models/svd100_model.py
-python cicunswnb15-models/svd200_model.py
+cd cicunswnb15-models && PPML_FHE_DEVICE=auto python svd100_model_fast.py
+# Full suite + report.txt from either directory:
+python run_all_and_report.py --device auto --only-fast
 ```
 
 **Single-record inference timing:**
@@ -53,7 +54,7 @@ Training scripts expect data at the working directory (e.g. `CIC-IDS-2018/` fold
 
 - No package structure, no tests, no CI, no linter/formatter — each directory is a standalone experiment.
 - `cicids2018-kdd-models/` is a **binary** classifier (benign/attack), training with both `TruncatedSVD(100)` and `TruncatedSVD(200)`.
-- `cicunswnb15-models/` is a **binary** classifier (benign/attack), with separate `svd100_model.py` and `svd200_model.py` trainers.
+- `cicunswnb15-models/` is a **binary** classifier (benign/attack), with `svd100_model.py` / `svd200_model.py` plus `*_fast.py` variants, latency helpers, GPU support, and `run_all_and_report.py` (same patterns as `cicids2018-kdd-models/`).
 - Both share the same 7-feature CICFlowMeter schema: `syn_flag_cnt`, `ack_flag_cnt`, `fin_flag_cnt`, `rst_flag_cnt`, `totlen_fwd_pkts` (numerical) + `protocol`, `dst_port` (categorical).
 - Preprocessing pipeline: `MinMaxScaler` + `OneHotEncoder` → `TruncatedSVD(n_components)` → saved as `.pkl`.
 
@@ -62,6 +63,6 @@ Training scripts expect data at the working directory (e.g. `CIC-IDS-2018/` fold
 - **CWD matters.** All scripts use relative paths. Run the selected trainer from inside the model directory.
 - **`*.pkl` is gitignored**, but some legacy `.pkl` files were committed before the gitignore rule. Do not assume all preprocessors are in the repo.
 - **`cicids2018-kdd-models/`** trains with both `TruncatedSVD(100)` and `TruncatedSVD(200)`.
-- Inference scripts (`best_model_single_record.py`, `single_record_inference.py`) re-run the full preprocessing pipeline on every invocation (they call `load_and_preprocess()` which re-reads the CSV). This is a known performance issue documented in README TODOs.
+- Inference scripts (`best_model_single_record.py`, `single_record_inference.py`) re-read the CSV and apply saved preprocessor/SVD on every invocation. This is a known performance issue documented in README TODOs.
 - The `cicunswnb15-models/` label column is `Label` (capital L), while the CIC-IDS-2018 models use `label` (lowercase) after `clean_col_names()`.
 - `Train.txt` and `Test.txt` at the repo root are legacy KDD Cup 1999 data files — they are **not** used by any current model.

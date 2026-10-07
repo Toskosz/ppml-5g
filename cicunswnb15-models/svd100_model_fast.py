@@ -3,7 +3,7 @@
 # Download: http://cicresearch.ca/CICDataset/CIC-UNSW/ (see https://www.unb.ca/cic/datasets/cic-unsw-nb15.html)
 # Task: binary classification (benign vs attack)
 # Features: CICFlowMeter output; model uses 5 numerical + 2 categorical
-# This script: SVD 100 components only
+# This script: SVD 100 components only (optimized: n_bits=5, p_error=0.01)
 
 from concrete.ml.deployment import FHEModelDev
 from concrete.ml.sklearn.rf import RandomForestClassifier
@@ -33,7 +33,8 @@ from zoneinfo import ZoneInfo
 from fhe_latency import measure_fhe_roundtrip, print_latency_summary
 from gpu_utils import compile_for_device, write_device_marker
 
-# Real FHE encrypt/infer/decrypt timing sample size (simulate phase uses the full test set).
+FHE_SIM_SAMPLE_SIZE = 50_000
+# Real FHE encrypt/infer/decrypt timing sample size (separate from simulate subset).
 FHE_LATENCY_SAMPLE_SIZE = 100
 # FHE device: auto | cpu | cuda  (override with PPML_FHE_DEVICE)
 FHE_DEVICE = os.environ.get("PPML_FHE_DEVICE", "auto")
@@ -230,7 +231,8 @@ for svd_idx, n_components_svd in enumerate(svd_groups, 1):
         classifier = RandomForestClassifier(
             n_estimators=n_estimators,
             max_depth=max_depth,
-            random_state=42
+            random_state=42,
+            n_bits=5,
         )
         classifier.fit(X_train_final, y_train_final)
         train_dur = _time.time() - t0
@@ -299,19 +301,26 @@ for svd_idx, n_components_svd in enumerate(svd_groups, 1):
             classifier,
             X_train_final,
             device=FHE_DEVICE,
+            p_error=0.01,
             log_fn=lambda msg: log_time(f"[{config_tag}] {msg}"),
         )
         compile_dur = _time.time() - t0
         log_time(f"[{config_tag}] FHE compilation completed in {compile_dur:,.1f}s on device='{fhe_device}'")
 
+        n_sim = min(FHE_SIM_SAMPLE_SIZE, len(y_test_final))
+        sim_idx = np.random.choice(len(y_test_final), n_sim, replace=False)
+        X_test_sim = X_test_final[sim_idx]
+        y_test_sim = y_test_final.iloc[sim_idx]
+        log_time(f"[{config_tag}] Subsampled {n_sim:,} rows for FHE simulation...")
+
         t0 = _time.time()
-        log_time(f"[{config_tag}] Starting FHE simulation prediction on {X_test_final.shape[0]} samples...")
-        y_pred_fhe = classifier.predict(X_test_final, fhe="simulate")
+        log_time(f"[{config_tag}] Starting FHE simulation prediction on {n_sim:,} samples...")
+        y_pred_fhe = classifier.predict(X_test_sim, fhe="simulate")
         fhe_dur = _time.time() - t0
         log_time(f"[{config_tag}] FHE simulation completed in {fhe_dur:,.1f}s")
 
-        log_time(f"[{config_tag}] FHE metrics:")
-        log_model_metrics(y_test_final, y_pred_fhe)
+        log_time(f"[{config_tag}] FHE metrics (on {n_sim:,} sample subset):")
+        log_model_metrics(y_test_sim, y_pred_fhe)
 
         model_dir = f"./fhe_model_{n_estimators}_estimators_{max_depth}_depth_svd_{n_components_svd}_components/"
         log_time(f"[{config_tag}] Saving compiled FHE circuit to '{model_dir}'...")
