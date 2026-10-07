@@ -8,7 +8,6 @@ from concrete.ml.deployment import FHEModelDev
 from concrete.ml.sklearn.rf import RandomForestClassifier
 from concrete.ml.common.serialization.dumpers import dump
 import datetime
-import glob
 import numpy as np
 import os
 import pandas as pd
@@ -30,6 +29,7 @@ from sklearn.metrics import (
 )
 from zoneinfo import ZoneInfo
 
+from data_load import clean_col_names, load_or_assemble_cic_ids_2018
 from fhe_latency import measure_fhe_roundtrip, print_latency_summary
 from gpu_utils import compile_for_device, write_device_marker
 
@@ -77,53 +77,21 @@ def log_model_metrics(y_test, y_pred):
     print(report)
 
 
-def clean_col_names(df):
-    """Cleans column names to be Python-friendly."""
-    cols = df.columns
-    new_cols = [col.strip().replace(' ', '_').replace('/', '_').lower() for col in cols]
-    df.columns = new_cols
-    return df
-
-
 log_time(f"Starting model.py — scikit-learn {sklearn.__version__}")
 
 numerical_features = ['syn_flag_cnt', 'ack_flag_cnt', 'fin_flag_cnt', 'rst_flag_cnt', 'totlen_fwd_pkts']
 categorical_features = ['protocol', 'dst_port']
-needed_cols = numerical_features + categorical_features + ['label']
 
 data_folder = 'CIC-IDS-2018'
 combined_csv_path = 'CIC-IDS-2018-Combined.csv'
 
-if os.path.exists(combined_csv_path):
-    log_time(f"Loading existing combined file '{combined_csv_path}'...")
-    df = pd.read_csv(combined_csv_path)
-    log_time(f"Loaded {len(df)} rows from '{combined_csv_path}'.")
-else:
-    log_time(f"No combined file found. Assembling data from '{data_folder}' folder...")
-    all_files = sorted(glob.glob(os.path.join(data_folder, "*.csv")))
-    if not all_files:
-        raise FileNotFoundError(
-            f"No CSV files found in '{data_folder}'. "
-            f"Download with: aws s3 sync --no-sign-request s3://cse-cic-ids2018/ {data_folder}/"
-        )
-    log_time(f"Found {len(all_files)} CSV files. Reading one at a time...")
-    chunks = []
-    for i, f in enumerate(all_files):
-        log_time(f"  Reading file {i+1}/{len(all_files)}: {os.path.basename(f)}...")
-        chunk = pd.read_csv(f, low_memory=False)
-        chunk = clean_col_names(chunk)
-        for col in numerical_features:
-            chunk[col] = pd.to_numeric(chunk[col], errors='coerce')
-        chunk.replace([np.inf, -np.inf], np.nan, inplace=True)
-        chunk.dropna(subset=needed_cols, inplace=True)
-        for col in categorical_features:
-            chunk[col] = chunk[col].astype(str)
-        chunks.append(chunk[needed_cols])
-    df = pd.concat(chunks, ignore_index=True)
-    del chunks
-    log_time(f"Combined {len(all_files)} files → {len(df)} rows.")
-    df.to_csv(combined_csv_path, index=False)
-    log_time(f"Saved combined data to '{combined_csv_path}'.")
+df = load_or_assemble_cic_ids_2018(
+    data_folder,
+    combined_csv_path,
+    numerical_features,
+    categorical_features,
+    log_time,
+)
 
 log_time("Cleaning column names and dropping NaN/Inf rows...")
 df = clean_col_names(df)
