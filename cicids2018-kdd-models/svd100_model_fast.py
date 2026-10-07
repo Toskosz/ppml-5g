@@ -30,7 +30,11 @@ from sklearn.metrics import (
 )
 from zoneinfo import ZoneInfo
 
+from fhe_latency import measure_fhe_roundtrip, print_latency_summary
+
 FHE_SIM_SAMPLE_SIZE = 50_000
+# Real FHE encrypt/infer/decrypt timing sample size (separate from simulate subset).
+FHE_LATENCY_SAMPLE_SIZE = 100
 
 _wall_start = _time.time()
 
@@ -332,17 +336,39 @@ for svd_idx, n_components_svd in enumerate(svd_groups, 1):
         dev.save()
         log_time(f"[{config_tag}] FHE assets saved. Summary — train: {train_dur:,.1f}s, predict: {pred_dur:,.1f}s, compile: {compile_dur:,.1f}s, fhe_sim: {fhe_dur:,.1f}s")
 
+        n_latency = min(FHE_LATENCY_SAMPLE_SIZE, X_test_final.shape[0])
+        log_time(f"[{config_tag}] Measuring real FHE encrypt/inference/decrypt on {n_latency} records...")
+        latency = measure_fhe_roundtrip(
+            model_dir,
+            X_test_final,
+            n_records=n_latency,
+            log_fn=lambda msg: log_time(f"[{config_tag}] {msg}"),
+        )
+        print_latency_summary(latency, title=f"FHE LATENCY ({config_tag})")
+
         cfg['compile_dur'] = compile_dur
         cfg['fhe_dur'] = fhe_dur
+        cfg['mean_encrypt_s'] = latency['mean_encrypt_s']
+        cfg['mean_inference_s'] = latency['mean_inference_s']
+        cfg['mean_decrypt_s'] = latency['mean_decrypt_s']
+        cfg['mean_e2e_s'] = latency['mean_e2e_s']
 
     print("\n" + "=" * 70)
     print(f"  FHE SUMMARY  (SVD {n_components_svd})")
     print("=" * 70)
-    print(f"{'Config':>30s} | {'Train (s)':>10s} | {'Predict (s)':>12s} | {'Compile (s)':>12s} | {'FHE Sim (s)':>12s}")
-    print("-" * 90)
+    print(
+        f"{'Config':>30s} | {'Train (s)':>10s} | {'Predict (s)':>12s} | {'Compile (s)':>12s} | "
+        f"{'FHE Sim (s)':>12s} | {'Enc (s)':>10s} | {'Inf (s)':>10s} | {'Dec (s)':>10s}"
+    )
+    print("-" * 130)
     for cfg in trained_configs:
         if cfg['n_components_svd'] == n_components_svd:
-            print(f"{cfg['config_tag']:>30s} | {cfg['train_dur']:>10.1f} | {cfg['pred_dur']:>12.1f} | {cfg['compile_dur']:>12.1f} | {cfg['fhe_dur']:>12.1f}")
+            print(
+                f"{cfg['config_tag']:>30s} | {cfg['train_dur']:>10.1f} | {cfg['pred_dur']:>12.1f} | "
+                f"{cfg['compile_dur']:>12.1f} | {cfg['fhe_dur']:>12.1f} | "
+                f"{cfg['mean_encrypt_s']:>10.6f} | {cfg['mean_inference_s']:>10.6f} | "
+                f"{cfg['mean_decrypt_s']:>10.6f}"
+            )
     print()
 
     log_time(f"FHE phase complete for SVD {n_components_svd}.")
@@ -354,10 +380,18 @@ for svd_idx, n_components_svd in enumerate(svd_groups, 1):
 print("\n" + "#" * 70)
 print("#  GLOBAL SUMMARY")
 print("#" * 70)
-print(f"{'Config':>30s} | {'Train (s)':>10s} | {'Predict (s)':>12s} | {'Compile (s)':>12s} | {'FHE Sim (s)':>12s}")
-print("-" * 90)
+print(
+    f"{'Config':>30s} | {'Train (s)':>10s} | {'Predict (s)':>12s} | {'Compile (s)':>12s} | "
+    f"{'FHE Sim (s)':>12s} | {'Enc (s)':>10s} | {'Inf (s)':>10s} | {'Dec (s)':>10s} | {'E2E (s)':>10s}"
+)
+print("-" * 145)
 for cfg in trained_configs:
-    print(f"{cfg['config_tag']:>30s} | {cfg['train_dur']:>10.1f} | {cfg['pred_dur']:>12.1f} | {cfg['compile_dur']:>12.1f} | {cfg['fhe_dur']:>12.1f}")
+    print(
+        f"{cfg['config_tag']:>30s} | {cfg['train_dur']:>10.1f} | {cfg['pred_dur']:>12.1f} | "
+        f"{cfg['compile_dur']:>12.1f} | {cfg['fhe_dur']:>12.1f} | "
+        f"{cfg['mean_encrypt_s']:>10.6f} | {cfg['mean_inference_s']:>10.6f} | "
+        f"{cfg['mean_decrypt_s']:>10.6f} | {cfg['mean_e2e_s']:>10.6f}"
+    )
 print()
 
 log_time("All configurations complete.")

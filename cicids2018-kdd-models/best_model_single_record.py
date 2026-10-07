@@ -3,7 +3,6 @@
 # Download: aws s3 sync --no-sign-request s3://cse-cic-ids2018/ CIC-IDS-2018/
 # Features: CICFlowMeter-V3; model uses 5 numerical + 2 categorical
 
-from concrete.ml.deployment import FHEModelClient, FHEModelServer
 from concrete.ml.common.serialization.loaders import load
 import datetime
 import glob
@@ -24,6 +23,8 @@ from sklearn.metrics import (
     recall_score
 )
 from zoneinfo import ZoneInfo
+
+from fhe_latency import measure_fhe_roundtrip, print_latency_summary
 
 _wall_start = _time.time()
 
@@ -104,37 +105,44 @@ def predict_single_record_plaintext(estimators, depth, n_components_svd=100):
 
     log_model_metrics(y_test_full, y_pred)
 
-    log_time(f"[{config_tag}] Running single-record inference on 1000 records...")
+    n_single = min(1000, X_test_final.shape[0])
+    log_time(f"[{config_tag}] Running single-record inference on {n_single} records...")
     inference_times = []
-    report_interval = 200
+    report_interval = max(1, n_single // 5)
 
-    for i in range(1000):
+    for i in range(n_single):
         single_record = X_test_final[i:i+1]
 
         start_time = _time.time()
-        output = classifier.predict(single_record)
+        classifier.predict(single_record)
         end_time = _time.time()
 
-        duration = end_time - start_time
-        inference_times.append(duration)
+        inference_times.append(end_time - start_time)
 
         if (i + 1) % report_interval == 0:
             avg_so_far = np.mean(inference_times)
-            log_time(f"[{config_tag}] Processed {i+1}/1000 records (avg {avg_so_far:.6f}s/record)")
+            log_time(f"[{config_tag}] Processed {i+1}/{n_single} records (avg {avg_so_far:.6f}s/record)")
 
-    log_time(f"[{config_tag}] All 1000 single-record inferences complete.")
+    log_time(f"[{config_tag}] All {n_single} single-record inferences complete.")
 
-    total_records = len(inference_times)
-    total_inference_time = sum(inference_times)
-    mean_inference_time = np.mean(inference_times) if total_records > 0 else 0
+    total_inference_time = float(np.sum(inference_times))
+    mean_inference_time = float(np.mean(inference_times))
+    std_inference_time = float(np.std(inference_times))
 
-    print("\n" + "="*20 + " INFERENCE SUMMARY " + "="*20)
-    print(f"Total records processed: {total_records}")
-    print(f"   Total inference time: {total_inference_time:.4f} seconds")
-    print(f"Mean inference time/record: {mean_inference_time:.6f} seconds")
-    print("="*61 + "\n")
+    print("\n" + "="*20 + " PLAINTEXT LATENCY SUMMARY " + "="*20)
+    print(f"Records measured: {n_single}")
+    print(f"Total inference time: {total_inference_time:.4f} s")
+    print(f"Mean inference time/record: {mean_inference_time:.6f} s")
+    print(f"Std inference time/record:  {std_inference_time:.6f} s")
+    print("="*70 + "\n")
 
-    return {'config_tag': config_tag, 'pred_dur': pred_dur}
+    return {
+        'config_tag': config_tag,
+        'pred_dur': pred_dur,
+        'mean_inference_s': mean_inference_time,
+        'std_inference_s': std_inference_time,
+        'n_records': n_single,
+    }
 
 
 def prepare_test_data_with_saved_artifacts(n_components_svd=100):
@@ -222,81 +230,56 @@ def predict_single_record_with_comparison(estimators, depth, records=1000, n_com
     log_time(f"[{config_tag}] Starting FHE inference benchmark")
 
     model_dir = f"./fhe_model_{estimators}_estimators_{depth}_depth_svd_{n_components_svd}_components/"
-
-    log_time(f"[{config_tag}] [STEP 1/4] Loading FHE circuit from '{model_dir}'...")
-    try:
-        fhe_model_server = FHEModelServer(model_dir)
-        fhe_model_server.load()
-        fhe_model_client = FHEModelClient(model_dir)
-        log_time(f"[{config_tag}] FHE circuit loaded.")
-    except FileNotFoundError as e:
-        log_time(f"[{config_tag}] ERROR loading model files: {e}")
-        print("Please run model.py first to generate the FHE assets.")
+    if not os.path.isdir(model_dir):
+        log_time(f"[{config_tag}] ERROR: FHE model directory not found at '{model_dir}'.")
+        print("Please run a training script first to generate the FHE assets.")
         return
 
-    log_time(f"[{config_tag}] [STEP 2/4] Preparing data using saved artifacts...")
+    log_time(f"[{config_tag}] [STEP 1/3] Preparing data using saved artifacts...")
     X_test_final, y_test_full, test_labels = prepare_test_data_with_saved_artifacts(n_components_svd)
-    log_time(f"[{config_tag}] {len(test_labels)} test records available, processing {records}.")
+    n_records = min(records, len(test_labels))
+    log_time(f"[{config_tag}] {len(test_labels)} test records available, processing {n_records}.")
 
-    log_time(f"[{config_tag}] [STEP 3/4] Running FHE inference on {records} records...")
-    inference_times = []
-    preprocessing_times = []
-    predictions = []
+    log_time(f"[{config_tag}] [STEP 2/3] Measuring encrypt / inference / decrypt...")
+    try:
+        latency = measure_fhe_roundtrip(
+            model_dir,
+            X_test_final,
+            n_records=n_records,
+            log_fn=lambda msg: log_time(f"[{config_tag}] {msg}"),
+            return_predictions=True,
+        )
+    except FileNotFoundError as e:
+        log_time(f"[{config_tag}] ERROR loading model files: {e}")
+        print("Please run a training script first to generate the FHE assets.")
+        return
+
+    log_time(f"[{config_tag}] [STEP 3/3] Computing FHE metrics...")
     true_labels = []
-
-    log_time(f"[{config_tag}] Generating evaluation keys...")
-    serialized_evaluation_keys = fhe_model_client.get_serialized_evaluation_keys()
-    log_time(f"[{config_tag}] Evaluation keys ready ({len(serialized_evaluation_keys):,} bytes).")
-
-    report_interval = max(1, records // 10)
-
-    for i in range(records):
-        single_record = X_test_final[i:i+1]
-
-        start_preprocessing = _time.time()
-        encrypted_input = fhe_model_client.quantize_encrypt_serialize(single_record)
-        end_preprocessing = _time.time()
-
-        preprocessing_duration = end_preprocessing - start_preprocessing
-        preprocessing_times.append(preprocessing_duration)
-
-        start_time = _time.time()
-        encrypted_output = fhe_model_server.run(encrypted_input, serialized_evaluation_keys)
-        end_time = _time.time()
-
-        result = fhe_model_client.deserialize_decrypt_dequantize(encrypted_output)
-        predicted_label = 1 if result[0][1] > 0.5 else 0
-        predictions.append(predicted_label)
-
+    for i in range(latency["n_records"]):
         true_label_text = test_labels.iloc[i]
-        true_label_binary = 0 if true_label_text == 'benign' else 1
-        true_labels.append(true_label_binary)
-
-        duration = end_time - start_time
-        inference_times.append(duration)
-
-        if (i + 1) % report_interval == 0:
-            avg_inf = np.mean(inference_times)
-            avg_prep = np.mean(preprocessing_times)
-            log_time(f"[{config_tag}] Processed {i+1}/{records} records (avg inference: {avg_inf:.4f}s, avg encrypt: {avg_prep:.6f}s)")
-
-    log_time(f"[{config_tag}] [STEP 4/4] All {records} records processed.")
+        true_labels.append(0 if true_label_text == 'benign' else 1)
 
     log_time(f"[{config_tag}] FHE metrics:")
-    log_model_metrics(np.array(true_labels), np.array(predictions))
+    log_model_metrics(np.array(true_labels), np.array(latency["predictions"]))
+    print_latency_summary(latency, title=f"FHE LATENCY ({config_tag})")
 
-    total_inference_time = sum(inference_times)
-    mean_inference_time = np.mean(inference_times) if records > 0 else 0
-    mean_preprocessing_time = np.mean(preprocessing_times) if records > 0 else 0
-
-    print("\n" + "="*20 + " INFERENCE SUMMARY " + "="*20)
-    print(f"Total records processed: {records}")
-    print(f"   Total inference time: {total_inference_time:.4f} seconds")
-    print(f"Mean inference time/record: {mean_inference_time:.6f} seconds")
-    print(f"Mean preprocessing time/record: {mean_preprocessing_time:.6f} seconds")
-    print("="*61 + "\n")
-
-    return {'config_tag': config_tag, 'total_inf': total_inference_time, 'mean_inf': mean_inference_time, 'mean_prep': mean_preprocessing_time}
+    return {
+        'config_tag': config_tag,
+        'n_records': latency["n_records"],
+        'keygen_s': latency["keygen_s"],
+        'mean_encrypt_s': latency["mean_encrypt_s"],
+        'mean_inference_s': latency["mean_inference_s"],
+        'mean_decrypt_s': latency["mean_decrypt_s"],
+        'mean_e2e_s': latency["mean_e2e_s"],
+        'std_encrypt_s': latency["std_encrypt_s"],
+        'std_inference_s': latency["std_inference_s"],
+        'std_decrypt_s': latency["std_decrypt_s"],
+        'total_encrypt_s': latency["total_encrypt_s"],
+        'total_inference_s': latency["total_inference_s"],
+        'total_decrypt_s': latency["total_decrypt_s"],
+        'total_e2e_s': latency["total_e2e_s"],
+    }
 
 
 if __name__ == "__main__":
@@ -339,10 +322,13 @@ if __name__ == "__main__":
         print("\n" + "=" * 70)
         print("  PLAINTEXT SUMMARY")
         print("=" * 70)
-        print(f"{'Config':>30s} | {'Predict (s)':>12s}")
-        print("-" * 50)
+        print(f"{'Config':>30s} | {'Batch Pred (s)':>14s} | {'Mean Inf (s)':>12s} | {'Std Inf (s)':>12s}")
+        print("-" * 76)
         for r in plaintext_results:
-            print(f"{r['config_tag']:>30s} | {r['pred_dur']:>12.1f}")
+            print(
+                f"{r['config_tag']:>30s} | {r['pred_dur']:>14.1f} | "
+                f"{r['mean_inference_s']:>12.6f} | {r['std_inference_s']:>12.6f}"
+            )
         print()
 
     log_time("Phase 1 complete — all plaintext variants evaluated.")
@@ -361,12 +347,19 @@ if __name__ == "__main__":
 
     if fhe_results:
         print("\n" + "=" * 70)
-        print("  FHE SUMMARY")
+        print("  FHE LATENCY SUMMARY (per-record means)")
         print("=" * 70)
-        print(f"{'Config':>30s} | {'Total Inf (s)':>14s} | {'Mean Inf (s)':>12s} | {'Mean Prep (s)':>13s}")
-        print("-" * 80)
+        print(
+            f"{'Config':>30s} | {'Encrypt (s)':>12s} | {'Infer (s)':>12s} | "
+            f"{'Decrypt (s)':>12s} | {'E2E (s)':>12s}"
+        )
+        print("-" * 90)
         for r in fhe_results:
-            print(f"{r['config_tag']:>30s} | {r['total_inf']:>14.1f} | {r['mean_inf']:>12.6f} | {r['mean_prep']:>13.6f}")
+            print(
+                f"{r['config_tag']:>30s} | {r['mean_encrypt_s']:>12.6f} | "
+                f"{r['mean_inference_s']:>12.6f} | {r['mean_decrypt_s']:>12.6f} | "
+                f"{r['mean_e2e_s']:>12.6f}"
+            )
         print()
 
     log_time(f"All {total} configurations complete.")
