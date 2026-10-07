@@ -9,16 +9,22 @@ FHE-based Random Forest classifiers for 5G/O-RAN network intrusion detection, bu
 ```bash
 pip install -r requirements.txt        # Linux (includes CUDA deps)
 pip install -r macos_requirements.txt   # macOS (no CUDA)
+
+# Optional: GPU-accelerated Concrete FHE runtime (Linux + NVIDIA CUDA >= 11.8)
+pip uninstall -y concrete-python
+pip install -r requirements-gpu.txt
 ```
 
 Pinned versions matter: `concrete-ml==1.9.0`, `numpy==1.26.4`. Do not upgrade these independently.
+
+FHE device (`cicids2018-kdd-models/`): `PPML_FHE_DEVICE=auto|cpu|cuda` or `run_all_and_report.py --device ...`. Default `auto` uses CUDA when the GPU Concrete wheel reports available+enabled; otherwise CPU.
 
 ## Running
 
 **Training / FHE circuit compilation** (run from inside each model directory — scripts use relative paths like `CIC-IDS-2018/`):
 
 ```bash
-python cicids2018-kdd-models/model.py
+cd cicids2018-kdd-models && PPML_FHE_DEVICE=auto python svd100_model_fast.py
 python cicunswnb15-models/svd100_model.py
 python cicunswnb15-models/svd200_model.py
 ```

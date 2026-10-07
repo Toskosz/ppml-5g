@@ -2,6 +2,7 @@
 
 from concrete.ml.deployment import FHEModelClient, FHEModelServer
 import numpy as np
+import os
 import sys
 import time as _time
 
@@ -24,6 +25,22 @@ def measure_fhe_roundtrip(model_dir, X, n_records=100, log_fn=None, return_predi
         raise ValueError("n_records must be >= 1 and X must be non-empty")
 
     log(f"Loading FHE client/server from '{model_dir}' for latency measurement...")
+    device_marker = os.path.join(model_dir, "fhe_device.txt")
+    if os.path.isfile(device_marker):
+        with open(device_marker, "r", encoding="utf-8") as f:
+            compiled_device = f.read().strip() or "unknown"
+        log(f"Model compiled for device='{compiled_device}' (from fhe_device.txt).")
+        if compiled_device == "cuda":
+            try:
+                import concrete.compiler as cc
+                if not cc.check_gpu_enabled():
+                    log(
+                        "WARNING: model was compiled for CUDA but Concrete GPU runtime "
+                        "is disabled. Install the GPU wheel from https://pypi.zama.ai/gpu"
+                    )
+            except Exception as exc:
+                log(f"WARNING: could not verify GPU runtime: {exc}")
+
     server = FHEModelServer(model_dir)
     server.load()
     client = FHEModelClient(model_dir)

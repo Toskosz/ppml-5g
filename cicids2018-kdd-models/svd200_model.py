@@ -31,9 +31,12 @@ from sklearn.metrics import (
 from zoneinfo import ZoneInfo
 
 from fhe_latency import measure_fhe_roundtrip, print_latency_summary
+from gpu_utils import compile_for_device, write_device_marker
 
 # Real FHE encrypt/infer/decrypt timing sample size (simulate phase uses the full test set).
 FHE_LATENCY_SAMPLE_SIZE = 100
+# FHE device: auto | cpu | cuda  (override with PPML_FHE_DEVICE)
+FHE_DEVICE = os.environ.get("PPML_FHE_DEVICE", "auto")
 
 _wall_start = _time.time()
 
@@ -307,9 +310,14 @@ for cfg in trained_configs:
 
     t0 = _time.time()
     log_time(f"[{config_tag}] Compiling FHE circuit (this may take a long time)...")
-    classifier.compile(X_train_final)
+    _, fhe_device = compile_for_device(
+        classifier,
+        X_train_final,
+        device=FHE_DEVICE,
+        log_fn=lambda msg: log_time(f"[{config_tag}] {msg}"),
+    )
     compile_dur = _time.time() - t0
-    log_time(f"[{config_tag}] FHE compilation completed in {compile_dur:,.1f}s")
+    log_time(f"[{config_tag}] FHE compilation completed in {compile_dur:,.1f}s on device='{fhe_device}'")
 
     t0 = _time.time()
     log_time(f"[{config_tag}] Starting FHE simulation prediction on {X_test_final.shape[0]} samples...")
@@ -324,7 +332,12 @@ for cfg in trained_configs:
     log_time(f"[{config_tag}] Saving compiled FHE circuit to '{model_dir}'...")
     dev = FHEModelDev(model_dir, classifier)
     dev.save()
-    log_time(f"[{config_tag}] FHE assets saved. Summary — train: {train_dur:,.1f}s, predict: {pred_dur:,.1f}s, compile: {compile_dur:,.1f}s, fhe_sim: {fhe_dur:,.1f}s")
+    write_device_marker(model_dir, fhe_device)
+    log_time(
+        f"[{config_tag}] FHE assets saved (device={fhe_device}). Summary — "
+        f"train: {train_dur:,.1f}s, predict: {pred_dur:,.1f}s, compile: {compile_dur:,.1f}s, "
+        f"fhe_sim: {fhe_dur:,.1f}s"
+    )
 
     n_latency = min(FHE_LATENCY_SAMPLE_SIZE, X_test_final.shape[0])
     log_time(f"[{config_tag}] Measuring real FHE encrypt/inference/decrypt on {n_latency} records...")
@@ -338,6 +351,7 @@ for cfg in trained_configs:
 
     cfg['compile_dur'] = compile_dur
     cfg['fhe_dur'] = fhe_dur
+    cfg['fhe_device'] = fhe_device
     cfg['mean_encrypt_s'] = latency['mean_encrypt_s']
     cfg['mean_inference_s'] = latency['mean_inference_s']
     cfg['mean_decrypt_s'] = latency['mean_decrypt_s']
@@ -347,14 +361,15 @@ print("\n" + "=" * 70)
 print(f"  FHE SUMMARY  (SVD {n_components_svd})")
 print("=" * 70)
 print(
-    f"{'Config':>30s} | {'Train (s)':>10s} | {'Predict (s)':>12s} | {'Compile (s)':>12s} | "
-    f"{'FHE Sim (s)':>12s} | {'Enc (s)':>10s} | {'Inf (s)':>10s} | {'Dec (s)':>10s} | {'E2E (s)':>10s}"
+    f"{'Config':>30s} | {'Device':>6s} | {'Train (s)':>10s} | {'Predict (s)':>12s} | "
+    f"{'Compile (s)':>12s} | {'FHE Sim (s)':>12s} | {'Enc (s)':>10s} | {'Inf (s)':>10s} | "
+    f"{'Dec (s)':>10s} | {'E2E (s)':>10s}"
 )
-print("-" * 145)
+print("-" * 155)
 for cfg in trained_configs:
     print(
-        f"{cfg['config_tag']:>30s} | {cfg['train_dur']:>10.1f} | {cfg['pred_dur']:>12.1f} | "
-        f"{cfg['compile_dur']:>12.1f} | {cfg['fhe_dur']:>12.1f} | "
+        f"{cfg['config_tag']:>30s} | {cfg['fhe_device']:>6s} | {cfg['train_dur']:>10.1f} | "
+        f"{cfg['pred_dur']:>12.1f} | {cfg['compile_dur']:>12.1f} | {cfg['fhe_dur']:>12.1f} | "
         f"{cfg['mean_encrypt_s']:>10.6f} | {cfg['mean_inference_s']:>10.6f} | "
         f"{cfg['mean_decrypt_s']:>10.6f} | {cfg['mean_e2e_s']:>10.6f}"
     )

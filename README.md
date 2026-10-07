@@ -122,7 +122,19 @@ CSE-CIC-IDS-2018 / CIC-UNSW-NB15:
 pip install -r requirements.txt
 # macOS:
 pip install -r macos_requirements.txt
+
+# Optional — GPU-accelerated FHE (Linux + NVIDIA CUDA >= 11.8):
+pip uninstall -y concrete-python
+pip install -r requirements-gpu.txt
 ```
+
+Verify Concrete GPU runtime:
+
+```bash
+python -c "import concrete.compiler as cc; print(cc.check_gpu_available(), cc.check_gpu_enabled())"
+```
+
+Both should print `True` after installing `requirements-gpu.txt` on a machine with a CUDA GPU.
 
 ---
 
@@ -131,14 +143,22 @@ pip install -r macos_requirements.txt
 ### Training (compiles FHE circuits)
 
 ```bash
-# From the repo root:
-python cicids2018-kdd-models/model.py
-python cicunswnb15-models/svd100_model.py
-python cicunswnb15-models/svd200_model.py
+# From cicids2018-kdd-models/ (CWD matters):
+PPML_FHE_DEVICE=auto python svd100_model_fast.py   # auto|cpu|cuda
+PPML_FHE_DEVICE=cuda python svd200_model_fast.py
+
+# Or run the full suite + report.txt:
+python run_all_and_report.py --device cuda --only-fast
+
+python ../cicunswnb15-models/svd100_model.py
+python ../cicunswnb15-models/svd200_model.py
 ```
 
 Data files must be in the working directory as listed above. Each script will look for
 a combined CSV cache before re-reading the folder.
+
+FHE circuits compiled with `device='cuda'` require the GPU Concrete runtime at inference time.
+Each saved model directory gets an `fhe_device.txt` marker (`cpu` or `cuda`).
 
 ### Single-record inference timing
 

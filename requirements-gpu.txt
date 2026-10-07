@@ -1,0 +1,15 @@
+# GPU-accelerated Concrete FHE runtime (optional).
+# Install AFTER requirements.txt, on a Linux machine with NVIDIA CUDA >= 11.8:
+#
+#   pip install -r requirements.txt
+#   pip uninstall -y concrete-python
+#   pip install -r requirements-gpu.txt
+#
+# Then run trainers with:
+#   PPML_FHE_DEVICE=cuda python svd100_model_fast.py
+#   # or: python run_all_and_report.py --device cuda
+#
+# Docs: https://docs.zama.org/concrete-ml/guides/using_gpu
+
+--extra-index-url https://pypi.zama.ai/gpu
+concrete-python==2.10.0

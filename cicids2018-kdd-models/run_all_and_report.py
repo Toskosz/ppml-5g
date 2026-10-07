@@ -125,6 +125,12 @@ LATENCY_BLOCK_RE = re.compile(
     r"end-to-end\s*\|\s*(?P<e2e_tot>[\d.]+)\s*\|\s*(?P<e2e_mean>[\d.]+)",
     re.DOTALL | re.IGNORECASE,
 )
+DEVICE_RE = re.compile(
+    r"FHE compilation completed in\s*[\d,.]+s on device='(?P<dev>cpu|cuda)'"
+    r"|FHE assets saved \(device=(?P<dev2>cpu|cuda)\)"
+    r"|FHE device:\s*(?P<dev3>cpu|cuda)",
+    re.IGNORECASE,
+)
 TRAIN_DONE_RE = re.compile(
     r"\[(?P<tag>n=\d+,\s*d=\d+,\s*svd=\d+)\]\s*Training completed in\s*(?P<t>[\d,.]+)s"
 )
@@ -185,7 +191,13 @@ def parse_log(text: str, script: str) -> dict:
         "fhe_latency": [],    # from FHE LATENCY blocks
         "plaintext_latency": [],
         "bench_fhe_rows": [],
+        "devices": [],        # device strings observed in the log
     }
+
+    for m in DEVICE_RE.finditer(text):
+        dev = m.group("dev") or m.group("dev2") or m.group("dev3")
+        if dev:
+            result["devices"].append(dev.lower())
 
     # Phase timings from log lines
     phase = result["phase_times"]
@@ -336,6 +348,7 @@ def build_report(run_meta: dict, run_results: list[dict], parsed: list[dict]) ->
     lines.append(f"Started:   {run_meta['started']}")
     lines.append(f"Host cwd:  {run_meta['cwd']}")
     lines.append(f"Python:    {run_meta['python']}")
+    lines.append(f"FHE device request: {run_meta.get('fhe_device', 'auto')}")
     lines.append(f"Total wall time: {format_duration(run_meta['total_elapsed_s'])}")
     lines.append("")
     lines.append(
@@ -346,16 +359,18 @@ def build_report(run_meta: dict, run_results: list[dict], parsed: list[dict]) ->
 
     lines.append(_section("1. RUN INVENTORY"))
     inv_rows = []
-    for r in run_results:
+    for r, p in zip(run_results, parsed):
+        devices = sorted(set(p.get("devices") or []))
         inv_rows.append([
             r["script"],
             r["status"],
             str(r["exit_code"]),
             format_duration(r["elapsed_s"]),
+            ",".join(devices) if devices else "-",
             r["log_path"],
         ])
     lines.append(_table(
-        ["Script", "Status", "Exit", "Wall time", "Log file"],
+        ["Script", "Status", "Exit", "Wall time", "FHE device(s)", "Log file"],
         inv_rows,
     ))
 
@@ -549,10 +564,21 @@ def main(argv=None) -> int:
         default=sys.executable,
         help="Python interpreter to use for child scripts",
     )
+    parser.add_argument(
+        "--device",
+        choices=["auto", "cpu", "cuda"],
+        default=None,
+        help="FHE compile/runtime device (sets PPML_FHE_DEVICE for child scripts). "
+             "Default: keep existing env or 'auto'.",
+    )
     args = parser.parse_args(argv)
 
     root = Path(__file__).resolve().parent
     os.chdir(root)
+
+    if args.device is not None:
+        os.environ["PPML_FHE_DEVICE"] = args.device
+        print(f"PPML_FHE_DEVICE={args.device}")
 
     if args.report_only:
         log_dir = Path(args.report_only).resolve()
@@ -584,6 +610,7 @@ def main(argv=None) -> int:
             "finished": now_brasilia().isoformat(),
             "cwd": str(root),
             "python": args.python,
+            "fhe_device": os.environ.get("PPML_FHE_DEVICE", "auto"),
             "total_elapsed_s": sum(r["elapsed_s"] for r in run_results),
         }
         report_path = write_report(root / args.report, run_meta, run_results)
@@ -642,6 +669,7 @@ def main(argv=None) -> int:
         "finished": finished,
         "cwd": str(root),
         "python": args.python,
+        "fhe_device": os.environ.get("PPML_FHE_DEVICE", "auto"),
         "total_elapsed_s": total_elapsed,
     }
 
