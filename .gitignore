@@ -5,3 +5,6 @@
 *:Zone.Identifier
 venv/
 dataset/
+__pycache__/
+*.pyc
+*.pyo
