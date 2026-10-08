@@ -6,6 +6,8 @@ import os
 import numpy as np
 import pandas as pd
 
+from gpu_utils import release_memory
+
 
 def normalize_col_name(col):
     return col.strip().replace(" ", "_").replace("/", "_").lower()
@@ -89,6 +91,7 @@ def load_or_assemble_cic_ids_2018(
         total_rows += len(slim)
         wrote_header = True
         del chunk, slim
+        release_memory()
 
     os.replace(partial_path, combined_csv_path)
     log_time(f"Combined {len(all_files)} files → {total_rows} rows.")

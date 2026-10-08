@@ -2,8 +2,9 @@
 # Replaces: KDD Cup 1999 / NSL-KDD (removed from CIC servers, deprecated)
 # Download: aws s3 sync --no-sign-request s3://cse-cic-ids2018/ CIC-IDS-2018/
 # Features: CICFlowMeter-V3 (83 features); model uses 5 numerical + 2 categorical
-# This script: SVD 100 components only
+# This script: SVD 15, 25, 40, and 100 components
 
+import atexit
 from concrete.ml.deployment import FHEModelDev
 from concrete.ml.sklearn.rf import RandomForestClassifier
 from concrete.ml.common.serialization.dumpers import dump
@@ -32,7 +33,7 @@ from zoneinfo import ZoneInfo
 
 from data_load import clean_col_names, load_or_assemble_cic_ids_2018
 from fhe_latency import measure_fhe_roundtrip, print_latency_summary
-from gpu_utils import compile_for_device, project_sparse_svd, release_memory, write_device_marker
+from gpu_utils import compile_for_device, release_memory, save_projection, write_device_marker
 
 # Real FHE encrypt/infer/decrypt timing sample size (simulate phase uses the full test set).
 FHE_LATENCY_SAMPLE_SIZE = 100
@@ -77,7 +78,7 @@ def log_model_metrics(y_test, y_pred):
     print(report)
 
 
-log_time(f"Starting model.py — scikit-learn {sklearn.__version__}")
+log_time(f"Starting svd_model.py — scikit-learn {sklearn.__version__}")
 
 numerical_features = ['syn_flag_cnt', 'ack_flag_cnt', 'fin_flag_cnt', 'rst_flag_cnt', 'totlen_fwd_pkts']
 categorical_features = ['protocol', 'dst_port']
@@ -127,42 +128,55 @@ X_train_sparse = preprocessor.fit_transform(train_df)
 X_test_sparse = preprocessor.transform(test_df)
 log_time(f"Preprocessing done. X_train: {X_train_sparse.shape}, X_test: {X_test_sparse.shape} (sparse)")
 
-y_train_full = train_df['binary_label']
-y_test_full = test_df['binary_label']
+y_train_final = train_df['binary_label'].to_numpy(dtype=np.int32, copy=True)
+y_test_final = test_df['binary_label'].to_numpy(dtype=np.int32, copy=True)
 
 del train_df
 del test_df
 del df
+release_memory()
 
 with open('preprocessor_cic_ids_2018.pkl', 'wb') as f:
     pickle.dump(preprocessor, f)
 log_time("Preprocessor saved to 'preprocessor_cic_ids_2018.pkl'.")
+del preprocessor
+release_memory()
+log_time("Released raw tables and fitted preprocessor.")
 
+# (n_estimators, max_depth, n_components_svd)
+_tree_configs = ((2, 2), (2, 4), (4, 2), (4, 4))
+_svd_components = (15, 25, 40, 100)
 configs = [
-    (2, 2, 100),
-    (2, 4, 100),
-    (4, 2, 100),
-    (4, 4, 100),
+    (n_estimators, max_depth, n_components)
+    for n_components in _svd_components
+    for n_estimators, max_depth in _tree_configs
 ]
 total_configs = len(configs)
-
-y_train_final = y_train_full
-y_test_final = y_test_full
 
 print(f"\n{'Config':>30s} | {'Phase':>20s} | {'Wall Time':>12s}")
 print("-" * 70)
 
 trained_configs = []
 svd_groups = sorted(set(c[2] for c in configs))
+projection_paths = {}
+
+def _cleanup_projection_files():
+    for paths in projection_paths.values():
+        for path in paths:
+            try:
+                os.remove(path)
+            except OSError:
+                pass
+
+atexit.register(_cleanup_projection_files)
 
 for svd_idx, n_components_svd in enumerate(svd_groups, 1):
-    group_configs = [c for c in configs if c[2] == n_components_svd]
-
     log_time(f"Applying TruncatedSVD: {X_train_sparse.shape[1]} → {n_components_svd} components  [SVD group {svd_idx}/{len(svd_groups)}]...")
     svd = TruncatedSVD(n_components=n_components_svd, random_state=42)
 
     svd_sample_size = 500_000
     n_rows = X_train_sparse.shape[0]
+    sample_idx = None
     if n_rows <= svd_sample_size:
         X_svd_fit = X_train_sparse
     else:
@@ -171,26 +185,38 @@ for svd_idx, n_components_svd in enumerate(svd_groups, 1):
         X_svd_fit = X_train_sparse[sample_idx]
 
     svd.fit(X_svd_fit)
-    del X_svd_fit
+    del X_svd_fit, sample_idx
     release_memory()
 
-    X_train_final = project_sparse_svd(svd, X_train_sparse, log_fn=log_time)
-    del X_train_sparse
-    release_memory()
-    log_time(f"Train transform done. Shape: {X_train_final.shape}")
-
-    X_test_final = project_sparse_svd(svd, X_test_sparse, log_fn=log_time)
-    del X_test_sparse
-    release_memory()
-    log_time(f"Test transform done. Shape: {X_test_final.shape}. Released one-hot matrices.")
-
-    log_time(f"SVD done. X_train: {X_train_final.shape}, X_test: {X_test_final.shape}. Explained variance ratio sum: {svd.explained_variance_ratio_.sum():.4f}")
+    explained = float(svd.explained_variance_ratio_.sum())
+    train_path = f"X_train_svd_{n_components_svd}.npy"
+    test_path = f"X_test_svd_{n_components_svd}.npy"
+    projection_paths[n_components_svd] = (train_path, test_path)
+    save_projection(svd, X_train_sparse, train_path, log_fn=log_time)
+    save_projection(svd, X_test_sparse, test_path, log_fn=log_time)
+    log_time(
+        f"SVD {n_components_svd} projections stored. "
+        f"Explained variance ratio sum: {explained:.4f}"
+    )
 
     svd_pkl_path = f'svd_cic_ids_2018_{n_components_svd}.pkl'
     with open(svd_pkl_path, 'wb') as f:
         pickle.dump(svd, f)
     log_time(f"SVD saved to '{svd_pkl_path}'.")
+    del svd
+    release_memory()
 
+del X_train_sparse
+del X_test_sparse
+release_memory()
+log_time("Released one-hot matrices before training and FHE compilation.")
+
+for svd_idx, n_components_svd in enumerate(svd_groups, 1):
+    group_configs = [c for c in configs if c[2] == n_components_svd]
+    train_path, test_path = projection_paths[n_components_svd]
+    log_time(f"Loading SVD {n_components_svd} projections for plaintext training...")
+    X_train_final = np.load(train_path)
+    X_test_final = np.load(test_path)
     log_time(f"Final training data: {X_train_final.shape}, testing data: {X_test_final.shape}")
 
     print("\n" + "#" * 70)
@@ -256,6 +282,11 @@ for svd_idx, n_components_svd in enumerate(svd_groups, 1):
 
     log_time(f"Phase 1 complete for SVD {n_components_svd} — all plaintext variants trained and evaluated.")
 
+    del X_train_final
+    del X_test_final
+    release_memory()
+    log_time(f"Released SVD {n_components_svd} projections before FHE compilation.")
+
     print("\n" + "#" * 70)
     print(f"#  PHASE 2: FHE COMPILATION & SIMULATION  (SVD {n_components_svd})")
     print("#" * 70)
@@ -278,6 +309,8 @@ for svd_idx, n_components_svd in enumerate(svd_groups, 1):
         print(f"{'='*60}")
         sys.stdout.flush()
 
+        log_time(f"[{config_tag}] Loading train projection for FHE compilation...")
+        X_train_final = np.load(train_path)
         t0 = _time.time()
         log_time(f"[{config_tag}] Compiling FHE circuit (this may take a long time)...")
         _, fhe_device = compile_for_device(
@@ -288,7 +321,11 @@ for svd_idx, n_components_svd in enumerate(svd_groups, 1):
         )
         compile_dur = _time.time() - t0
         log_time(f"[{config_tag}] FHE compilation completed in {compile_dur:,.1f}s on device='{fhe_device}'")
+        del X_train_final
+        release_memory()
 
+        log_time(f"[{config_tag}] Loading test projection for FHE simulation...")
+        X_test_final = np.load(test_path)
         t0 = _time.time()
         log_time(f"[{config_tag}] Starting FHE simulation prediction on {X_test_final.shape[0]} samples...")
         y_pred_fhe = classifier.predict(X_test_final, fhe="simulate")
@@ -297,23 +334,31 @@ for svd_idx, n_components_svd in enumerate(svd_groups, 1):
 
         log_time(f"[{config_tag}] FHE metrics:")
         log_model_metrics(y_test_final, y_pred_fhe)
+        del y_pred_fhe
+
+        n_latency = min(FHE_LATENCY_SAMPLE_SIZE, X_test_final.shape[0])
+        X_latency = np.array(X_test_final[:n_latency], dtype=np.float32, copy=True)
+        del X_test_final
+        release_memory()
 
         model_dir = f"./fhe_model_{n_estimators}_estimators_{max_depth}_depth_svd_{n_components_svd}_components/"
         log_time(f"[{config_tag}] Saving compiled FHE circuit to '{model_dir}'...")
         dev = FHEModelDev(model_dir, classifier)
         dev.save()
         write_device_marker(model_dir, fhe_device)
+        del dev
         log_time(
             f"[{config_tag}] FHE assets saved (device={fhe_device}). Summary — "
             f"train: {train_dur:,.1f}s, predict: {pred_dur:,.1f}s, compile: {compile_dur:,.1f}s, "
             f"fhe_sim: {fhe_dur:,.1f}s"
         )
+        del classifier
+        release_memory()
 
-        n_latency = min(FHE_LATENCY_SAMPLE_SIZE, X_test_final.shape[0])
         log_time(f"[{config_tag}] Measuring real FHE encrypt/inference/decrypt on {n_latency} records...")
         latency = measure_fhe_roundtrip(
             model_dir,
-            X_test_final,
+            X_latency,
             n_records=n_latency,
             log_fn=lambda msg: log_time(f"[{config_tag}] {msg}"),
         )
@@ -326,8 +371,7 @@ for svd_idx, n_components_svd in enumerate(svd_groups, 1):
         cfg['mean_inference_s'] = latency['mean_inference_s']
         cfg['mean_decrypt_s'] = latency['mean_decrypt_s']
         cfg['mean_e2e_s'] = latency['mean_e2e_s']
-        del classifier
-        del y_pred_fhe
+        del X_latency, latency
         release_memory()
 
     print("\n" + "=" * 70)
@@ -349,10 +393,10 @@ for svd_idx, n_components_svd in enumerate(svd_groups, 1):
     print()
 
     log_time(f"FHE phase complete for SVD {n_components_svd}.")
-
-    del X_train_final
-    del X_test_final
-    del svd
+    for projection_path in (train_path, test_path):
+        os.remove(projection_path)
+    log_time(f"Deleted SVD {n_components_svd} projection files.")
+    release_memory()
 
 print("\n" + "#" * 70)
 print("#  GLOBAL SUMMARY")

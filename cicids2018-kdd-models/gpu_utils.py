@@ -182,6 +182,25 @@ def project_sparse_svd(svd, X_sparse, log_fn=None, chunk_size=50_000):
     return out
 
 
+def save_projection(svd, X_sparse, path, log_fn=None):
+    """Project *X_sparse* and write one float32 ``.npy``, then free the buffer.
+
+    Callers keep the sparse one-hot matrix only while projections are written,
+    then delete it before training and FHE compilation.
+    """
+    import numpy as np
+
+    projected = project_sparse_svd(svd, X_sparse, log_fn=log_fn)
+    if log_fn is not None:
+        log_fn(
+            f"Writing {projected.shape} float32 projection "
+            f"({projected.nbytes / 1e9:.2f} GB) to '{path}'..."
+        )
+    np.save(path, projected)
+    del projected
+    release_memory()
+
+
 def release_memory() -> None:
     """Return freed arrays to the OS before the next forest is trained.
 

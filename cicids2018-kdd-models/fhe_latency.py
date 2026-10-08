@@ -75,6 +75,7 @@ def measure_fhe_roundtrip(model_dir, X, n_records=100, log_fn=None, return_predi
 
         if return_predictions:
             predictions.append(1 if decrypted[0][1] > 0.5 else 0)
+        del encrypted_input, encrypted_output, decrypted
 
         if (i + 1) % report_interval == 0:
             log(
@@ -83,6 +84,8 @@ def measure_fhe_roundtrip(model_dir, X, n_records=100, log_fn=None, return_predi
                 f"avg infer={np.mean(inference_times):.6f}s, "
                 f"avg decrypt={np.mean(decrypt_times):.6f}s"
             )
+
+    del server, client, evaluation_keys
 
     result = {
         "n_records": n_records,

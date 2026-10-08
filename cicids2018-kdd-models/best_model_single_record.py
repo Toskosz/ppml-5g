@@ -25,6 +25,7 @@ from zoneinfo import ZoneInfo
 
 from data_load import clean_col_names, load_or_assemble_cic_ids_2018
 from fhe_latency import measure_fhe_roundtrip, print_latency_summary
+from gpu_utils import project_sparse_svd, release_memory
 
 _wall_start = _time.time()
 
@@ -67,6 +68,83 @@ def log_model_metrics(y_test, y_pred):
 NUMERICAL_FEATURES = ['syn_flag_cnt', 'ack_flag_cnt', 'fin_flag_cnt', 'rst_flag_cnt', 'totlen_fwd_pkts']
 CATEGORICAL_FEATURES = ['protocol', 'dst_port']
 
+# One sparse test matrix for the whole run, plus the projection for the SVD size in use.
+_test_cache = {
+    "X_sparse": None,
+    "y": None,
+    "labels": None,
+    "n_components": None,
+    "X": None,
+}
+
+
+def _ensure_test_sparse():
+    if _test_cache["X_sparse"] is not None:
+        return
+
+    log_time("Loading test data once for the full benchmark...")
+    df = load_or_assemble_cic_ids_2018(
+        'CIC-IDS-2018',
+        'CIC-IDS-2018-Combined.csv',
+        NUMERICAL_FEATURES,
+        CATEGORICAL_FEATURES,
+        log_time,
+    )
+    df = clean_col_names(df)
+    rows_before = len(df)
+    df.replace([np.inf, -np.inf], np.nan, inplace=True)
+    df.dropna(inplace=True)
+    for col in NUMERICAL_FEATURES:
+        df[col] = pd.to_numeric(df[col], errors='coerce')
+    df.dropna(subset=NUMERICAL_FEATURES, inplace=True)
+    for col in CATEGORICAL_FEATURES:
+        df[col] = df[col].astype(str)
+    log_time(f"Dropped {rows_before - len(df)} rows with NaN/Inf. Remaining: {len(df)} rows.")
+
+    df['label'] = df['label'].str.strip().str.lower()
+    df['binary_label'] = (df['label'] != 'benign').astype(int)
+    log_time(f"Label distribution — benign: {(df['binary_label']==0).sum()}, attack: {(df['binary_label']==1).sum()}")
+
+    log_time("Splitting data 80/20 (stratified)...")
+    train_df, test_df = train_test_split(df, test_size=0.2, random_state=42, stratify=df['label'])
+    del train_df, df
+    release_memory()
+    log_time(f"Test: {len(test_df)}. Released training split.")
+
+    y_test = test_df['binary_label'].to_numpy(dtype=np.int32, copy=True)
+    test_labels = test_df['label'].astype(str).to_numpy(copy=True)
+    with open('preprocessor_cic_ids_2018.pkl', 'rb') as f:
+        preprocessor = pickle.load(f)
+    X_test_sparse = preprocessor.transform(test_df)
+    del test_df, preprocessor
+    release_memory()
+    log_time(f"Sparse test matrix ready — {X_test_sparse.shape}.")
+
+    _test_cache["X_sparse"] = X_test_sparse
+    _test_cache["y"] = y_test
+    _test_cache["labels"] = test_labels
+
+
+def load_test_projection(n_components_svd):
+    """Return the test projection for one SVD size, dropping the previous size first."""
+    _ensure_test_sparse()
+    if _test_cache["n_components"] != n_components_svd:
+        _test_cache["X"] = None
+        _test_cache["n_components"] = None
+        release_memory()
+
+        svd_pkl_path = f'svd_cic_ids_2018_{n_components_svd}.pkl'
+        log_time(f"Projecting test set with saved SVD from '{svd_pkl_path}'...")
+        with open(svd_pkl_path, 'rb') as f:
+            svd = pickle.load(f)
+        X_test = project_sparse_svd(svd, _test_cache["X_sparse"], log_fn=log_time)
+        del svd
+        release_memory()
+        _test_cache["X"] = X_test
+        _test_cache["n_components"] = n_components_svd
+        log_time(f"Test projection ready — {X_test.shape}.")
+    return _test_cache["X"], _test_cache["y"], _test_cache["labels"]
+
 
 def predict_single_record_plaintext(estimators, depth, n_components_svd=100):
     config_tag = f"n={estimators}, d={depth}, svd={n_components_svd}"
@@ -79,7 +157,7 @@ def predict_single_record_plaintext(estimators, depth, n_components_svd=100):
     json_path = f"plaintext_model_{estimators}_estimators_{depth}_depth_svd_{n_components_svd}.json"
     if not os.path.exists(json_path):
         log_time(f"[{config_tag}] ERROR: Serialized model not found at '{json_path}'.")
-        print(f"Please run model.py (or svd200_model.py) first to generate the model artifacts.")
+        print("Please run svd_model.py (or svd_model_fast.py) first to generate the model artifacts.")
         return None
 
     log_time(f"[{config_tag}] Loading Concrete ML model from '{json_path}'...")
@@ -87,7 +165,7 @@ def predict_single_record_plaintext(estimators, depth, n_components_svd=100):
         classifier = load(f)
     log_time(f"[{config_tag}] Model loaded.")
 
-    X_test_final, y_test_full, _ = prepare_test_data_with_saved_artifacts(n_components_svd)
+    X_test_final, y_test_full, _ = load_test_projection(n_components_svd)
 
     t0 = _time.time()
     log_time(f"[{config_tag}] Starting clear (plaintext) prediction on {X_test_final.shape[0]} samples...")
@@ -128,66 +206,16 @@ def predict_single_record_plaintext(estimators, depth, n_components_svd=100):
     print(f"Std inference time/record:  {std_inference_time:.6f} s")
     print("="*70 + "\n")
 
-    return {
+    result = {
         'config_tag': config_tag,
         'pred_dur': pred_dur,
         'mean_inference_s': mean_inference_time,
         'std_inference_s': std_inference_time,
         'n_records': n_single,
     }
-
-
-def prepare_test_data_with_saved_artifacts(n_components_svd=100):
-    log_time(f"Loading test data using saved preprocessor and SVD artifacts (svd={n_components_svd})...")
-
-    with open('preprocessor_cic_ids_2018.pkl', 'rb') as f:
-        preprocessor = pickle.load(f)
-    log_time("Loaded saved preprocessor.")
-
-    svd_pkl_path = f'svd_cic_ids_2018_{n_components_svd}.pkl'
-    with open(svd_pkl_path, 'rb') as f:
-        svd = pickle.load(f)
-    log_time(f"Loaded saved SVD from '{svd_pkl_path}'.")
-
-    combined_csv_path = 'CIC-IDS-2018-Combined.csv'
-    data_folder = 'CIC-IDS-2018'
-
-    df = load_or_assemble_cic_ids_2018(
-        data_folder,
-        combined_csv_path,
-        NUMERICAL_FEATURES,
-        CATEGORICAL_FEATURES,
-        log_time,
-    )
-
-    log_time("Cleaning column names and dropping NaN/Inf rows...")
-    df = clean_col_names(df)
-    rows_before = len(df)
-    df.replace([np.inf, -np.inf], np.nan, inplace=True)
-    df.dropna(inplace=True)
-    for col in NUMERICAL_FEATURES:
-        df[col] = pd.to_numeric(df[col], errors='coerce')
-    df.dropna(subset=NUMERICAL_FEATURES, inplace=True)
-    for col in CATEGORICAL_FEATURES:
-        df[col] = df[col].astype(str)
-    log_time(f"Dropped {rows_before - len(df)} rows with NaN/Inf. Remaining: {len(df)} rows.")
-
-    df['label'] = df['label'].str.strip().str.lower()
-    df['binary_label'] = (df['label'] != 'benign').astype(int)
-    log_time(f"Label distribution — benign: {(df['binary_label']==0).sum()}, attack: {(df['binary_label']==1).sum()}")
-
-    log_time("Splitting data 80/20 (stratified)...")
-    _, test_df = train_test_split(df, test_size=0.2, random_state=42, stratify=df['label'])
-    log_time(f"Test: {len(test_df)}.")
-    test_labels = test_df['label'].reset_index(drop=True)
-    y_test_full = test_df['binary_label']
-
-    X_test_sparse = preprocessor.transform(test_df)
-    X_test_final = svd.transform(X_test_sparse)
-    log_time(f"Test data ready — {X_test_final.shape}, using saved preprocessor and SVD.")
-
-    del df
-    return X_test_final, y_test_full, test_labels
+    del classifier, y_pred, inference_times
+    release_memory()
+    return result
 
 
 def predict_single_record_with_comparison(estimators, depth, records=1000, n_components_svd=100):
@@ -205,7 +233,7 @@ def predict_single_record_with_comparison(estimators, depth, records=1000, n_com
         return
 
     log_time(f"[{config_tag}] [STEP 1/3] Preparing data using saved artifacts...")
-    X_test_final, y_test_full, test_labels = prepare_test_data_with_saved_artifacts(n_components_svd)
+    X_test_final, _, test_labels = load_test_projection(n_components_svd)
     n_records = min(records, len(test_labels))
     log_time(f"[{config_tag}] {len(test_labels)} test records available, processing {n_records}.")
 
@@ -224,16 +252,17 @@ def predict_single_record_with_comparison(estimators, depth, records=1000, n_com
         return
 
     log_time(f"[{config_tag}] [STEP 3/3] Computing FHE metrics...")
-    true_labels = []
-    for i in range(latency["n_records"]):
-        true_label_text = test_labels.iloc[i]
-        true_labels.append(0 if true_label_text == 'benign' else 1)
+    true_labels = np.array([
+        0 if test_labels[i] == 'benign' else 1
+        for i in range(latency["n_records"])
+    ], dtype=np.int32)
 
     log_time(f"[{config_tag}] FHE metrics:")
-    log_model_metrics(np.array(true_labels), np.array(latency["predictions"]))
+    predictions = np.array(latency["predictions"])
+    log_model_metrics(true_labels, predictions)
     print_latency_summary(latency, title=f"FHE LATENCY ({config_tag})")
 
-    return {
+    result = {
         'config_tag': config_tag,
         'n_records': latency["n_records"],
         'keygen_s': latency["keygen_s"],
@@ -249,28 +278,24 @@ def predict_single_record_with_comparison(estimators, depth, records=1000, n_com
         'total_decrypt_s': latency["total_decrypt_s"],
         'total_e2e_s': latency["total_e2e_s"],
     }
+    del latency, predictions, true_labels
+    release_memory()
+    return result
 
 
 if __name__ == "__main__":
     log_time(f"Starting best_model_single_record.py — scikit-learn {sklearn.__version__}")
 
+    _tree_configs = ((2, 2), (2, 4), (4, 2), (4, 4))
+    _svd_components = (15, 25, 40, 100)
     configs = [
-        ("plaintext", 2, 2, 100),
-        ("plaintext", 2, 4, 100),
-        ("plaintext", 4, 2, 100),
-        ("plaintext", 4, 4, 100),
-        ("plaintext", 2, 2, 200),
-        ("plaintext", 2, 4, 200),
-        ("plaintext", 4, 2, 200),
-        ("plaintext", 4, 4, 200),
-        ("fhe", 2, 2, 1000, 100),
-        ("fhe", 2, 4, 1000, 100),
-        ("fhe", 4, 2, 1000, 100),
-        ("fhe", 4, 4, 1000, 100),
-        ("fhe", 2, 2, 1000, 200),
-        ("fhe", 2, 4, 1000, 200),
-        ("fhe", 4, 2, 1000, 200),
-        ("fhe", 4, 4, 1000, 200),
+        ("plaintext", n_estimators, max_depth, n_components)
+        for n_components in _svd_components
+        for n_estimators, max_depth in _tree_configs
+    ] + [
+        ("fhe", n_estimators, max_depth, 1000, n_components)
+        for n_components in _svd_components
+        for n_estimators, max_depth in _tree_configs
     ]
     total = len(configs)
     log_time(f"Starting benchmark suite — {total} configurations to run")

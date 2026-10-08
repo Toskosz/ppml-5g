@@ -53,9 +53,9 @@ the relevant starting point — but no labeled attack benchmark exists for those
 | **Label column** | `label` (after `clean_col_names`); benign value = `'benign'` |
 | **Numerical features** | `syn_cnt`, `ack_cnt`, `fin_cnt`, `rst_cnt`, `tot_l_fw_pkt` |
 | **Categorical features** | `protocol`, `dst_port` |
-| **Preprocessor** | `MinMaxScaler` + `OneHotEncoder` → `TruncatedSVD(100)` and `TruncatedSVD(200)` |
+| **Preprocessor** | `MinMaxScaler` + `OneHotEncoder` → `TruncatedSVD` at 15, 25, 40, and 100 components |
 | **Saved preprocessor** | `preprocessor_cic_ids_2018.pkl` |
-| **FHE model dirs** | `fhe_model_{n}_estimators_{d}_depth_svd_{100|200}_components/` |
+| **FHE model dirs** | `fhe_model_{n}_estimators_{d}_depth_svd_{15\|25\|40\|100}_components/` |
 | **Attack types** | FTP/SSH BruteForce, DoS (GoldenEye/Slowloris/Hulk), DDoS (LOIC/HOIC), Botnet, Web attacks, Infiltration |
 
 **Download:**
@@ -143,7 +143,9 @@ Both should print `True` after installing `requirements-gpu.txt` on a machine wi
 ### Training (compiles FHE circuits)
 
 ```bash
-# From cicids2018-kdd-models/ or cicunswnb15-models/ (CWD matters):
+# cicids2018-kdd-models/ — SVD 15, 25, 40, and 100 (CWD matters):
+PPML_FHE_DEVICE=auto python svd_model_fast.py      # auto|cpu|cuda
+# cicunswnb15-models/:
 PPML_FHE_DEVICE=auto python svd100_model_fast.py   # auto|cpu|cuda
 PPML_FHE_DEVICE=cuda python svd200_model_fast.py
 

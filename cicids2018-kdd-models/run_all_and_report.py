@@ -4,7 +4,7 @@ Run all cicids2018-kdd-models experiment scripts and write report.txt.
 
 Usage (from this directory):
     python run_all_and_report.py
-    python run_all_and_report.py --skip-fast          # only svd100/200 + inference
+    python run_all_and_report.py --skip-fast          # svd_model.py (SVD 15/25/40/100) + inference
     python run_all_and_report.py --only-inference     # best_model_single_record.py only
     python run_all_and_report.py --report-only DIR    # rebuild report from existing logs
 
@@ -27,10 +27,8 @@ from zoneinfo import ZoneInfo
 
 # Runnable experiment scripts (fhe_latency.py is a helper module, not listed).
 ALL_SCRIPTS = [
-    "svd100_model.py",
-    "svd200_model.py",
-    "svd100_model_fast.py",
-    "svd200_model_fast.py",
+    "svd_model.py",
+    "svd_model_fast.py",
     "best_model_single_record.py",
 ]
 
@@ -532,7 +530,7 @@ def main(argv=None) -> int:
     parser.add_argument(
         "--skip-fast",
         action="store_true",
-        help="Skip svd100_model_fast.py and svd200_model_fast.py",
+        help="Skip svd_model_fast.py",
     )
     parser.add_argument(
         "--only-fast",
@@ -623,14 +621,12 @@ def main(argv=None) -> int:
         scripts = ["best_model_single_record.py"]
     elif args.only_fast:
         scripts = [
-            "svd100_model_fast.py",
-            "svd200_model_fast.py",
+            "svd_model_fast.py",
             "best_model_single_record.py",
         ]
     elif args.skip_fast:
         scripts = [
-            "svd100_model.py",
-            "svd200_model.py",
+            "svd_model.py",
             "best_model_single_record.py",
         ]
     else:
