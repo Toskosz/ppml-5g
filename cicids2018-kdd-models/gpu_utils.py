@@ -146,3 +146,21 @@ def write_device_marker(model_dir: str, device: str) -> None:
     marker = os.path.join(model_dir, "fhe_device.txt")
     with open(marker, "w", encoding="utf-8") as f:
         f.write(device.strip().lower() + "\n")
+
+
+def release_memory() -> None:
+    """Return freed arrays to the OS before the next forest is trained.
+
+    Large numpy blocks are released on free. malloc_trim covers the smaller
+    glibc heap that sklearn and Concrete ML leave behind, which otherwise
+    keeps RSS high enough for the OOM killer to send SIGKILL.
+    """
+    import gc
+
+    gc.collect()
+    try:
+        import ctypes
+
+        ctypes.CDLL("libc.so.6").malloc_trim(0)
+    except (OSError, AttributeError):
+        pass

@@ -8,6 +8,7 @@
 from concrete.ml.deployment import FHEModelDev
 from concrete.ml.sklearn.rf import RandomForestClassifier
 from concrete.ml.common.serialization.dumpers import dump
+from concrete.ml.common.serialization.loaders import load
 import datetime
 import numpy as np
 import os
@@ -31,7 +32,7 @@ from sklearn.metrics import (
 from zoneinfo import ZoneInfo
 
 from fhe_latency import measure_fhe_roundtrip, print_latency_summary
-from gpu_utils import compile_for_device, write_device_marker
+from gpu_utils import compile_for_device, release_memory, write_device_marker
 
 FHE_SIM_SAMPLE_SIZE = 50_000
 # Real FHE encrypt/infer/decrypt timing sample size (separate from simulate subset).
@@ -205,7 +206,8 @@ for start in range(0, X_test_sparse.shape[0], chunk_size):
 X_test_final = np.vstack(chunks)
 del chunks
 del X_test_sparse
-log_time(f"Test transform done. Shape: {X_test_final.shape}")
+release_memory()
+log_time(f"Test transform done. Shape: {X_test_final.shape}. Released one-hot matrices.")
 
 log_time(f"SVD done. X_train: {X_train_final.shape}, X_test: {X_test_final.shape}. Explained variance ratio sum: {svd.explained_variance_ratio_.sum():.4f}")
 
@@ -249,21 +251,24 @@ for n_estimators, max_depth, _ in configs:
     log_time(f"[{config_tag}] Plaintext metrics:")
     log_model_metrics(y_test_final, y_pred)
 
+    json_path = f"plaintext_model_{n_estimators}_estimators_{max_depth}_depth_svd_{n_components_svd}.json"
+    with open(json_path, "w") as f:
+        dump(classifier, f)
+    log_time(f"[{config_tag}] Plaintext model saved to '{json_path}'.")
+
     trained_configs.append({
         'idx': idx,
         'n_estimators': n_estimators,
         'max_depth': max_depth,
         'n_components_svd': n_components_svd,
         'config_tag': config_tag,
-        'classifier': classifier,
+        'json_path': json_path,
         'train_dur': train_dur,
         'pred_dur': pred_dur,
     })
-
-    json_path = f"plaintext_model_{n_estimators}_estimators_{max_depth}_depth_svd_{n_components_svd}.json"
-    with open(json_path, "w") as f:
-        dump(classifier, f)
-    log_time(f"[{config_tag}] Plaintext model saved to '{json_path}'.")
+    del classifier
+    del y_pred
+    release_memory()
 
 print("\n" + "=" * 70)
 print(f"  PLAINTEXT SUMMARY  (SVD {n_components_svd})")
@@ -284,7 +289,9 @@ for cfg in trained_configs:
     config_tag = cfg['config_tag']
     n_estimators = cfg['n_estimators']
     max_depth = cfg['max_depth']
-    classifier = cfg['classifier']
+    log_time(f"[{config_tag}] Loading plaintext model from '{cfg['json_path']}'...")
+    with open(cfg['json_path'], "r") as f:
+        classifier = load(f)
     train_dur = cfg['train_dur']
     pred_dur = cfg['pred_dur']
 
@@ -348,6 +355,10 @@ for cfg in trained_configs:
     cfg['mean_inference_s'] = latency['mean_inference_s']
     cfg['mean_decrypt_s'] = latency['mean_decrypt_s']
     cfg['mean_e2e_s'] = latency['mean_e2e_s']
+    del classifier
+    del y_pred_fhe
+    del X_test_sim
+    release_memory()
 
 print("\n" + "=" * 70)
 print(f"  FHE SUMMARY  (SVD {n_components_svd})")
