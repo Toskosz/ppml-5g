@@ -32,7 +32,7 @@ from zoneinfo import ZoneInfo
 
 from data_load import clean_col_names, load_or_assemble_cic_ids_2018
 from fhe_latency import measure_fhe_roundtrip, print_latency_summary
-from gpu_utils import compile_for_device, release_memory, write_device_marker
+from gpu_utils import compile_for_device, project_sparse_svd, release_memory, write_device_marker
 
 # Real FHE encrypt/infer/decrypt timing sample size (simulate phase uses the full test set).
 FHE_LATENCY_SAMPLE_SIZE = 100
@@ -172,23 +172,17 @@ for svd_idx, n_components_svd in enumerate(svd_groups, 1):
 
     svd.fit(X_svd_fit)
     del X_svd_fit
+    release_memory()
 
-    chunk_size = 500_000
-    log_time(f"Transforming training data in chunks of {chunk_size:,}...")
-    chunks = []
-    for start in range(0, X_train_sparse.shape[0], chunk_size):
-        end = min(start + chunk_size, X_train_sparse.shape[0])
-        chunks.append(svd.transform(X_train_sparse[start:end]).astype(np.float32))
-    X_train_final = np.vstack(chunks)
-    del chunks
+    X_train_final = project_sparse_svd(svd, X_train_sparse, log_fn=log_time)
+    del X_train_sparse
+    release_memory()
+    log_time(f"Train transform done. Shape: {X_train_final.shape}")
 
-    log_time(f"Transforming test data in chunks of {chunk_size:,}...")
-    chunks = []
-    for start in range(0, X_test_sparse.shape[0], chunk_size):
-        end = min(start + chunk_size, X_test_sparse.shape[0])
-        chunks.append(svd.transform(X_test_sparse[start:end]).astype(np.float32))
-    X_test_final = np.vstack(chunks)
-    del chunks
+    X_test_final = project_sparse_svd(svd, X_test_sparse, log_fn=log_time)
+    del X_test_sparse
+    release_memory()
+    log_time(f"Test transform done. Shape: {X_test_final.shape}. Released one-hot matrices.")
 
     log_time(f"SVD done. X_train: {X_train_final.shape}, X_test: {X_test_final.shape}. Explained variance ratio sum: {svd.explained_variance_ratio_.sum():.4f}")
 
@@ -198,12 +192,6 @@ for svd_idx, n_components_svd in enumerate(svd_groups, 1):
     log_time(f"SVD saved to '{svd_pkl_path}'.")
 
     log_time(f"Final training data: {X_train_final.shape}, testing data: {X_test_final.shape}")
-
-    if svd_idx == len(svd_groups):
-        del X_train_sparse
-        del X_test_sparse
-        release_memory()
-        log_time("Released one-hot matrices before training.")
 
     print("\n" + "#" * 70)
     print(f"#  PHASE 1: PLAINTEXT TRAINING & EVALUATION  (SVD {n_components_svd})")

@@ -32,7 +32,7 @@ from zoneinfo import ZoneInfo
 
 from data_load import clean_col_names, load_or_assemble_cic_ids_2018
 from fhe_latency import measure_fhe_roundtrip, print_latency_summary
-from gpu_utils import compile_for_device, release_memory, write_device_marker
+from gpu_utils import compile_for_device, project_sparse_svd, release_memory, write_device_marker
 
 FHE_SIM_SAMPLE_SIZE = 50_000
 # Real FHE encrypt/infer/decrypt timing sample size (separate from simulate subset).
@@ -170,26 +170,15 @@ else:
 
 svd.fit(X_svd_fit)
 del X_svd_fit
+release_memory()
 log_time("SVD fitted on subsample.")
 
-chunk_size = 500_000
-log_time(f"Transforming training data in chunks of {chunk_size:,}...")
-chunks = []
-for start in range(0, X_train_sparse.shape[0], chunk_size):
-    end = min(start + chunk_size, X_train_sparse.shape[0])
-    chunks.append(svd.transform(X_train_sparse[start:end]).astype(np.float32))
-X_train_final = np.vstack(chunks)
-del chunks
+X_train_final = project_sparse_svd(svd, X_train_sparse, log_fn=log_time)
 del X_train_sparse
+release_memory()
 log_time(f"Train transform done. Shape: {X_train_final.shape}")
 
-log_time(f"Transforming test data in chunks of {chunk_size:,}...")
-chunks = []
-for start in range(0, X_test_sparse.shape[0], chunk_size):
-    end = min(start + chunk_size, X_test_sparse.shape[0])
-    chunks.append(svd.transform(X_test_sparse[start:end]).astype(np.float32))
-X_test_final = np.vstack(chunks)
-del chunks
+X_test_final = project_sparse_svd(svd, X_test_sparse, log_fn=log_time)
 del X_test_sparse
 release_memory()
 log_time(f"Test transform done. Shape: {X_test_final.shape}. Released one-hot matrices.")

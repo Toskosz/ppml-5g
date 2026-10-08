@@ -148,6 +148,40 @@ def write_device_marker(model_dir: str, device: str) -> None:
         f.write(device.strip().lower() + "\n")
 
 
+def project_sparse_svd(svd, X_sparse, log_fn=None, chunk_size=50_000):
+    """Project a wide sparse matrix with a fitted TruncatedSVD.
+
+    One float32 buffer is filled in place. The previous path kept every
+    chunk and then np.vstack'd them, so the 200-component training matrix
+    (~10 GB) was allocated twice and the kernel sent SIGKILL.
+    """
+    import numpy as np
+
+    n_rows = int(X_sparse.shape[0])
+    n_components = int(svd.components_.shape[0])
+    components_t = np.ascontiguousarray(svd.components_.T, dtype=np.float32)
+    out = np.empty((n_rows, n_components), dtype=np.float32)
+    if log_fn is not None:
+        log_fn(
+            f"Projecting {n_rows:,} x {X_sparse.shape[1]:,} -> {n_components} components "
+            f"in chunks of {chunk_size:,}..."
+        )
+    next_log = 0
+    for start in range(0, n_rows, chunk_size):
+        end = min(start + chunk_size, n_rows)
+        block = X_sparse[start:end]
+        if block.dtype != np.float32:
+            block = block.astype(np.float32)
+        out[start:end] = np.asarray(block @ components_t, dtype=np.float32)
+        del block
+        if log_fn is not None and end >= next_log:
+            log_fn(f"Projected rows {end:,} / {n_rows:,}")
+            next_log = end + 1_000_000
+    del components_t
+    release_memory()
+    return out
+
+
 def release_memory() -> None:
     """Return freed arrays to the OS before the next forest is trained.
 
