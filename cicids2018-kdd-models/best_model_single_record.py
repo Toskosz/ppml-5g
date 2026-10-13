@@ -287,15 +287,19 @@ if __name__ == "__main__":
     log_time(f"Starting best_model_single_record.py — scikit-learn {sklearn.__version__}")
 
     _tree_configs = ((2, 2), (2, 4), (4, 2), (4, 4))
-    _svd_components = (15, 25, 40, 100)
+    _svd_components = (15, 25, 40)
+    # SVD 100 only fits n_estimators=2, max_depth=2 (larger trees exit -9).
+    _model_configs = [
+        (n_estimators, max_depth, n_components)
+        for n_components in _svd_components
+        for n_estimators, max_depth in _tree_configs
+    ] + [(2, 2, 100)]
     configs = [
         ("plaintext", n_estimators, max_depth, n_components)
-        for n_components in _svd_components
-        for n_estimators, max_depth in _tree_configs
+        for n_estimators, max_depth, n_components in _model_configs
     ] + [
         ("fhe", n_estimators, max_depth, 1000, n_components)
-        for n_components in _svd_components
-        for n_estimators, max_depth in _tree_configs
+        for n_estimators, max_depth, n_components in _model_configs
     ]
     total = len(configs)
     log_time(f"Starting benchmark suite — {total} configurations to run")

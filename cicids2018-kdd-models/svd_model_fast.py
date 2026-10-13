@@ -145,13 +145,15 @@ release_memory()
 log_time("Released raw tables and fitted preprocessor.")
 
 # (n_estimators, max_depth, n_components_svd)
+# SVD 100 only fits n_estimators=2, max_depth=2. The next config (2, 4, 100)
+# is killed during plaintext training (exit -9).
 _tree_configs = ((2, 2), (2, 4), (4, 2), (4, 4))
-_svd_components = (15, 25, 40, 100)
+_svd_components = (15, 25, 40)
 configs = [
     (n_estimators, max_depth, n_components)
     for n_components in _svd_components
     for n_estimators, max_depth in _tree_configs
-]
+] + [(2, 2, 100)]
 total_configs = len(configs)
 
 print(f"\n{'Config':>30s} | {'Phase':>20s} | {'Wall Time':>12s}")
