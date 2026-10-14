@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import json
 import os
+import shutil
 import sys
 
 
@@ -146,6 +148,103 @@ def write_device_marker(model_dir: str, device: str) -> None:
     marker = os.path.join(model_dir, "fhe_device.txt")
     with open(marker, "w", encoding="utf-8") as f:
         f.write(device.strip().lower() + "\n")
+
+
+def read_fhe_device(model_dir: str) -> str:
+    """Return the device recorded by write_device_marker."""
+    marker = os.path.join(model_dir.rstrip("/"), "fhe_device.txt")
+    with open(marker, encoding="utf-8") as f:
+        return f.read().strip() or "unknown"
+
+
+FHE_ASSET_NAMES = ("client.zip", "server.zip", "fhe_device.txt")
+
+
+def _nonempty_file(path: str) -> bool:
+    return os.path.isfile(path) and os.path.getsize(path) > 0
+
+
+def fhe_assets_ready(model_dir: str) -> bool:
+    """True when a previous save finished (circuit zips plus device marker)."""
+    root = model_dir.rstrip("/")
+    return all(_nonempty_file(os.path.join(root, name)) for name in FHE_ASSET_NAMES)
+
+
+def recover_interrupted_fhe_save(model_dir: str) -> str | None:
+    """Finish or roll back a save that died while swapping directories.
+
+    Returns ``promoted-tmp``, ``restored-old``, ``kept``, or None when there
+    was nothing to repair.
+    """
+    model_dir = model_dir.rstrip("/")
+    tmp_dir = model_dir + ".tmp"
+    old_dir = model_dir + ".old"
+    # A finished temp dir is a newer save that died before the swap.
+    if fhe_assets_ready(tmp_dir):
+        if os.path.isdir(model_dir):
+            if os.path.isdir(old_dir):
+                shutil.rmtree(old_dir)
+            os.rename(model_dir, old_dir)
+        os.rename(tmp_dir, model_dir)
+        if os.path.isdir(old_dir):
+            shutil.rmtree(old_dir)
+        return "promoted-tmp"
+    if fhe_assets_ready(model_dir):
+        removed = False
+        for leftover in (tmp_dir, old_dir):
+            if os.path.isdir(leftover):
+                shutil.rmtree(leftover)
+                removed = True
+        return "kept" if removed else None
+    if fhe_assets_ready(old_dir):
+        if os.path.isdir(model_dir):
+            shutil.rmtree(model_dir)
+        os.rename(old_dir, model_dir)
+        if os.path.isdir(tmp_dir):
+            shutil.rmtree(tmp_dir)
+        return "restored-old"
+    return None
+
+
+def save_fhe_model(model_dir: str, classifier, device: str, meta: dict | None = None) -> None:
+    """Save a compiled circuit, replacing any previous directory.
+
+    Concrete ML refuses to save into a non-empty directory. The circuit is
+    written to a sibling temp directory and swapped into place only after
+    ``client.zip``, ``server.zip``, and ``fhe_device.txt`` exist, so a rerun
+    neither crashes nor deletes a good model halfway through the write.
+    """
+    from concrete.ml.deployment import FHEModelDev
+
+    model_dir = model_dir.rstrip("/")
+    parent = os.path.dirname(os.path.abspath(model_dir)) or "."
+    os.makedirs(parent, exist_ok=True)
+    recover_interrupted_fhe_save(model_dir)
+    tmp_dir = model_dir + ".tmp"
+    old_dir = model_dir + ".old"
+    if os.path.isdir(tmp_dir):
+        shutil.rmtree(tmp_dir)
+    dev = FHEModelDev(tmp_dir, classifier)
+    try:
+        dev.save()
+        write_device_marker(tmp_dir, device)
+        if meta is not None:
+            with open(os.path.join(tmp_dir, "run_meta.json"), "w", encoding="utf-8") as f:
+                json.dump(meta, f)
+        if not fhe_assets_ready(tmp_dir):
+            raise RuntimeError(f"FHE save to '{tmp_dir}' did not produce the expected files.")
+    except Exception:
+        shutil.rmtree(tmp_dir, ignore_errors=True)
+        raise
+    finally:
+        del dev
+    if os.path.isdir(old_dir):
+        shutil.rmtree(old_dir)
+    if os.path.isdir(model_dir):
+        os.rename(model_dir, old_dir)
+    os.rename(tmp_dir, model_dir)
+    if os.path.isdir(old_dir):
+        shutil.rmtree(old_dir)
 
 
 def project_sparse_svd(svd, X_sparse, log_fn=None, chunk_size=50_000):
