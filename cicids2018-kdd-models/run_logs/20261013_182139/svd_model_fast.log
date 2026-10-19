@@ -1,0 +1,312 @@
+# script: svd_model_fast.py
+# started: 2026-10-14T00:01:02.287159-03:00
+######################################################################
+[LOG 2026-10-14 00:01:05 -03-0300] (elapsed 0.0s) Starting svd_model_fast.py — scikit-learn 1.5.0
+[LOG 2026-10-14 00:01:05 -03-0300] (elapsed 0.0s) Loading existing combined file 'CIC-IDS-2018-Combined.csv'...
+[LOG 2026-10-14 00:01:11 -03-0300] (elapsed 5.7s) Loaded 16232943 rows from 'CIC-IDS-2018-Combined.csv'.
+[LOG 2026-10-14 00:01:11 -03-0300] (elapsed 5.7s) Cleaning column names and dropping NaN/Inf rows...
+[LOG 2026-10-14 00:01:20 -03-0300] (elapsed 14.8s) Dropped 0 rows with NaN/Inf. Remaining: 16232943 rows.
+[LOG 2026-10-14 00:01:25 -03-0300] (elapsed 20.3s) Label distribution — benign: 13484708, attack: 2748235
+[LOG 2026-10-14 00:01:25 -03-0300] (elapsed 20.3s) Splitting data 80/20 (stratified)...
+[LOG 2026-10-14 00:01:47 -03-0300] (elapsed 41.8s) Train: 12986354, Test: 3246589.
+Applying preprocessing (MinMaxScaler and OneHotEncoder)...
+[LOG 2026-10-14 00:01:47 -03-0300] (elapsed 41.8s) Fitting preprocessor on training data...
+[LOG 2026-10-14 00:02:08 -03-0300] (elapsed 62.8s) Preprocessing done. X_train: (12986354, 64539), X_test: (3246589, 64539) (sparse)
+[LOG 2026-10-14 00:02:09 -03-0300] (elapsed 64.1s) Preprocessor saved to 'preprocessor_cic_ids_2018.pkl'.
+[LOG 2026-10-14 00:02:09 -03-0300] (elapsed 64.2s) Released raw tables and fitted preprocessor.
+
+                        Config |                Phase |    Wall Time
+----------------------------------------------------------------------
+[LOG 2026-10-14 00:02:09 -03-0300] (elapsed 64.2s) Applying TruncatedSVD: 64539 → 15 components  [SVD group 1/4]...
+[LOG 2026-10-14 00:02:09 -03-0300] (elapsed 64.2s) Subsampling 500,000 rows from 12,986,354 for SVD fitting...
+[LOG 2026-10-14 00:02:12 -03-0300] (elapsed 66.5s) Projecting 12,986,354 x 64,539 -> 15 components in chunks of 50,000...
+[LOG 2026-10-14 00:02:12 -03-0300] (elapsed 66.5s) Projected rows 50,000 / 12,986,354
+[LOG 2026-10-14 00:02:12 -03-0300] (elapsed 66.5s) Projected rows 1,050,000 / 12,986,354
+[LOG 2026-10-14 00:02:12 -03-0300] (elapsed 66.6s) Projected rows 2,050,000 / 12,986,354
+[LOG 2026-10-14 00:02:12 -03-0300] (elapsed 66.7s) Projected rows 3,050,000 / 12,986,354
+[LOG 2026-10-14 00:02:12 -03-0300] (elapsed 66.8s) Projected rows 4,050,000 / 12,986,354
+[LOG 2026-10-14 00:02:12 -03-0300] (elapsed 66.8s) Projected rows 5,050,000 / 12,986,354
+[LOG 2026-10-14 00:02:12 -03-0300] (elapsed 66.9s) Projected rows 6,050,000 / 12,986,354
+[LOG 2026-10-14 00:02:12 -03-0300] (elapsed 67.0s) Projected rows 7,050,000 / 12,986,354
+[LOG 2026-10-14 00:02:12 -03-0300] (elapsed 67.0s) Projected rows 8,050,000 / 12,986,354
+[LOG 2026-10-14 00:02:12 -03-0300] (elapsed 67.1s) Projected rows 9,050,000 / 12,986,354
+[LOG 2026-10-14 00:02:12 -03-0300] (elapsed 67.2s) Projected rows 10,050,000 / 12,986,354
+[LOG 2026-10-14 00:02:12 -03-0300] (elapsed 67.2s) Projected rows 11,050,000 / 12,986,354
+[LOG 2026-10-14 00:02:13 -03-0300] (elapsed 67.3s) Projected rows 12,050,000 / 12,986,354
+[LOG 2026-10-14 00:02:13 -03-0300] (elapsed 67.5s) Writing (12986354, 15) float32 projection (0.78 GB) to 'X_train_svd_15.npy'...
+[LOG 2026-10-14 00:02:13 -03-0300] (elapsed 68.0s) Projecting 3,246,589 x 64,539 -> 15 components in chunks of 50,000...
+[LOG 2026-10-14 00:02:13 -03-0300] (elapsed 68.0s) Projected rows 50,000 / 3,246,589
+[LOG 2026-10-14 00:02:13 -03-0300] (elapsed 68.0s) Projected rows 1,050,000 / 3,246,589
+[LOG 2026-10-14 00:02:13 -03-0300] (elapsed 68.1s) Projected rows 2,050,000 / 3,246,589
+[LOG 2026-10-14 00:02:13 -03-0300] (elapsed 68.2s) Projected rows 3,050,000 / 3,246,589
+[LOG 2026-10-14 00:02:13 -03-0300] (elapsed 68.3s) Writing (3246589, 15) float32 projection (0.19 GB) to 'X_test_svd_15.npy'...
+[LOG 2026-10-14 00:02:14 -03-0300] (elapsed 68.5s) SVD 15 projections stored. Explained variance ratio sum: 0.8892
+[LOG 2026-10-14 00:02:14 -03-0300] (elapsed 68.5s) SVD saved to 'svd_cic_ids_2018_15.pkl'.
+[LOG 2026-10-14 00:02:14 -03-0300] (elapsed 68.6s) Applying TruncatedSVD: 64539 → 25 components  [SVD group 2/4]...
+[LOG 2026-10-14 00:02:14 -03-0300] (elapsed 68.6s) Subsampling 500,000 rows from 12,986,354 for SVD fitting...
+[LOG 2026-10-14 00:02:18 -03-0300] (elapsed 72.3s) Projecting 12,986,354 x 64,539 -> 25 components in chunks of 50,000...
+[LOG 2026-10-14 00:02:18 -03-0300] (elapsed 72.3s) Projected rows 50,000 / 12,986,354
+[LOG 2026-10-14 00:02:18 -03-0300] (elapsed 72.4s) Projected rows 1,050,000 / 12,986,354
+[LOG 2026-10-14 00:02:18 -03-0300] (elapsed 72.5s) Projected rows 2,050,000 / 12,986,354
+[LOG 2026-10-14 00:02:18 -03-0300] (elapsed 72.5s) Projected rows 3,050,000 / 12,986,354
+[LOG 2026-10-14 00:02:18 -03-0300] (elapsed 72.6s) Projected rows 4,050,000 / 12,986,354
+[LOG 2026-10-14 00:02:18 -03-0300] (elapsed 72.7s) Projected rows 5,050,000 / 12,986,354
+[LOG 2026-10-14 00:02:18 -03-0300] (elapsed 72.8s) Projected rows 6,050,000 / 12,986,354
+[LOG 2026-10-14 00:02:18 -03-0300] (elapsed 72.9s) Projected rows 7,050,000 / 12,986,354
+[LOG 2026-10-14 00:02:18 -03-0300] (elapsed 73.0s) Projected rows 8,050,000 / 12,986,354
+[LOG 2026-10-14 00:02:18 -03-0300] (elapsed 73.0s) Projected rows 9,050,000 / 12,986,354
+[LOG 2026-10-14 00:02:18 -03-0300] (elapsed 73.1s) Projected rows 10,050,000 / 12,986,354
+[LOG 2026-10-14 00:02:18 -03-0300] (elapsed 73.2s) Projected rows 11,050,000 / 12,986,354
+[LOG 2026-10-14 00:02:18 -03-0300] (elapsed 73.3s) Projected rows 12,050,000 / 12,986,354
+[LOG 2026-10-14 00:02:19 -03-0300] (elapsed 73.5s) Writing (12986354, 25) float32 projection (1.30 GB) to 'X_train_svd_25.npy'...
+[LOG 2026-10-14 00:02:19 -03-0300] (elapsed 74.2s) Projecting 3,246,589 x 64,539 -> 25 components in chunks of 50,000...
+[LOG 2026-10-14 00:02:19 -03-0300] (elapsed 74.2s) Projected rows 50,000 / 3,246,589
+[LOG 2026-10-14 00:02:20 -03-0300] (elapsed 74.3s) Projected rows 1,050,000 / 3,246,589
+[LOG 2026-10-14 00:02:20 -03-0300] (elapsed 74.4s) Projected rows 2,050,000 / 3,246,589
+[LOG 2026-10-14 00:02:20 -03-0300] (elapsed 74.5s) Projected rows 3,050,000 / 3,246,589
+[LOG 2026-10-14 00:02:20 -03-0300] (elapsed 74.6s) Writing (3246589, 25) float32 projection (0.32 GB) to 'X_test_svd_25.npy'...
+[LOG 2026-10-14 00:02:20 -03-0300] (elapsed 74.9s) SVD 25 projections stored. Explained variance ratio sum: 0.8940
+[LOG 2026-10-14 00:02:20 -03-0300] (elapsed 74.9s) SVD saved to 'svd_cic_ids_2018_25.pkl'.
+[LOG 2026-10-14 00:02:20 -03-0300] (elapsed 75.0s) Applying TruncatedSVD: 64539 → 40 components  [SVD group 3/4]...
+[LOG 2026-10-14 00:02:20 -03-0300] (elapsed 75.0s) Subsampling 500,000 rows from 12,986,354 for SVD fitting...
+[LOG 2026-10-14 00:02:25 -03-0300] (elapsed 80.3s) Projecting 12,986,354 x 64,539 -> 40 components in chunks of 50,000...
+[LOG 2026-10-14 00:02:25 -03-0300] (elapsed 80.3s) Projected rows 50,000 / 12,986,354
+[LOG 2026-10-14 00:02:26 -03-0300] (elapsed 80.4s) Projected rows 1,050,000 / 12,986,354
+[LOG 2026-10-14 00:02:26 -03-0300] (elapsed 80.5s) Projected rows 2,050,000 / 12,986,354
+[LOG 2026-10-14 00:02:26 -03-0300] (elapsed 80.6s) Projected rows 3,050,000 / 12,986,354
+[LOG 2026-10-14 00:02:26 -03-0300] (elapsed 80.7s) Projected rows 4,050,000 / 12,986,354
+[LOG 2026-10-14 00:02:26 -03-0300] (elapsed 80.8s) Projected rows 5,050,000 / 12,986,354
+[LOG 2026-10-14 00:02:26 -03-0300] (elapsed 80.9s) Projected rows 6,050,000 / 12,986,354
+[LOG 2026-10-14 00:02:26 -03-0300] (elapsed 81.0s) Projected rows 7,050,000 / 12,986,354
+[LOG 2026-10-14 00:02:26 -03-0300] (elapsed 81.1s) Projected rows 8,050,000 / 12,986,354
+[LOG 2026-10-14 00:02:26 -03-0300] (elapsed 81.2s) Projected rows 9,050,000 / 12,986,354
+[LOG 2026-10-14 00:02:27 -03-0300] (elapsed 81.3s) Projected rows 10,050,000 / 12,986,354
+[LOG 2026-10-14 00:02:27 -03-0300] (elapsed 81.4s) Projected rows 11,050,000 / 12,986,354
+[LOG 2026-10-14 00:02:27 -03-0300] (elapsed 81.6s) Projected rows 12,050,000 / 12,986,354
+[LOG 2026-10-14 00:02:27 -03-0300] (elapsed 81.7s) Writing (12986354, 40) float32 projection (2.08 GB) to 'X_train_svd_40.npy'...
+[LOG 2026-10-14 00:02:28 -03-0300] (elapsed 83.0s) Projecting 3,246,589 x 64,539 -> 40 components in chunks of 50,000...
+[LOG 2026-10-14 00:02:28 -03-0300] (elapsed 83.0s) Projected rows 50,000 / 3,246,589
+[LOG 2026-10-14 00:02:28 -03-0300] (elapsed 83.1s) Projected rows 1,050,000 / 3,246,589
+[LOG 2026-10-14 00:02:28 -03-0300] (elapsed 83.2s) Projected rows 2,050,000 / 3,246,589
+[LOG 2026-10-14 00:02:29 -03-0300] (elapsed 83.3s) Projected rows 3,050,000 / 3,246,589
+[LOG 2026-10-14 00:02:29 -03-0300] (elapsed 83.4s) Writing (3246589, 40) float32 projection (0.52 GB) to 'X_test_svd_40.npy'...
+[LOG 2026-10-14 00:02:29 -03-0300] (elapsed 83.8s) SVD 40 projections stored. Explained variance ratio sum: 0.8952
+[LOG 2026-10-14 00:02:29 -03-0300] (elapsed 83.8s) SVD saved to 'svd_cic_ids_2018_40.pkl'.
+[LOG 2026-10-14 00:02:29 -03-0300] (elapsed 83.9s) Applying TruncatedSVD: 64539 → 100 components  [SVD group 4/4]...
+[LOG 2026-10-14 00:02:29 -03-0300] (elapsed 83.9s) Subsampling 500,000 rows from 12,986,354 for SVD fitting...
+[LOG 2026-10-14 00:02:41 -03-0300] (elapsed 96.2s) Projecting 12,986,354 x 64,539 -> 100 components in chunks of 50,000...
+[LOG 2026-10-14 00:02:41 -03-0300] (elapsed 96.2s) Projected rows 50,000 / 12,986,354
+[LOG 2026-10-14 00:02:42 -03-0300] (elapsed 96.4s) Projected rows 1,050,000 / 12,986,354
+[LOG 2026-10-14 00:02:42 -03-0300] (elapsed 96.6s) Projected rows 2,050,000 / 12,986,354
+[LOG 2026-10-14 00:02:42 -03-0300] (elapsed 96.8s) Projected rows 3,050,000 / 12,986,354
+[LOG 2026-10-14 00:02:42 -03-0300] (elapsed 97.0s) Projected rows 4,050,000 / 12,986,354
+[LOG 2026-10-14 00:02:42 -03-0300] (elapsed 97.2s) Projected rows 5,050,000 / 12,986,354
+[LOG 2026-10-14 00:02:43 -03-0300] (elapsed 97.5s) Projected rows 6,050,000 / 12,986,354
+[LOG 2026-10-14 00:02:43 -03-0300] (elapsed 97.7s) Projected rows 7,050,000 / 12,986,354
+[LOG 2026-10-14 00:02:43 -03-0300] (elapsed 97.9s) Projected rows 8,050,000 / 12,986,354
+[LOG 2026-10-14 00:02:43 -03-0300] (elapsed 98.1s) Projected rows 9,050,000 / 12,986,354
+[LOG 2026-10-14 00:02:43 -03-0300] (elapsed 98.3s) Projected rows 10,050,000 / 12,986,354
+[LOG 2026-10-14 00:02:44 -03-0300] (elapsed 98.5s) Projected rows 11,050,000 / 12,986,354
+[LOG 2026-10-14 00:02:44 -03-0300] (elapsed 98.7s) Projected rows 12,050,000 / 12,986,354
+[LOG 2026-10-14 00:02:44 -03-0300] (elapsed 98.9s) Writing (12986354, 100) float32 projection (5.19 GB) to 'X_train_svd_100.npy'...
+[LOG 2026-10-14 00:02:47 -03-0300] (elapsed 102.1s) Projecting 3,246,589 x 64,539 -> 100 components in chunks of 50,000...
+[LOG 2026-10-14 00:02:47 -03-0300] (elapsed 102.1s) Projected rows 50,000 / 3,246,589
+[LOG 2026-10-14 00:02:48 -03-0300] (elapsed 102.3s) Projected rows 1,050,000 / 3,246,589
+[LOG 2026-10-14 00:02:48 -03-0300] (elapsed 102.5s) Projected rows 2,050,000 / 3,246,589
+[LOG 2026-10-14 00:02:48 -03-0300] (elapsed 102.7s) Projected rows 3,050,000 / 3,246,589
+[LOG 2026-10-14 00:02:48 -03-0300] (elapsed 102.9s) Writing (3246589, 100) float32 projection (1.30 GB) to 'X_test_svd_100.npy'...
+[LOG 2026-10-14 00:02:49 -03-0300] (elapsed 103.7s) SVD 100 projections stored. Explained variance ratio sum: 0.8962
+[LOG 2026-10-14 00:02:49 -03-0300] (elapsed 103.8s) SVD saved to 'svd_cic_ids_2018_100.pkl'.
+[LOG 2026-10-14 00:02:49 -03-0300] (elapsed 103.9s) Released one-hot matrices before training and FHE compilation.
+[LOG 2026-10-14 00:02:49 -03-0300] (elapsed 103.9s) Loading SVD 15 projections for plaintext training...
+[LOG 2026-10-14 00:02:59 -03-0300] (elapsed 113.9s) Final training data: (12986354, 15), testing data: (3246589, 15)
+
+######################################################################
+#  PHASE 1: PLAINTEXT TRAINING & EVALUATION  (SVD 15)
+######################################################################
+
+============================================================
+  CONFIG 1/13: n_estimators=2, max_depth=2, svd=15
+============================================================
+[LOG 2026-10-14 00:02:59 -03-0300] (elapsed 113.9s) [n=2, d=2, svd=15] Training RandomForestClassifier...
+[LOG 2026-10-14 00:03:11 -03-0300] (elapsed 126.1s) [n=2, d=2, svd=15] Training completed in 12.2s
+[LOG 2026-10-14 00:03:11 -03-0300] (elapsed 126.1s) [n=2, d=2, svd=15] Starting clear (plaintext) prediction on 3246589 samples...
+[LOG 2026-10-14 00:03:13 -03-0300] (elapsed 127.9s) [n=2, d=2, svd=15] Clear prediction completed in 1.8s
+[LOG 2026-10-14 00:03:13 -03-0300] (elapsed 127.9s) [n=2, d=2, svd=15] Plaintext metrics:
+--- Model Evaluation ---
+Accuracy: 0.8710
+Precision: 0.9804
+Recall: 0.2432
+F1-Score: 0.3897
+
+--- Confusion Matrix ---
+[[2694266    2676]
+ [ 416000  133647]]
+
+--- Classification Report ---
+              precision    recall  f1-score   support
+
+           0       0.87      1.00      0.93   2696942
+           1       0.98      0.24      0.39    549647
+
+    accuracy                           0.87   3246589
+   macro avg       0.92      0.62      0.66   3246589
+weighted avg       0.89      0.87      0.84   3246589
+
+[LOG 2026-10-14 00:03:24 -03-0300] (elapsed 138.7s) [n=2, d=2, svd=15] Plaintext model saved to 'plaintext_model_2_estimators_2_depth_svd_15.json'.
+
+============================================================
+  CONFIG 2/13: n_estimators=2, max_depth=4, svd=15
+============================================================
+[LOG 2026-10-14 00:03:24 -03-0300] (elapsed 138.8s) [n=2, d=4, svd=15] Training RandomForestClassifier...
+[LOG 2026-10-14 00:03:41 -03-0300] (elapsed 156.2s) [n=2, d=4, svd=15] Training completed in 17.4s
+[LOG 2026-10-14 00:03:41 -03-0300] (elapsed 156.2s) [n=2, d=4, svd=15] Starting clear (plaintext) prediction on 3246589 samples...
+[LOG 2026-10-14 00:03:46 -03-0300] (elapsed 161.2s) [n=2, d=4, svd=15] Clear prediction completed in 5.0s
+[LOG 2026-10-14 00:03:46 -03-0300] (elapsed 161.2s) [n=2, d=4, svd=15] Plaintext metrics:
+--- Model Evaluation ---
+Accuracy: 0.9137
+Precision: 0.7396
+Recall: 0.7567
+F1-Score: 0.7481
+
+--- Confusion Matrix ---
+[[2550489  146453]
+ [ 133717  415930]]
+
+--- Classification Report ---
+              precision    recall  f1-score   support
+
+           0       0.95      0.95      0.95   2696942
+           1       0.74      0.76      0.75    549647
+
+    accuracy                           0.91   3246589
+   macro avg       0.84      0.85      0.85   3246589
+weighted avg       0.91      0.91      0.91   3246589
+
+[LOG 2026-10-14 00:03:58 -03-0300] (elapsed 172.5s) [n=2, d=4, svd=15] Plaintext model saved to 'plaintext_model_2_estimators_4_depth_svd_15.json'.
+
+============================================================
+  CONFIG 3/13: n_estimators=4, max_depth=2, svd=15
+============================================================
+[LOG 2026-10-14 00:03:58 -03-0300] (elapsed 172.6s) [n=4, d=2, svd=15] Training RandomForestClassifier...
+[LOG 2026-10-14 00:04:16 -03-0300] (elapsed 190.4s) [n=4, d=2, svd=15] Training completed in 17.8s
+[LOG 2026-10-14 00:04:16 -03-0300] (elapsed 190.4s) [n=4, d=2, svd=15] Starting clear (plaintext) prediction on 3246589 samples...
+[LOG 2026-10-14 00:04:18 -03-0300] (elapsed 193.1s) [n=4, d=2, svd=15] Clear prediction completed in 2.6s
+[LOG 2026-10-14 00:04:18 -03-0300] (elapsed 193.1s) [n=4, d=2, svd=15] Plaintext metrics:
+--- Model Evaluation ---
+Accuracy: 0.9048
+Precision: 0.7249
+Recall: 0.7058
+F1-Score: 0.7152
+
+--- Confusion Matrix ---
+[[2549735  147207]
+ [ 161709  387938]]
+
+--- Classification Report ---
+              precision    recall  f1-score   support
+
+           0       0.94      0.95      0.94   2696942
+           1       0.72      0.71      0.72    549647
+
+    accuracy                           0.90   3246589
+   macro avg       0.83      0.83      0.83   3246589
+weighted avg       0.90      0.90      0.90   3246589
+
+[LOG 2026-10-14 00:04:30 -03-0300] (elapsed 204.6s) [n=4, d=2, svd=15] Plaintext model saved to 'plaintext_model_4_estimators_2_depth_svd_15.json'.
+
+============================================================
+  CONFIG 4/13: n_estimators=4, max_depth=4, svd=15
+============================================================
+[LOG 2026-10-14 00:04:30 -03-0300] (elapsed 204.7s) [n=4, d=4, svd=15] Training RandomForestClassifier...
+[LOG 2026-10-14 00:04:58 -03-0300] (elapsed 232.7s) [n=4, d=4, svd=15] Training completed in 28.0s
+[LOG 2026-10-14 00:04:58 -03-0300] (elapsed 232.7s) [n=4, d=4, svd=15] Starting clear (plaintext) prediction on 3246589 samples...
+[LOG 2026-10-14 00:05:07 -03-0300] (elapsed 241.7s) [n=4, d=4, svd=15] Clear prediction completed in 9.0s
+[LOG 2026-10-14 00:05:07 -03-0300] (elapsed 241.7s) [n=4, d=4, svd=15] Plaintext metrics:
+--- Model Evaluation ---
+Accuracy: 0.9137
+Precision: 0.7395
+Recall: 0.7567
+F1-Score: 0.7480
+
+--- Confusion Matrix ---
+[[2550427  146515]
+ [ 133717  415930]]
+
+--- Classification Report ---
+              precision    recall  f1-score   support
+
+           0       0.95      0.95      0.95   2696942
+           1       0.74      0.76      0.75    549647
+
+    accuracy                           0.91   3246589
+   macro avg       0.84      0.85      0.85   3246589
+weighted avg       0.91      0.91      0.91   3246589
+
+[LOG 2026-10-14 00:05:18 -03-0300] (elapsed 253.1s) [n=4, d=4, svd=15] Plaintext model saved to 'plaintext_model_4_estimators_4_depth_svd_15.json'.
+
+======================================================================
+  PLAINTEXT SUMMARY  (SVD 15)
+======================================================================
+                        Config |  Train (s) |  Predict (s)
+------------------------------------------------------------
+              n=2, d=2, svd=15 |       12.2 |          1.8
+              n=2, d=4, svd=15 |       17.4 |          5.0
+              n=4, d=2, svd=15 |       17.8 |          2.6
+              n=4, d=4, svd=15 |       28.0 |          9.0
+
+[LOG 2026-10-14 00:05:18 -03-0300] (elapsed 253.2s) Phase 1 complete for SVD 15 — all plaintext variants trained and evaluated.
+[LOG 2026-10-14 00:05:18 -03-0300] (elapsed 253.3s) Released SVD 15 projections before FHE compilation.
+
+######################################################################
+#  PHASE 2: FHE COMPILATION & SIMULATION  (SVD 15)
+######################################################################
+[LOG 2026-10-14 00:05:18 -03-0300] (elapsed 253.3s) [n=2, d=2, svd=15] Loading plaintext model from 'plaintext_model_2_estimators_2_depth_svd_15.json'...
+
+============================================================
+  FHE for CONFIG 1/13: n_estimators=2, max_depth=2, svd=15
+============================================================
+[LOG 2026-10-14 00:05:19 -03-0300] (elapsed 253.3s) [n=2, d=2, svd=15] Loading train projection for FHE compilation...
+[LOG 2026-10-14 00:05:19 -03-0300] (elapsed 253.5s) [n=2, d=2, svd=15] Compiling FHE circuit (this may take a long time)...
+[LOG 2026-10-14 00:05:19 -03-0300] (elapsed 253.5s) [n=2, d=2, svd=15] GPU status — available=False, enabled(runtime)=False
+[LOG 2026-10-14 00:05:19 -03-0300] (elapsed 253.5s) [n=2, d=2, svd=15] FHE device: cpu (auto — no CUDA GPU / GPU runtime)
+[LOG 2026-10-14 00:05:19 -03-0300] (elapsed 253.5s) [n=2, d=2, svd=15] Compiling FHE circuit with device='cpu'...
+[LOG 2026-10-14 02:20:53 -03-0300] (elapsed 8,388.4s) [n=2, d=2, svd=15] FHE compilation succeeded on device='cpu'.
+[LOG 2026-10-14 02:20:54 -03-0300] (elapsed 8,388.4s) [n=2, d=2, svd=15] FHE compilation completed in 8,134.9s on device='cpu'
+[LOG 2026-10-14 02:20:54 -03-0300] (elapsed 8,388.5s) [n=2, d=2, svd=15] Loading test projection for FHE simulation...
+[LOG 2026-10-14 02:20:54 -03-0300] (elapsed 8,388.7s) [n=2, d=2, svd=15] Subsampled 50,000 rows for FHE simulation...
+[LOG 2026-10-14 02:20:54 -03-0300] (elapsed 8,388.7s) [n=2, d=2, svd=15] Starting FHE simulation prediction on 50,000 samples...
+[LOG 2026-10-14 02:23:53 -03-0300] (elapsed 8,567.9s) [n=2, d=2, svd=15] FHE simulation completed in 179.2s
+[LOG 2026-10-14 02:23:53 -03-0300] (elapsed 8,567.9s) [n=2, d=2, svd=15] FHE metrics (on 50,000 sample subset):
+--- Model Evaluation ---
+Accuracy: 0.8600
+Precision: 0.7628
+Recall: 0.2629
+F1-Score: 0.3910
+
+--- Confusion Matrix ---
+[[40750   699]
+ [ 6303  2248]]
+
+--- Classification Report ---
+              precision    recall  f1-score   support
+
+           0       0.87      0.98      0.92     41449
+           1       0.76      0.26      0.39      8551
+
+    accuracy                           0.86     50000
+   macro avg       0.81      0.62      0.66     50000
+weighted avg       0.85      0.86      0.83     50000
+
+[LOG 2026-10-14 02:23:53 -03-0300] (elapsed 8,568.1s) [n=2, d=2, svd=15] Saving compiled FHE circuit to './fhe_model_2_estimators_2_depth_svd_15_components/'...
+Traceback (most recent call last):
+  File "/home/thiago.tokarski/ppml-5g/cicids2018-kdd-models/svd_model_fast.py", line 357, in <module>
+    dev.save()
+  File "/home/thiago.tokarski/ppml-5g/.venv/lib/python3.12/site-packages/concrete/ml/deployment/fhe_client_server.py", line 323, in save
+    raise Exception(
+Exception: path_dir: ./fhe_model_2_estimators_2_depth_svd_15_components/ is not empty. Please delete it before saving a new model.
+
+######################################################################
+# finished: 2026-10-14T02:23:54.256607-03:00
+# exit_code: 0
+# wall_time_s: 8571.970

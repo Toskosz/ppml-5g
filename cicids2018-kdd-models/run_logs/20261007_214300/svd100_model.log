@@ -1,0 +1,88 @@
+# script: svd100_model.py
+# started: 2026-10-07T21:43:00.381414-03:00
+######################################################################
+[LOG 2026-10-07 21:43:03 -03-0300] (elapsed 0.0s) Starting model.py — scikit-learn 1.5.0
+[LOG 2026-10-07 21:43:03 -03-0300] (elapsed 0.0s) Loading existing combined file 'CIC-IDS-2018-Combined.csv'...
+[LOG 2026-10-07 21:43:09 -03-0300] (elapsed 5.6s) Loaded 16232943 rows from 'CIC-IDS-2018-Combined.csv'.
+[LOG 2026-10-07 21:43:09 -03-0300] (elapsed 5.6s) Cleaning column names and dropping NaN/Inf rows...
+[LOG 2026-10-07 21:43:18 -03-0300] (elapsed 14.8s) Dropped 0 rows with NaN/Inf. Remaining: 16232943 rows.
+[LOG 2026-10-07 21:43:23 -03-0300] (elapsed 20.1s) Label distribution — benign: 13484708, attack: 2748235
+[LOG 2026-10-07 21:43:23 -03-0300] (elapsed 20.1s) Splitting data 80/20 (stratified)...
+[LOG 2026-10-07 21:43:45 -03-0300] (elapsed 41.7s) Train: 12986354, Test: 3246589.
+Applying preprocessing (MinMaxScaler and OneHotEncoder)...
+[LOG 2026-10-07 21:43:45 -03-0300] (elapsed 41.7s) Fitting preprocessor on training data...
+[LOG 2026-10-07 21:44:06 -03-0300] (elapsed 62.6s) Preprocessing done. X_train: (12986354, 64539), X_test: (3246589, 64539) (sparse)
+[LOG 2026-10-07 21:44:07 -03-0300] (elapsed 63.7s) Preprocessor saved to 'preprocessor_cic_ids_2018.pkl'.
+
+                        Config |                Phase |    Wall Time
+----------------------------------------------------------------------
+[LOG 2026-10-07 21:44:07 -03-0300] (elapsed 63.7s) Applying TruncatedSVD: 64539 → 100 components  [SVD group 1/1]...
+[LOG 2026-10-07 21:44:07 -03-0300] (elapsed 63.7s) Subsampling 500,000 rows from 12,986,354 for SVD fitting...
+[LOG 2026-10-07 21:44:22 -03-0300] (elapsed 78.7s) Projecting 12,986,354 x 64,539 -> 100 components in chunks of 50,000...
+[LOG 2026-10-07 21:44:22 -03-0300] (elapsed 78.8s) Projected rows 50,000 / 12,986,354
+[LOG 2026-10-07 21:44:22 -03-0300] (elapsed 79.0s) Projected rows 1,050,000 / 12,986,354
+[LOG 2026-10-07 21:44:23 -03-0300] (elapsed 79.3s) Projected rows 2,050,000 / 12,986,354
+[LOG 2026-10-07 21:44:23 -03-0300] (elapsed 79.6s) Projected rows 3,050,000 / 12,986,354
+[LOG 2026-10-07 21:44:23 -03-0300] (elapsed 79.9s) Projected rows 4,050,000 / 12,986,354
+[LOG 2026-10-07 21:44:23 -03-0300] (elapsed 80.1s) Projected rows 5,050,000 / 12,986,354
+[LOG 2026-10-07 21:44:24 -03-0300] (elapsed 80.4s) Projected rows 6,050,000 / 12,986,354
+[LOG 2026-10-07 21:44:24 -03-0300] (elapsed 80.7s) Projected rows 7,050,000 / 12,986,354
+[LOG 2026-10-07 21:44:24 -03-0300] (elapsed 81.0s) Projected rows 8,050,000 / 12,986,354
+[LOG 2026-10-07 21:44:25 -03-0300] (elapsed 81.2s) Projected rows 9,050,000 / 12,986,354
+[LOG 2026-10-07 21:44:25 -03-0300] (elapsed 81.5s) Projected rows 10,050,000 / 12,986,354
+[LOG 2026-10-07 21:44:25 -03-0300] (elapsed 81.8s) Projected rows 11,050,000 / 12,986,354
+[LOG 2026-10-07 21:44:25 -03-0300] (elapsed 82.1s) Projected rows 12,050,000 / 12,986,354
+[LOG 2026-10-07 21:44:26 -03-0300] (elapsed 82.6s) Train transform done. Shape: (12986354, 100)
+[LOG 2026-10-07 21:44:26 -03-0300] (elapsed 82.6s) Projecting 3,246,589 x 64,539 -> 100 components in chunks of 50,000...
+[LOG 2026-10-07 21:44:26 -03-0300] (elapsed 82.6s) Projected rows 50,000 / 3,246,589
+[LOG 2026-10-07 21:44:26 -03-0300] (elapsed 82.9s) Projected rows 1,050,000 / 3,246,589
+[LOG 2026-10-07 21:44:26 -03-0300] (elapsed 83.1s) Projected rows 2,050,000 / 3,246,589
+[LOG 2026-10-07 21:44:27 -03-0300] (elapsed 83.4s) Projected rows 3,050,000 / 3,246,589
+[LOG 2026-10-07 21:44:27 -03-0300] (elapsed 83.7s) Test transform done. Shape: (3246589, 100). Released one-hot matrices.
+[LOG 2026-10-07 21:44:27 -03-0300] (elapsed 83.7s) SVD done. X_train: (12986354, 100), X_test: (3246589, 100). Explained variance ratio sum: 0.8956
+[LOG 2026-10-07 21:44:27 -03-0300] (elapsed 83.8s) SVD saved to 'svd_cic_ids_2018_100.pkl'.
+[LOG 2026-10-07 21:44:27 -03-0300] (elapsed 83.8s) Final training data: (12986354, 100), testing data: (3246589, 100)
+
+######################################################################
+#  PHASE 1: PLAINTEXT TRAINING & EVALUATION  (SVD 100)
+######################################################################
+
+============================================================
+  CONFIG 1/4: n_estimators=2, max_depth=2, svd=100
+============================================================
+[LOG 2026-10-07 21:44:27 -03-0300] (elapsed 83.8s) [n=2, d=2, svd=100] Training RandomForestClassifier...
+[LOG 2026-10-07 21:45:30 -03-0300] (elapsed 147.1s) [n=2, d=2, svd=100] Training completed in 63.3s
+[LOG 2026-10-07 21:45:30 -03-0300] (elapsed 147.1s) [n=2, d=2, svd=100] Starting clear (plaintext) prediction on 3246589 samples...
+[LOG 2026-10-07 21:45:40 -03-0300] (elapsed 156.9s) [n=2, d=2, svd=100] Clear prediction completed in 9.8s
+[LOG 2026-10-07 21:45:40 -03-0300] (elapsed 156.9s) [n=2, d=2, svd=100] Plaintext metrics:
+--- Model Evaluation ---
+Accuracy: 0.8775
+Precision: 0.6679
+Recall: 0.5502
+F1-Score: 0.6033
+
+--- Confusion Matrix ---
+[[2546579  150363]
+ [ 247250  302397]]
+
+--- Classification Report ---
+              precision    recall  f1-score   support
+
+           0       0.91      0.94      0.93   2696942
+           1       0.67      0.55      0.60    549647
+
+    accuracy                           0.88   3246589
+   macro avg       0.79      0.75      0.77   3246589
+weighted avg       0.87      0.88      0.87   3246589
+
+[LOG 2026-10-07 21:45:55 -03-0300] (elapsed 171.8s) [n=2, d=2, svd=100] Plaintext model saved to 'plaintext_model_2_estimators_2_depth_svd_100.json'.
+
+============================================================
+  CONFIG 2/4: n_estimators=2, max_depth=4, svd=100
+============================================================
+[LOG 2026-10-07 21:45:55 -03-0300] (elapsed 171.9s) [n=2, d=4, svd=100] Training RandomForestClassifier...
+
+######################################################################
+# finished: 2026-10-07T21:46:57.920704-03:00
+# exit_code: -9
+# wall_time_s: 237.537

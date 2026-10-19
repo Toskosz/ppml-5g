@@ -1,0 +1,212 @@
+# script: best_model_single_record.py
+# started: 2026-10-07T01:07:20.744893-03:00
+######################################################################
+[LOG 2026-10-07 01:07:27 -03-0300] (elapsed 0.0s) Starting best_model_single_record.py — scikit-learn 1.5.0
+[LOG 2026-10-07 01:07:27 -03-0300] (elapsed 0.0s) Starting benchmark suite — 16 configurations to run
+
+######################################################################
+#  PHASE 1: PLAINTEXT INFERENCE BENCHMARK
+######################################################################
+[LOG 2026-10-07 01:07:27 -03-0300] (elapsed 0.0s) === Configuration 1/16 ===
+
+============================================================
+  PLAINTEXT CONFIG: n_estimators=2, max_depth=2, svd=100
+============================================================
+[LOG 2026-10-07 01:07:27 -03-0300] (elapsed 0.0s) [n=2, d=2, svd=100] Starting plaintext inference benchmark
+[LOG 2026-10-07 01:07:27 -03-0300] (elapsed 0.0s) [n=2, d=2, svd=100] Loading Concrete ML model from 'plaintext_model_2_estimators_2_depth_svd_100.json'...
+[LOG 2026-10-07 01:07:27 -03-0300] (elapsed 0.2s) [n=2, d=2, svd=100] Model loaded.
+[LOG 2026-10-07 01:07:27 -03-0300] (elapsed 0.2s) Loading test data using saved preprocessor and SVD artifacts (svd=100)...
+[LOG 2026-10-07 01:07:27 -03-0300] (elapsed 0.2s) Loaded saved preprocessor.
+[LOG 2026-10-07 01:07:27 -03-0300] (elapsed 0.2s) Loaded saved SVD from 'svd_cic_ids_2018_100.pkl'.
+[LOG 2026-10-07 01:07:27 -03-0300] (elapsed 0.2s) Loading existing combined file 'CIC-IDS-2018-Combined.csv'...
+[LOG 2026-10-07 01:07:33 -03-0300] (elapsed 6.0s) Loaded 16232943 rows from 'CIC-IDS-2018-Combined.csv'.
+[LOG 2026-10-07 01:07:33 -03-0300] (elapsed 6.0s) Cleaning column names and dropping NaN/Inf rows...
+[LOG 2026-10-07 01:07:42 -03-0300] (elapsed 15.1s) Dropped 0 rows with NaN/Inf. Remaining: 16232943 rows.
+[LOG 2026-10-07 01:07:47 -03-0300] (elapsed 20.5s) Label distribution — benign: 13484708, attack: 2748235
+[LOG 2026-10-07 01:07:47 -03-0300] (elapsed 20.5s) Splitting data 80/20 (stratified)...
+[LOG 2026-10-07 01:08:09 -03-0300] (elapsed 42.2s) Test: 3246589.
+[LOG 2026-10-07 01:08:15 -03-0300] (elapsed 48.1s) Test data ready — (3246589, 100), using saved preprocessor and SVD.
+[LOG 2026-10-07 01:08:17 -03-0300] (elapsed 50.8s) [n=2, d=2, svd=100] Starting clear (plaintext) prediction on 3246589 samples...
+[LOG 2026-10-07 01:08:28 -03-0300] (elapsed 61.1s) [n=2, d=2, svd=100] Clear prediction completed in 10.3s
+--- Model Evaluation ---
+Accuracy: 0.8512
+Precision: 0.9985
+Recall: 0.1213
+F1-Score: 0.2163
+
+--- Confusion Matrix ---
+[[2696843      99]
+ [ 482985   66662]]
+
+--- Classification Report ---
+              precision    recall  f1-score   support
+
+           0       0.85      1.00      0.92   2696942
+           1       1.00      0.12      0.22    549647
+
+    accuracy                           0.85   3246589
+   macro avg       0.92      0.56      0.57   3246589
+weighted avg       0.87      0.85      0.80   3246589
+
+[LOG 2026-10-07 01:08:45 -03-0300] (elapsed 78.6s) [n=2, d=2, svd=100] Running single-record inference on 1000 records...
+[LOG 2026-10-07 01:08:45 -03-0300] (elapsed 78.7s) [n=2, d=2, svd=100] Processed 200/1000 records (avg 0.000901s/record)
+[LOG 2026-10-07 01:08:45 -03-0300] (elapsed 78.9s) [n=2, d=2, svd=100] Processed 400/1000 records (avg 0.000895s/record)
+[LOG 2026-10-07 01:08:46 -03-0300] (elapsed 79.1s) [n=2, d=2, svd=100] Processed 600/1000 records (avg 0.000892s/record)
+[LOG 2026-10-07 01:08:46 -03-0300] (elapsed 79.3s) [n=2, d=2, svd=100] Processed 800/1000 records (avg 0.000892s/record)
+[LOG 2026-10-07 01:08:46 -03-0300] (elapsed 79.4s) [n=2, d=2, svd=100] Processed 1000/1000 records (avg 0.000891s/record)
+[LOG 2026-10-07 01:08:46 -03-0300] (elapsed 79.4s) [n=2, d=2, svd=100] All 1000 single-record inferences complete.
+
+==================== PLAINTEXT LATENCY SUMMARY ====================
+Records measured: 1000
+Total inference time: 0.8907 s
+Mean inference time/record: 0.000891 s
+Std inference time/record:  0.000035 s
+======================================================================
+
+[LOG 2026-10-07 01:08:46 -03-0300] (elapsed 79.7s) === Configuration 2/16 ===
+
+============================================================
+  PLAINTEXT CONFIG: n_estimators=2, max_depth=4, svd=100
+============================================================
+[LOG 2026-10-07 01:08:46 -03-0300] (elapsed 79.7s) [n=2, d=4, svd=100] Starting plaintext inference benchmark
+[LOG 2026-10-07 01:08:46 -03-0300] (elapsed 79.7s) [n=2, d=4, svd=100] ERROR: Serialized model not found at 'plaintext_model_2_estimators_4_depth_svd_100.json'.
+Please run model.py (or svd200_model.py) first to generate the model artifacts.
+[LOG 2026-10-07 01:08:46 -03-0300] (elapsed 79.7s) === Configuration 3/16 ===
+
+============================================================
+  PLAINTEXT CONFIG: n_estimators=4, max_depth=2, svd=100
+============================================================
+[LOG 2026-10-07 01:08:46 -03-0300] (elapsed 79.7s) [n=4, d=2, svd=100] Starting plaintext inference benchmark
+[LOG 2026-10-07 01:08:46 -03-0300] (elapsed 79.7s) [n=4, d=2, svd=100] ERROR: Serialized model not found at 'plaintext_model_4_estimators_2_depth_svd_100.json'.
+Please run model.py (or svd200_model.py) first to generate the model artifacts.
+[LOG 2026-10-07 01:08:46 -03-0300] (elapsed 79.7s) === Configuration 4/16 ===
+
+============================================================
+  PLAINTEXT CONFIG: n_estimators=4, max_depth=4, svd=100
+============================================================
+[LOG 2026-10-07 01:08:46 -03-0300] (elapsed 79.7s) [n=4, d=4, svd=100] Starting plaintext inference benchmark
+[LOG 2026-10-07 01:08:46 -03-0300] (elapsed 79.7s) [n=4, d=4, svd=100] ERROR: Serialized model not found at 'plaintext_model_4_estimators_4_depth_svd_100.json'.
+Please run model.py (or svd200_model.py) first to generate the model artifacts.
+[LOG 2026-10-07 01:08:46 -03-0300] (elapsed 79.7s) === Configuration 5/16 ===
+
+============================================================
+  PLAINTEXT CONFIG: n_estimators=2, max_depth=2, svd=200
+============================================================
+[LOG 2026-10-07 01:08:46 -03-0300] (elapsed 79.7s) [n=2, d=2, svd=200] Starting plaintext inference benchmark
+[LOG 2026-10-07 01:08:46 -03-0300] (elapsed 79.7s) [n=2, d=2, svd=200] ERROR: Serialized model not found at 'plaintext_model_2_estimators_2_depth_svd_200.json'.
+Please run model.py (or svd200_model.py) first to generate the model artifacts.
+[LOG 2026-10-07 01:08:46 -03-0300] (elapsed 79.7s) === Configuration 6/16 ===
+
+============================================================
+  PLAINTEXT CONFIG: n_estimators=2, max_depth=4, svd=200
+============================================================
+[LOG 2026-10-07 01:08:46 -03-0300] (elapsed 79.7s) [n=2, d=4, svd=200] Starting plaintext inference benchmark
+[LOG 2026-10-07 01:08:46 -03-0300] (elapsed 79.7s) [n=2, d=4, svd=200] ERROR: Serialized model not found at 'plaintext_model_2_estimators_4_depth_svd_200.json'.
+Please run model.py (or svd200_model.py) first to generate the model artifacts.
+[LOG 2026-10-07 01:08:46 -03-0300] (elapsed 79.7s) === Configuration 7/16 ===
+
+============================================================
+  PLAINTEXT CONFIG: n_estimators=4, max_depth=2, svd=200
+============================================================
+[LOG 2026-10-07 01:08:46 -03-0300] (elapsed 79.7s) [n=4, d=2, svd=200] Starting plaintext inference benchmark
+[LOG 2026-10-07 01:08:46 -03-0300] (elapsed 79.7s) [n=4, d=2, svd=200] ERROR: Serialized model not found at 'plaintext_model_4_estimators_2_depth_svd_200.json'.
+Please run model.py (or svd200_model.py) first to generate the model artifacts.
+[LOG 2026-10-07 01:08:46 -03-0300] (elapsed 79.7s) === Configuration 8/16 ===
+
+============================================================
+  PLAINTEXT CONFIG: n_estimators=4, max_depth=4, svd=200
+============================================================
+[LOG 2026-10-07 01:08:46 -03-0300] (elapsed 79.7s) [n=4, d=4, svd=200] Starting plaintext inference benchmark
+[LOG 2026-10-07 01:08:46 -03-0300] (elapsed 79.7s) [n=4, d=4, svd=200] ERROR: Serialized model not found at 'plaintext_model_4_estimators_4_depth_svd_200.json'.
+Please run model.py (or svd200_model.py) first to generate the model artifacts.
+[LOG 2026-10-07 01:08:46 -03-0300] (elapsed 79.7s) === Configuration 9/16 ===
+[LOG 2026-10-07 01:08:46 -03-0300] (elapsed 79.7s) === Configuration 10/16 ===
+[LOG 2026-10-07 01:08:46 -03-0300] (elapsed 79.7s) === Configuration 11/16 ===
+[LOG 2026-10-07 01:08:46 -03-0300] (elapsed 79.7s) === Configuration 12/16 ===
+[LOG 2026-10-07 01:08:46 -03-0300] (elapsed 79.7s) === Configuration 13/16 ===
+[LOG 2026-10-07 01:08:46 -03-0300] (elapsed 79.7s) === Configuration 14/16 ===
+[LOG 2026-10-07 01:08:46 -03-0300] (elapsed 79.7s) === Configuration 15/16 ===
+[LOG 2026-10-07 01:08:46 -03-0300] (elapsed 79.7s) === Configuration 16/16 ===
+
+======================================================================
+  PLAINTEXT SUMMARY
+======================================================================
+                        Config | Batch Pred (s) | Mean Inf (s) |  Std Inf (s)
+----------------------------------------------------------------------------
+             n=2, d=2, svd=100 |           10.3 |     0.000891 |     0.000035
+
+[LOG 2026-10-07 01:08:46 -03-0300] (elapsed 79.7s) Phase 1 complete — all plaintext variants evaluated.
+
+######################################################################
+#  PHASE 2: FHE INFERENCE BENCHMARK
+######################################################################
+[LOG 2026-10-07 01:08:46 -03-0300] (elapsed 79.7s) === FHE Configuration ===
+
+============================================================
+  FHE CONFIG: n_estimators=2, max_depth=2, svd=100
+============================================================
+[LOG 2026-10-07 01:08:46 -03-0300] (elapsed 79.7s) [n=2, d=2, svd=100] Starting FHE inference benchmark
+[LOG 2026-10-07 01:08:46 -03-0300] (elapsed 79.7s) [n=2, d=2, svd=100] ERROR: FHE model directory not found at './fhe_model_2_estimators_2_depth_svd_100_components/'.
+Please run a training script first to generate the FHE assets.
+[LOG 2026-10-07 01:08:46 -03-0300] (elapsed 79.7s) === FHE Configuration ===
+
+============================================================
+  FHE CONFIG: n_estimators=2, max_depth=4, svd=100
+============================================================
+[LOG 2026-10-07 01:08:46 -03-0300] (elapsed 79.7s) [n=2, d=4, svd=100] Starting FHE inference benchmark
+[LOG 2026-10-07 01:08:46 -03-0300] (elapsed 79.7s) [n=2, d=4, svd=100] ERROR: FHE model directory not found at './fhe_model_2_estimators_4_depth_svd_100_components/'.
+Please run a training script first to generate the FHE assets.
+[LOG 2026-10-07 01:08:46 -03-0300] (elapsed 79.7s) === FHE Configuration ===
+
+============================================================
+  FHE CONFIG: n_estimators=4, max_depth=2, svd=100
+============================================================
+[LOG 2026-10-07 01:08:46 -03-0300] (elapsed 79.7s) [n=4, d=2, svd=100] Starting FHE inference benchmark
+[LOG 2026-10-07 01:08:46 -03-0300] (elapsed 79.7s) [n=4, d=2, svd=100] ERROR: FHE model directory not found at './fhe_model_4_estimators_2_depth_svd_100_components/'.
+Please run a training script first to generate the FHE assets.
+[LOG 2026-10-07 01:08:46 -03-0300] (elapsed 79.7s) === FHE Configuration ===
+
+============================================================
+  FHE CONFIG: n_estimators=4, max_depth=4, svd=100
+============================================================
+[LOG 2026-10-07 01:08:46 -03-0300] (elapsed 79.7s) [n=4, d=4, svd=100] Starting FHE inference benchmark
+[LOG 2026-10-07 01:08:46 -03-0300] (elapsed 79.7s) [n=4, d=4, svd=100] ERROR: FHE model directory not found at './fhe_model_4_estimators_4_depth_svd_100_components/'.
+Please run a training script first to generate the FHE assets.
+[LOG 2026-10-07 01:08:46 -03-0300] (elapsed 79.7s) === FHE Configuration ===
+
+============================================================
+  FHE CONFIG: n_estimators=2, max_depth=2, svd=200
+============================================================
+[LOG 2026-10-07 01:08:46 -03-0300] (elapsed 79.7s) [n=2, d=2, svd=200] Starting FHE inference benchmark
+[LOG 2026-10-07 01:08:46 -03-0300] (elapsed 79.7s) [n=2, d=2, svd=200] ERROR: FHE model directory not found at './fhe_model_2_estimators_2_depth_svd_200_components/'.
+Please run a training script first to generate the FHE assets.
+[LOG 2026-10-07 01:08:46 -03-0300] (elapsed 79.7s) === FHE Configuration ===
+
+============================================================
+  FHE CONFIG: n_estimators=2, max_depth=4, svd=200
+============================================================
+[LOG 2026-10-07 01:08:46 -03-0300] (elapsed 79.7s) [n=2, d=4, svd=200] Starting FHE inference benchmark
+[LOG 2026-10-07 01:08:46 -03-0300] (elapsed 79.7s) [n=2, d=4, svd=200] ERROR: FHE model directory not found at './fhe_model_2_estimators_4_depth_svd_200_components/'.
+Please run a training script first to generate the FHE assets.
+[LOG 2026-10-07 01:08:46 -03-0300] (elapsed 79.7s) === FHE Configuration ===
+
+============================================================
+  FHE CONFIG: n_estimators=4, max_depth=2, svd=200
+============================================================
+[LOG 2026-10-07 01:08:46 -03-0300] (elapsed 79.7s) [n=4, d=2, svd=200] Starting FHE inference benchmark
+[LOG 2026-10-07 01:08:46 -03-0300] (elapsed 79.7s) [n=4, d=2, svd=200] ERROR: FHE model directory not found at './fhe_model_4_estimators_2_depth_svd_200_components/'.
+Please run a training script first to generate the FHE assets.
+[LOG 2026-10-07 01:08:46 -03-0300] (elapsed 79.7s) === FHE Configuration ===
+
+============================================================
+  FHE CONFIG: n_estimators=4, max_depth=4, svd=200
+============================================================
+[LOG 2026-10-07 01:08:46 -03-0300] (elapsed 79.7s) [n=4, d=4, svd=200] Starting FHE inference benchmark
+[LOG 2026-10-07 01:08:46 -03-0300] (elapsed 79.7s) [n=4, d=4, svd=200] ERROR: FHE model directory not found at './fhe_model_4_estimators_4_depth_svd_200_components/'.
+Please run a training script first to generate the FHE assets.
+[LOG 2026-10-07 01:08:46 -03-0300] (elapsed 79.7s) All 16 configurations complete.
+
+######################################################################
+# finished: 2026-10-07T01:08:47.606692-03:00
+# exit_code: 0
+# wall_time_s: 86.863

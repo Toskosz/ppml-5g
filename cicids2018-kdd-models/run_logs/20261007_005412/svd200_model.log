@@ -1,0 +1,27 @@
+# script: svd200_model.py
+# started: 2026-10-07T00:58:27.835823-03:00
+######################################################################
+[LOG 2026-10-07 00:58:34 -03-0300] (elapsed 0.0s) Starting svd200_model.py — scikit-learn 1.5.0
+[LOG 2026-10-07 00:58:34 -03-0300] (elapsed 0.0s) Loading existing combined file 'CIC-IDS-2018-Combined.csv'...
+[LOG 2026-10-07 00:58:40 -03-0300] (elapsed 5.8s) Loaded 16232943 rows from 'CIC-IDS-2018-Combined.csv'.
+[LOG 2026-10-07 00:58:40 -03-0300] (elapsed 5.8s) Cleaning column names and dropping NaN/Inf rows...
+[LOG 2026-10-07 00:58:49 -03-0300] (elapsed 15.0s) Dropped 0 rows with NaN/Inf. Remaining: 16232943 rows.
+[LOG 2026-10-07 00:58:54 -03-0300] (elapsed 20.5s) Label distribution — benign: 13484708, attack: 2748235
+[LOG 2026-10-07 00:58:54 -03-0300] (elapsed 20.5s) Splitting data 80/20 (stratified)...
+[LOG 2026-10-07 00:59:16 -03-0300] (elapsed 41.9s) Train: 12986354, Test: 3246589.
+Applying preprocessing (MinMaxScaler and OneHotEncoder)...
+[LOG 2026-10-07 00:59:16 -03-0300] (elapsed 41.9s) Fitting preprocessor on training data...
+[LOG 2026-10-07 00:59:36 -03-0300] (elapsed 62.4s) Preprocessing done. X_train: (12986354, 64539), X_test: (3246589, 64539) (sparse)
+[LOG 2026-10-07 00:59:37 -03-0300] (elapsed 63.5s) Preprocessor saved to 'preprocessor_cic_ids_2018.pkl'.
+
+                        Config |                Phase |    Wall Time
+----------------------------------------------------------------------
+[LOG 2026-10-07 00:59:37 -03-0300] (elapsed 63.5s) Applying TruncatedSVD: 64539 → 200 components...
+[LOG 2026-10-07 00:59:37 -03-0300] (elapsed 63.5s) Subsampling 500,000 rows from 12,986,354 for SVD fitting...
+[LOG 2026-10-07 01:00:00 -03-0300] (elapsed 86.2s) SVD fitted on subsample.
+[LOG 2026-10-07 01:00:00 -03-0300] (elapsed 86.2s) Transforming training data in chunks of 500,000...
+
+######################################################################
+# finished: 2026-10-07T01:00:22.765025-03:00
+# exit_code: -9
+# wall_time_s: 114.928

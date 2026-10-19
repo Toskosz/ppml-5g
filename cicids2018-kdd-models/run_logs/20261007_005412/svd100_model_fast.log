@@ -1,0 +1,69 @@
+# script: svd100_model_fast.py
+# started: 2026-10-07T01:00:22.773590-03:00
+######################################################################
+[LOG 2026-10-07 01:00:29 -03-0300] (elapsed 0.0s) Starting model.py — scikit-learn 1.5.0
+[LOG 2026-10-07 01:00:29 -03-0300] (elapsed 0.0s) Loading existing combined file 'CIC-IDS-2018-Combined.csv'...
+[LOG 2026-10-07 01:00:35 -03-0300] (elapsed 5.8s) Loaded 16232943 rows from 'CIC-IDS-2018-Combined.csv'.
+[LOG 2026-10-07 01:00:35 -03-0300] (elapsed 5.8s) Cleaning column names and dropping NaN/Inf rows...
+[LOG 2026-10-07 01:00:44 -03-0300] (elapsed 15.0s) Dropped 0 rows with NaN/Inf. Remaining: 16232943 rows.
+[LOG 2026-10-07 01:00:49 -03-0300] (elapsed 20.5s) Label distribution — benign: 13484708, attack: 2748235
+[LOG 2026-10-07 01:00:49 -03-0300] (elapsed 20.5s) Splitting data 80/20 (stratified)...
+[LOG 2026-10-07 01:01:11 -03-0300] (elapsed 42.6s) Train: 12986354, Test: 3246589.
+Applying preprocessing (MinMaxScaler and OneHotEncoder)...
+[LOG 2026-10-07 01:01:11 -03-0300] (elapsed 42.6s) Fitting preprocessor on training data...
+[LOG 2026-10-07 01:01:32 -03-0300] (elapsed 63.6s) Preprocessing done. X_train: (12986354, 64539), X_test: (3246589, 64539) (sparse)
+[LOG 2026-10-07 01:01:33 -03-0300] (elapsed 64.7s) Preprocessor saved to 'preprocessor_cic_ids_2018.pkl'.
+
+                        Config |                Phase |    Wall Time
+----------------------------------------------------------------------
+[LOG 2026-10-07 01:01:33 -03-0300] (elapsed 64.7s) Applying TruncatedSVD: 64539 → 100 components  [SVD group 1/1]...
+[LOG 2026-10-07 01:01:33 -03-0300] (elapsed 64.7s) Subsampling 500,000 rows from 12,986,354 for SVD fitting...
+[LOG 2026-10-07 01:01:47 -03-0300] (elapsed 77.9s) Transforming training data in chunks of 500,000...
+[LOG 2026-10-07 01:01:58 -03-0300] (elapsed 88.8s) Transforming test data in chunks of 500,000...
+[LOG 2026-10-07 01:02:00 -03-0300] (elapsed 91.5s) SVD done. X_train: (12986354, 100), X_test: (3246589, 100). Explained variance ratio sum: 0.8965
+[LOG 2026-10-07 01:02:00 -03-0300] (elapsed 91.6s) SVD saved to 'svd_cic_ids_2018_100.pkl'.
+[LOG 2026-10-07 01:02:00 -03-0300] (elapsed 91.6s) Final training data: (12986354, 100), testing data: (3246589, 100)
+
+######################################################################
+#  PHASE 1: PLAINTEXT TRAINING & EVALUATION  (SVD 100)
+######################################################################
+
+============================================================
+  CONFIG 1/4: n_estimators=2, max_depth=2, svd=100
+============================================================
+[LOG 2026-10-07 01:02:00 -03-0300] (elapsed 91.6s) [n=2, d=2, svd=100] Training RandomForestClassifier...
+[LOG 2026-10-07 01:02:54 -03-0300] (elapsed 145.2s) [n=2, d=2, svd=100] Training completed in 53.7s
+[LOG 2026-10-07 01:02:54 -03-0300] (elapsed 145.2s) [n=2, d=2, svd=100] Starting clear (plaintext) prediction on 3246589 samples...
+[LOG 2026-10-07 01:03:04 -03-0300] (elapsed 154.9s) [n=2, d=2, svd=100] Clear prediction completed in 9.7s
+[LOG 2026-10-07 01:03:04 -03-0300] (elapsed 154.9s) [n=2, d=2, svd=100] Plaintext metrics:
+--- Model Evaluation ---
+Accuracy: 0.8512
+Precision: 0.9985
+Recall: 0.1213
+F1-Score: 0.2163
+
+--- Confusion Matrix ---
+[[2696843      99]
+ [ 482985   66662]]
+
+--- Classification Report ---
+              precision    recall  f1-score   support
+
+           0       0.85      1.00      0.92   2696942
+           1       1.00      0.12      0.22    549647
+
+    accuracy                           0.85   3246589
+   macro avg       0.92      0.56      0.57   3246589
+weighted avg       0.87      0.85      0.80   3246589
+
+[LOG 2026-10-07 01:03:18 -03-0300] (elapsed 169.0s) [n=2, d=2, svd=100] Plaintext model saved to 'plaintext_model_2_estimators_2_depth_svd_100.json'.
+
+============================================================
+  CONFIG 2/4: n_estimators=2, max_depth=4, svd=100
+============================================================
+[LOG 2026-10-07 01:03:18 -03-0300] (elapsed 169.0s) [n=2, d=4, svd=100] Training RandomForestClassifier...
+
+######################################################################
+# finished: 2026-10-07T01:05:27.985328-03:00
+# exit_code: -9
+# wall_time_s: 305.210

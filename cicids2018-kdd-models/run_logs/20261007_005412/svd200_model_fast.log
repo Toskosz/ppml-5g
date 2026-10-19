@@ -1,0 +1,27 @@
+# script: svd200_model_fast.py
+# started: 2026-10-07T01:05:27.993258-03:00
+######################################################################
+[LOG 2026-10-07 01:05:34 -03-0300] (elapsed 0.0s) Starting svd200_model.py — scikit-learn 1.5.0
+[LOG 2026-10-07 01:05:34 -03-0300] (elapsed 0.0s) Loading existing combined file 'CIC-IDS-2018-Combined.csv'...
+[LOG 2026-10-07 01:05:40 -03-0300] (elapsed 5.9s) Loaded 16232943 rows from 'CIC-IDS-2018-Combined.csv'.
+[LOG 2026-10-07 01:05:40 -03-0300] (elapsed 5.9s) Cleaning column names and dropping NaN/Inf rows...
+[LOG 2026-10-07 01:05:49 -03-0300] (elapsed 15.0s) Dropped 0 rows with NaN/Inf. Remaining: 16232943 rows.
+[LOG 2026-10-07 01:05:55 -03-0300] (elapsed 20.5s) Label distribution — benign: 13484708, attack: 2748235
+[LOG 2026-10-07 01:05:55 -03-0300] (elapsed 20.5s) Splitting data 80/20 (stratified)...
+[LOG 2026-10-07 01:06:16 -03-0300] (elapsed 42.1s) Train: 12986354, Test: 3246589.
+Applying preprocessing (MinMaxScaler and OneHotEncoder)...
+[LOG 2026-10-07 01:06:16 -03-0300] (elapsed 42.1s) Fitting preprocessor on training data...
+[LOG 2026-10-07 01:06:37 -03-0300] (elapsed 62.8s) Preprocessing done. X_train: (12986354, 64539), X_test: (3246589, 64539) (sparse)
+[LOG 2026-10-07 01:06:38 -03-0300] (elapsed 63.9s) Preprocessor saved to 'preprocessor_cic_ids_2018.pkl'.
+
+                        Config |                Phase |    Wall Time
+----------------------------------------------------------------------
+[LOG 2026-10-07 01:06:38 -03-0300] (elapsed 63.9s) Applying TruncatedSVD: 64539 → 200 components...
+[LOG 2026-10-07 01:06:38 -03-0300] (elapsed 63.9s) Subsampling 500,000 rows from 12,986,354 for SVD fitting...
+[LOG 2026-10-07 01:07:00 -03-0300] (elapsed 86.2s) SVD fitted on subsample.
+[LOG 2026-10-07 01:07:00 -03-0300] (elapsed 86.2s) Transforming training data in chunks of 500,000...
+
+######################################################################
+# finished: 2026-10-07T01:07:20.736731-03:00
+# exit_code: -9
+# wall_time_s: 112.742

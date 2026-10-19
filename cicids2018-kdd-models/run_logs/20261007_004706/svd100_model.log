@@ -1,0 +1,83 @@
+# script: svd100_model.py
+# started: 2026-10-07T00:47:06.137256-03:00
+######################################################################
+[LOG 2026-10-07 00:47:09 -03-0300] (elapsed 0.0s) Starting model.py — scikit-learn 1.5.0
+[LOG 2026-10-07 00:47:09 -03-0300] (elapsed 0.0s) No combined file found. Assembling data from 'CIC-IDS-2018' folder...
+[LOG 2026-10-07 00:47:09 -03-0300] (elapsed 0.0s) Found 10 CSV files. Reading one at a time (needed columns only)...
+[LOG 2026-10-07 00:47:09 -03-0300] (elapsed 0.0s)   Reading file 1/10: Friday-02-03-2018_TrafficForML_CICFlowMeter.csv...
+[LOG 2026-10-07 00:47:14 -03-0300] (elapsed 4.8s)   Reading file 2/10: Friday-16-02-2018_TrafficForML_CICFlowMeter.csv...
+[LOG 2026-10-07 00:47:22 -03-0300] (elapsed 13.6s)   Reading file 3/10: Friday-23-02-2018_TrafficForML_CICFlowMeter.csv...
+[LOG 2026-10-07 00:47:27 -03-0300] (elapsed 18.5s)   Reading file 4/10: Thuesday-20-02-2018_TrafficForML_CICFlowMeter.csv...
+[LOG 2026-10-07 00:48:17 -03-0300] (elapsed 67.9s)   Reading file 5/10: Thursday-01-03-2018_TrafficForML_CICFlowMeter.csv...
+[LOG 2026-10-07 00:48:20 -03-0300] (elapsed 70.7s)   Reading file 6/10: Thursday-15-02-2018_TrafficForML_CICFlowMeter.csv...
+[LOG 2026-10-07 00:48:24 -03-0300] (elapsed 75.6s)   Reading file 7/10: Thursday-22-02-2018_TrafficForML_CICFlowMeter.csv...
+[LOG 2026-10-07 00:48:29 -03-0300] (elapsed 80.6s)   Reading file 8/10: Wednesday-14-02-2018_TrafficForML_CICFlowMeter.csv...
+[LOG 2026-10-07 00:48:34 -03-0300] (elapsed 85.3s)   Reading file 9/10: Wednesday-21-02-2018_TrafficForML_CICFlowMeter.csv...
+[LOG 2026-10-07 00:48:39 -03-0300] (elapsed 90.0s)   Reading file 10/10: Wednesday-28-02-2018_TrafficForML_CICFlowMeter.csv...
+[LOG 2026-10-07 00:48:44 -03-0300] (elapsed 94.8s) Combined 10 files → 16232943 rows.
+[LOG 2026-10-07 00:48:44 -03-0300] (elapsed 94.8s) Saved combined data to 'CIC-IDS-2018-Combined.csv'.
+[LOG 2026-10-07 00:48:44 -03-0300] (elapsed 94.8s) Loading combined file 'CIC-IDS-2018-Combined.csv'...
+[LOG 2026-10-07 00:48:49 -03-0300] (elapsed 100.5s) Loaded 16232943 rows from 'CIC-IDS-2018-Combined.csv'.
+[LOG 2026-10-07 00:48:49 -03-0300] (elapsed 100.5s) Cleaning column names and dropping NaN/Inf rows...
+[LOG 2026-10-07 00:48:58 -03-0300] (elapsed 109.6s) Dropped 0 rows with NaN/Inf. Remaining: 16232943 rows.
+[LOG 2026-10-07 00:49:04 -03-0300] (elapsed 115.1s) Label distribution — benign: 13484708, attack: 2748235
+[LOG 2026-10-07 00:49:04 -03-0300] (elapsed 115.1s) Splitting data 80/20 (stratified)...
+[LOG 2026-10-07 00:49:26 -03-0300] (elapsed 136.7s) Train: 12986354, Test: 3246589.
+Applying preprocessing (MinMaxScaler and OneHotEncoder)...
+[LOG 2026-10-07 00:49:26 -03-0300] (elapsed 136.8s) Fitting preprocessor on training data...
+[LOG 2026-10-07 00:49:47 -03-0300] (elapsed 157.7s) Preprocessing done. X_train: (12986354, 64539), X_test: (3246589, 64539) (sparse)
+[LOG 2026-10-07 00:49:48 -03-0300] (elapsed 158.8s) Preprocessor saved to 'preprocessor_cic_ids_2018.pkl'.
+
+                        Config |                Phase |    Wall Time
+----------------------------------------------------------------------
+[LOG 2026-10-07 00:49:48 -03-0300] (elapsed 158.8s) Applying TruncatedSVD: 64539 → 100 components  [SVD group 1/1]...
+[LOG 2026-10-07 00:49:48 -03-0300] (elapsed 158.8s) Subsampling 500,000 rows from 12,986,354 for SVD fitting...
+[LOG 2026-10-07 00:50:00 -03-0300] (elapsed 171.1s) Transforming training data in chunks of 500,000...
+[LOG 2026-10-07 00:50:10 -03-0300] (elapsed 181.3s) Transforming test data in chunks of 500,000...
+[LOG 2026-10-07 00:50:13 -03-0300] (elapsed 183.7s) SVD done. X_train: (12986354, 100), X_test: (3246589, 100). Explained variance ratio sum: 0.8958
+[LOG 2026-10-07 00:50:13 -03-0300] (elapsed 183.7s) SVD saved to 'svd_cic_ids_2018_100.pkl'.
+[LOG 2026-10-07 00:50:13 -03-0300] (elapsed 183.7s) Final training data: (12986354, 100), testing data: (3246589, 100)
+
+######################################################################
+#  PHASE 1: PLAINTEXT TRAINING & EVALUATION  (SVD 100)
+######################################################################
+
+============================================================
+  CONFIG 1/4: n_estimators=2, max_depth=2, svd=100
+============================================================
+[LOG 2026-10-07 00:50:13 -03-0300] (elapsed 183.7s) [n=2, d=2, svd=100] Training RandomForestClassifier...
+[LOG 2026-10-07 00:51:08 -03-0300] (elapsed 238.7s) [n=2, d=2, svd=100] Training completed in 55.0s
+[LOG 2026-10-07 00:51:08 -03-0300] (elapsed 238.7s) [n=2, d=2, svd=100] Starting clear (plaintext) prediction on 3246589 samples...
+[LOG 2026-10-07 00:51:17 -03-0300] (elapsed 248.4s) [n=2, d=2, svd=100] Clear prediction completed in 9.6s
+[LOG 2026-10-07 00:51:17 -03-0300] (elapsed 248.4s) [n=2, d=2, svd=100] Plaintext metrics:
+--- Model Evaluation ---
+Accuracy: 0.8775
+Precision: 0.6679
+Recall: 0.5502
+F1-Score: 0.6033
+
+--- Confusion Matrix ---
+[[2546579  150363]
+ [ 247250  302397]]
+
+--- Classification Report ---
+              precision    recall  f1-score   support
+
+           0       0.91      0.94      0.93   2696942
+           1       0.67      0.55      0.60    549647
+
+    accuracy                           0.88   3246589
+   macro avg       0.79      0.75      0.77   3246589
+weighted avg       0.87      0.88      0.87   3246589
+
+[LOG 2026-10-07 00:51:32 -03-0300] (elapsed 262.9s) [n=2, d=2, svd=100] Plaintext model saved to 'plaintext_model_2_estimators_2_depth_svd_100.json'.
+
+============================================================
+  CONFIG 2/4: n_estimators=2, max_depth=4, svd=100
+============================================================
+[LOG 2026-10-07 00:51:32 -03-0300] (elapsed 262.9s) [n=2, d=4, svd=100] Training RandomForestClassifier...
+
+######################################################################
+# finished: 2026-10-07T00:52:41.641459-03:00
+# exit_code: -9
+# wall_time_s: 335.497

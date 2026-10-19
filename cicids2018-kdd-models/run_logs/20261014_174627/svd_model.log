@@ -1,0 +1,302 @@
+# script: svd_model.py
+# started: 2026-10-14T17:46:27.400585-03:00
+######################################################################
+[LOG 2026-10-14 17:46:30 -03-0300] (elapsed 0.0s) Starting svd_model.py — scikit-learn 1.5.0
+[LOG 2026-10-14 17:46:30 -03-0300] (elapsed 0.0s) Loading existing combined file 'CIC-IDS-2018-Combined.csv'...
+[LOG 2026-10-14 17:46:37 -03-0300] (elapsed 6.2s) Loaded 16232943 rows from 'CIC-IDS-2018-Combined.csv'.
+[LOG 2026-10-14 17:46:37 -03-0300] (elapsed 6.2s) Cleaning column names and dropping NaN/Inf rows...
+[LOG 2026-10-14 17:46:47 -03-0300] (elapsed 16.7s) Dropped 0 rows with NaN/Inf. Remaining: 16232943 rows.
+[LOG 2026-10-14 17:46:53 -03-0300] (elapsed 22.6s) Label distribution — benign: 13484708, attack: 2748235
+[LOG 2026-10-14 17:46:53 -03-0300] (elapsed 22.6s) Splitting data 80/20 (stratified)...
+[LOG 2026-10-14 17:47:17 -03-0300] (elapsed 46.6s) Train: 12986354, Test: 3246589.
+Applying preprocessing (MinMaxScaler and OneHotEncoder)...
+[LOG 2026-10-14 17:47:17 -03-0300] (elapsed 46.6s) Loading existing preprocessor from 'preprocessor_cic_ids_2018.pkl'.
+[LOG 2026-10-14 17:47:41 -03-0300] (elapsed 70.5s) Preprocessing done. X_train: (12986354, 64539), X_test: (3246589, 64539) (sparse)
+[LOG 2026-10-14 17:47:42 -03-0300] (elapsed 72.2s) Released raw tables and fitted preprocessor.
+
+                        Config |                Phase |    Wall Time
+----------------------------------------------------------------------
+[LOG 2026-10-14 17:47:42 -03-0300] (elapsed 72.2s) SVD 15 artifacts already complete. Skipping projection.
+[LOG 2026-10-14 17:47:42 -03-0300] (elapsed 72.2s) SVD 25 artifacts already complete. Skipping projection.
+[LOG 2026-10-14 17:47:42 -03-0300] (elapsed 72.2s) SVD 40 artifacts already complete. Skipping projection.
+[LOG 2026-10-14 17:47:42 -03-0300] (elapsed 72.2s) Loading existing SVD from 'svd_cic_ids_2018_100.pkl'.
+[LOG 2026-10-14 17:47:43 -03-0300] (elapsed 72.2s) Projecting 12,986,354 x 64,539 -> 100 components in chunks of 50,000...
+[LOG 2026-10-14 17:47:43 -03-0300] (elapsed 72.3s) Projected rows 50,000 / 12,986,354
+[LOG 2026-10-14 17:47:43 -03-0300] (elapsed 72.5s) Projected rows 1,050,000 / 12,986,354
+[LOG 2026-10-14 17:47:43 -03-0300] (elapsed 72.7s) Projected rows 2,050,000 / 12,986,354
+[LOG 2026-10-14 17:47:43 -03-0300] (elapsed 72.9s) Projected rows 3,050,000 / 12,986,354
+[LOG 2026-10-14 17:47:44 -03-0300] (elapsed 73.2s) Projected rows 4,050,000 / 12,986,354
+[LOG 2026-10-14 17:47:44 -03-0300] (elapsed 73.5s) Projected rows 5,050,000 / 12,986,354
+[LOG 2026-10-14 17:47:44 -03-0300] (elapsed 73.8s) Projected rows 6,050,000 / 12,986,354
+[LOG 2026-10-14 17:47:44 -03-0300] (elapsed 74.0s) Projected rows 7,050,000 / 12,986,354
+[LOG 2026-10-14 17:47:45 -03-0300] (elapsed 74.3s) Projected rows 8,050,000 / 12,986,354
+[LOG 2026-10-14 17:47:45 -03-0300] (elapsed 74.7s) Projected rows 9,050,000 / 12,986,354
+[LOG 2026-10-14 17:47:45 -03-0300] (elapsed 75.1s) Projected rows 10,050,000 / 12,986,354
+[LOG 2026-10-14 17:47:46 -03-0300] (elapsed 75.5s) Projected rows 11,050,000 / 12,986,354
+[LOG 2026-10-14 17:47:46 -03-0300] (elapsed 75.9s) Projected rows 12,050,000 / 12,986,354
+[LOG 2026-10-14 17:47:47 -03-0300] (elapsed 76.3s) Writing (12986354, 100) float32 projection (5.19 GB) to 'X_train_svd_100.npy'...
+[LOG 2026-10-14 17:47:51 -03-0300] (elapsed 80.6s) Projecting 3,246,589 x 64,539 -> 100 components in chunks of 50,000...
+[LOG 2026-10-14 17:47:51 -03-0300] (elapsed 80.6s) Projected rows 50,000 / 3,246,589
+[LOG 2026-10-14 17:47:51 -03-0300] (elapsed 80.9s) Projected rows 1,050,000 / 3,246,589
+[LOG 2026-10-14 17:47:51 -03-0300] (elapsed 81.2s) Projected rows 2,050,000 / 3,246,589
+[LOG 2026-10-14 17:47:52 -03-0300] (elapsed 81.4s) Projected rows 3,050,000 / 3,246,589
+[LOG 2026-10-14 17:47:52 -03-0300] (elapsed 81.6s) Writing (3246589, 100) float32 projection (1.30 GB) to 'X_test_svd_100.npy'...
+[LOG 2026-10-14 17:47:53 -03-0300] (elapsed 82.6s) SVD 100 projections stored. Explained variance ratio sum: 0.8962
+[LOG 2026-10-14 17:47:53 -03-0300] (elapsed 82.8s) Released one-hot matrices before training and FHE compilation.
+[LOG 2026-10-14 17:47:53 -03-0300] (elapsed 82.8s) SVD 15 artifacts already complete. Skipping plaintext training and FHE compilation.
+
+######################################################################
+#  PHASE 1: PLAINTEXT TRAINING & EVALUATION  (SVD 15)
+######################################################################
+
+============================================================
+  CONFIG 1/13: n_estimators=2, max_depth=2, svd=15
+============================================================
+[LOG 2026-10-14 17:47:53 -03-0300] (elapsed 82.8s) [n=2, d=2, svd=15] Reusing plaintext model 'plaintext_model_2_estimators_2_depth_svd_15.json'.
+
+============================================================
+  CONFIG 2/13: n_estimators=2, max_depth=4, svd=15
+============================================================
+[LOG 2026-10-14 17:47:53 -03-0300] (elapsed 82.8s) [n=2, d=4, svd=15] Reusing plaintext model 'plaintext_model_2_estimators_4_depth_svd_15.json'.
+
+============================================================
+  CONFIG 3/13: n_estimators=4, max_depth=2, svd=15
+============================================================
+[LOG 2026-10-14 17:47:53 -03-0300] (elapsed 82.8s) [n=4, d=2, svd=15] Reusing plaintext model 'plaintext_model_4_estimators_2_depth_svd_15.json'.
+
+============================================================
+  CONFIG 4/13: n_estimators=4, max_depth=4, svd=15
+============================================================
+[LOG 2026-10-14 17:47:53 -03-0300] (elapsed 82.8s) [n=4, d=4, svd=15] Reusing plaintext model 'plaintext_model_4_estimators_4_depth_svd_15.json'.
+
+======================================================================
+  PLAINTEXT SUMMARY  (SVD 15)
+======================================================================
+                        Config |  Train (s) |  Predict (s)
+------------------------------------------------------------
+              n=2, d=2, svd=15 |     cached |       cached
+              n=2, d=4, svd=15 |     cached |       cached
+              n=4, d=2, svd=15 |     cached |       cached
+              n=4, d=4, svd=15 |     cached |       cached
+
+[LOG 2026-10-14 17:47:53 -03-0300] (elapsed 82.8s) Phase 1 complete for SVD 15 — reused saved plaintext models.
+
+######################################################################
+#  PHASE 2: FHE COMPILATION & SIMULATION  (SVD 15)
+######################################################################
+
+============================================================
+  FHE for CONFIG 1/13: n_estimators=2, max_depth=2, svd=15
+============================================================
+[LOG 2026-10-14 17:47:53 -03-0300] (elapsed 82.8s) [n=2, d=2, svd=15] Reusing compiled FHE circuit './fhe_model_2_estimators_2_depth_svd_15_components' (device=cpu).
+
+============================================================
+  FHE for CONFIG 2/13: n_estimators=2, max_depth=4, svd=15
+============================================================
+[LOG 2026-10-14 17:47:53 -03-0300] (elapsed 82.8s) [n=2, d=4, svd=15] Reusing compiled FHE circuit './fhe_model_2_estimators_4_depth_svd_15_components' (device=cpu).
+
+============================================================
+  FHE for CONFIG 3/13: n_estimators=4, max_depth=2, svd=15
+============================================================
+[LOG 2026-10-14 17:47:53 -03-0300] (elapsed 82.8s) [n=4, d=2, svd=15] Reusing compiled FHE circuit './fhe_model_4_estimators_2_depth_svd_15_components' (device=cpu).
+
+============================================================
+  FHE for CONFIG 4/13: n_estimators=4, max_depth=4, svd=15
+============================================================
+[LOG 2026-10-14 17:47:53 -03-0300] (elapsed 82.8s) [n=4, d=4, svd=15] Reusing compiled FHE circuit './fhe_model_4_estimators_4_depth_svd_15_components' (device=cpu).
+
+======================================================================
+  FHE SUMMARY  (SVD 15)
+======================================================================
+                        Config | Device |  Train (s) |  Predict (s) |  Compile (s) |  FHE Sim (s) |    Enc (s) |    Inf (s) |    Dec (s)
+--------------------------------------------------------------------------------------------------------------------------------------------
+              n=2, d=2, svd=15 |    cpu |     cached |       cached |       cached |       cached |     cached |     cached |     cached
+              n=2, d=4, svd=15 |    cpu |     cached |       cached |       cached |       cached |     cached |     cached |     cached
+              n=4, d=2, svd=15 |    cpu |     cached |       cached |       cached |       cached |     cached |     cached |     cached
+              n=4, d=4, svd=15 |    cpu |     cached |       cached |       cached |       cached |     cached |     cached |     cached
+
+[LOG 2026-10-14 17:47:53 -03-0300] (elapsed 82.8s) FHE phase complete for SVD 15.
+[LOG 2026-10-14 17:47:53 -03-0300] (elapsed 82.8s) SVD 25 artifacts already complete. Skipping plaintext training and FHE compilation.
+
+######################################################################
+#  PHASE 1: PLAINTEXT TRAINING & EVALUATION  (SVD 25)
+######################################################################
+
+============================================================
+  CONFIG 5/13: n_estimators=2, max_depth=2, svd=25
+============================================================
+[LOG 2026-10-14 17:47:53 -03-0300] (elapsed 82.8s) [n=2, d=2, svd=25] Reusing plaintext model 'plaintext_model_2_estimators_2_depth_svd_25.json'.
+
+============================================================
+  CONFIG 6/13: n_estimators=2, max_depth=4, svd=25
+============================================================
+[LOG 2026-10-14 17:47:53 -03-0300] (elapsed 82.8s) [n=2, d=4, svd=25] Reusing plaintext model 'plaintext_model_2_estimators_4_depth_svd_25.json'.
+
+============================================================
+  CONFIG 7/13: n_estimators=4, max_depth=2, svd=25
+============================================================
+[LOG 2026-10-14 17:47:53 -03-0300] (elapsed 82.8s) [n=4, d=2, svd=25] Reusing plaintext model 'plaintext_model_4_estimators_2_depth_svd_25.json'.
+
+============================================================
+  CONFIG 8/13: n_estimators=4, max_depth=4, svd=25
+============================================================
+[LOG 2026-10-14 17:47:53 -03-0300] (elapsed 82.8s) [n=4, d=4, svd=25] Reusing plaintext model 'plaintext_model_4_estimators_4_depth_svd_25.json'.
+
+======================================================================
+  PLAINTEXT SUMMARY  (SVD 25)
+======================================================================
+                        Config |  Train (s) |  Predict (s)
+------------------------------------------------------------
+              n=2, d=2, svd=25 |     cached |       cached
+              n=2, d=4, svd=25 |     cached |       cached
+              n=4, d=2, svd=25 |     cached |       cached
+              n=4, d=4, svd=25 |     cached |       cached
+
+[LOG 2026-10-14 17:47:53 -03-0300] (elapsed 82.8s) Phase 1 complete for SVD 25 — reused saved plaintext models.
+
+######################################################################
+#  PHASE 2: FHE COMPILATION & SIMULATION  (SVD 25)
+######################################################################
+
+============================================================
+  FHE for CONFIG 5/13: n_estimators=2, max_depth=2, svd=25
+============================================================
+[LOG 2026-10-14 17:47:53 -03-0300] (elapsed 82.8s) [n=2, d=2, svd=25] Reusing compiled FHE circuit './fhe_model_2_estimators_2_depth_svd_25_components' (device=cpu).
+
+============================================================
+  FHE for CONFIG 6/13: n_estimators=2, max_depth=4, svd=25
+============================================================
+[LOG 2026-10-14 17:47:53 -03-0300] (elapsed 82.8s) [n=2, d=4, svd=25] Reusing compiled FHE circuit './fhe_model_2_estimators_4_depth_svd_25_components' (device=cpu).
+
+============================================================
+  FHE for CONFIG 7/13: n_estimators=4, max_depth=2, svd=25
+============================================================
+[LOG 2026-10-14 17:47:53 -03-0300] (elapsed 82.8s) [n=4, d=2, svd=25] Reusing compiled FHE circuit './fhe_model_4_estimators_2_depth_svd_25_components' (device=cpu).
+
+============================================================
+  FHE for CONFIG 8/13: n_estimators=4, max_depth=4, svd=25
+============================================================
+[LOG 2026-10-14 17:47:53 -03-0300] (elapsed 82.8s) [n=4, d=4, svd=25] Reusing compiled FHE circuit './fhe_model_4_estimators_4_depth_svd_25_components' (device=cpu).
+
+======================================================================
+  FHE SUMMARY  (SVD 25)
+======================================================================
+                        Config | Device |  Train (s) |  Predict (s) |  Compile (s) |  FHE Sim (s) |    Enc (s) |    Inf (s) |    Dec (s)
+--------------------------------------------------------------------------------------------------------------------------------------------
+              n=2, d=2, svd=25 |    cpu |     cached |       cached |       cached |       cached |     cached |     cached |     cached
+              n=2, d=4, svd=25 |    cpu |     cached |       cached |       cached |       cached |     cached |     cached |     cached
+              n=4, d=2, svd=25 |    cpu |     cached |       cached |       cached |       cached |     cached |     cached |     cached
+              n=4, d=4, svd=25 |    cpu |     cached |       cached |       cached |       cached |     cached |     cached |     cached
+
+[LOG 2026-10-14 17:47:53 -03-0300] (elapsed 82.8s) FHE phase complete for SVD 25.
+[LOG 2026-10-14 17:47:53 -03-0300] (elapsed 82.8s) SVD 40 artifacts already complete. Skipping plaintext training and FHE compilation.
+
+######################################################################
+#  PHASE 1: PLAINTEXT TRAINING & EVALUATION  (SVD 40)
+######################################################################
+
+============================================================
+  CONFIG 9/13: n_estimators=2, max_depth=2, svd=40
+============================================================
+[LOG 2026-10-14 17:47:53 -03-0300] (elapsed 82.8s) [n=2, d=2, svd=40] Reusing plaintext model 'plaintext_model_2_estimators_2_depth_svd_40.json'.
+
+============================================================
+  CONFIG 10/13: n_estimators=2, max_depth=4, svd=40
+============================================================
+[LOG 2026-10-14 17:47:53 -03-0300] (elapsed 82.8s) [n=2, d=4, svd=40] Reusing plaintext model 'plaintext_model_2_estimators_4_depth_svd_40.json'.
+
+============================================================
+  CONFIG 11/13: n_estimators=4, max_depth=2, svd=40
+============================================================
+[LOG 2026-10-14 17:47:53 -03-0300] (elapsed 82.8s) [n=4, d=2, svd=40] Reusing plaintext model 'plaintext_model_4_estimators_2_depth_svd_40.json'.
+
+============================================================
+  CONFIG 12/13: n_estimators=4, max_depth=4, svd=40
+============================================================
+[LOG 2026-10-14 17:47:53 -03-0300] (elapsed 82.8s) [n=4, d=4, svd=40] Reusing plaintext model 'plaintext_model_4_estimators_4_depth_svd_40.json'.
+
+======================================================================
+  PLAINTEXT SUMMARY  (SVD 40)
+======================================================================
+                        Config |  Train (s) |  Predict (s)
+------------------------------------------------------------
+              n=2, d=2, svd=40 |     cached |       cached
+              n=2, d=4, svd=40 |     cached |       cached
+              n=4, d=2, svd=40 |     cached |       cached
+              n=4, d=4, svd=40 |     cached |       cached
+
+[LOG 2026-10-14 17:47:53 -03-0300] (elapsed 82.8s) Phase 1 complete for SVD 40 — reused saved plaintext models.
+
+######################################################################
+#  PHASE 2: FHE COMPILATION & SIMULATION  (SVD 40)
+######################################################################
+
+============================================================
+  FHE for CONFIG 9/13: n_estimators=2, max_depth=2, svd=40
+============================================================
+[LOG 2026-10-14 17:47:53 -03-0300] (elapsed 82.8s) [n=2, d=2, svd=40] Reusing compiled FHE circuit './fhe_model_2_estimators_2_depth_svd_40_components' (device=cpu).
+
+============================================================
+  FHE for CONFIG 10/13: n_estimators=2, max_depth=4, svd=40
+============================================================
+[LOG 2026-10-14 17:47:53 -03-0300] (elapsed 82.8s) [n=2, d=4, svd=40] Reusing compiled FHE circuit './fhe_model_2_estimators_4_depth_svd_40_components' (device=cpu).
+
+============================================================
+  FHE for CONFIG 11/13: n_estimators=4, max_depth=2, svd=40
+============================================================
+[LOG 2026-10-14 17:47:53 -03-0300] (elapsed 82.8s) [n=4, d=2, svd=40] Reusing compiled FHE circuit './fhe_model_4_estimators_2_depth_svd_40_components' (device=cpu).
+
+============================================================
+  FHE for CONFIG 12/13: n_estimators=4, max_depth=4, svd=40
+============================================================
+[LOG 2026-10-14 17:47:53 -03-0300] (elapsed 82.8s) [n=4, d=4, svd=40] Reusing compiled FHE circuit './fhe_model_4_estimators_4_depth_svd_40_components' (device=cpu).
+
+======================================================================
+  FHE SUMMARY  (SVD 40)
+======================================================================
+                        Config | Device |  Train (s) |  Predict (s) |  Compile (s) |  FHE Sim (s) |    Enc (s) |    Inf (s) |    Dec (s)
+--------------------------------------------------------------------------------------------------------------------------------------------
+              n=2, d=2, svd=40 |    cpu |     cached |       cached |       cached |       cached |     cached |     cached |     cached
+              n=2, d=4, svd=40 |    cpu |     cached |       cached |       cached |       cached |     cached |     cached |     cached
+              n=4, d=2, svd=40 |    cpu |     cached |       cached |       cached |       cached |     cached |     cached |     cached
+              n=4, d=4, svd=40 |    cpu |     cached |       cached |       cached |       cached |     cached |     cached |     cached
+
+[LOG 2026-10-14 17:47:53 -03-0300] (elapsed 82.8s) FHE phase complete for SVD 40.
+[LOG 2026-10-14 17:47:53 -03-0300] (elapsed 82.8s) SVD 100 plaintext models already saved. Skipping training.
+
+######################################################################
+#  PHASE 1: PLAINTEXT TRAINING & EVALUATION  (SVD 100)
+######################################################################
+
+============================================================
+  CONFIG 13/13: n_estimators=2, max_depth=2, svd=100
+============================================================
+[LOG 2026-10-14 17:47:53 -03-0300] (elapsed 82.8s) [n=2, d=2, svd=100] Reusing plaintext model 'plaintext_model_2_estimators_2_depth_svd_100.json'.
+
+======================================================================
+  PLAINTEXT SUMMARY  (SVD 100)
+======================================================================
+                        Config |  Train (s) |  Predict (s)
+------------------------------------------------------------
+             n=2, d=2, svd=100 |     cached |       cached
+
+[LOG 2026-10-14 17:47:53 -03-0300] (elapsed 82.8s) Phase 1 complete for SVD 100 — all plaintext variants trained and evaluated.
+
+######################################################################
+#  PHASE 2: FHE COMPILATION & SIMULATION  (SVD 100)
+######################################################################
+
+============================================================
+  FHE for CONFIG 13/13: n_estimators=2, max_depth=2, svd=100
+============================================================
+[LOG 2026-10-14 17:47:53 -03-0300] (elapsed 82.8s) [n=2, d=2, svd=100] Loading plaintext model from 'plaintext_model_2_estimators_2_depth_svd_100.json'...
+[LOG 2026-10-14 17:47:53 -03-0300] (elapsed 82.9s) [n=2, d=2, svd=100] Loading train projection for FHE compilation...
+[LOG 2026-10-14 17:47:55 -03-0300] (elapsed 85.0s) [n=2, d=2, svd=100] Compiling FHE circuit (this may take a long time)...
+[LOG 2026-10-14 17:47:55 -03-0300] (elapsed 85.0s) [n=2, d=2, svd=100] GPU status — available=False, enabled(runtime)=False
+[LOG 2026-10-14 17:47:55 -03-0300] (elapsed 85.0s) [n=2, d=2, svd=100] FHE device: cpu (auto — no CUDA GPU / GPU runtime)
+[LOG 2026-10-14 17:47:55 -03-0300] (elapsed 85.0s) [n=2, d=2, svd=100] Compiling FHE circuit with device='cpu'...
+
+######################################################################
+# finished: 2026-10-16T05:48:11.339207-03:00
+# exit_code: -9
+# wall_time_s: 129703.930

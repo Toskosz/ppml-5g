@@ -1,0 +1,1418 @@
+# script: best_model_single_record.py
+# started: 2026-10-17T20:13:21.320427-03:00
+######################################################################
+[LOG 2026-10-17 20:13:27 -03-0300] (elapsed 0.0s) Starting best_model_single_record.py — scikit-learn 1.5.0
+[LOG 2026-10-17 20:13:27 -03-0300] (elapsed 0.0s) Starting benchmark suite — 26 configurations to run
+
+######################################################################
+#  PHASE 1: PLAINTEXT INFERENCE BENCHMARK
+######################################################################
+[LOG 2026-10-17 20:13:27 -03-0300] (elapsed 0.0s) === Configuration 1/26 ===
+
+============================================================
+  PLAINTEXT CONFIG: n_estimators=2, max_depth=2, svd=15
+============================================================
+[LOG 2026-10-17 20:13:27 -03-0300] (elapsed 0.0s) [n=2, d=2, svd=15] Starting plaintext inference benchmark
+[LOG 2026-10-17 20:13:27 -03-0300] (elapsed 0.0s) [n=2, d=2, svd=15] Loading Concrete ML model from 'plaintext_model_2_estimators_2_depth_svd_15.json'...
+[LOG 2026-10-17 20:13:27 -03-0300] (elapsed 0.2s) [n=2, d=2, svd=15] Model loaded.
+[LOG 2026-10-17 20:13:27 -03-0300] (elapsed 0.2s) Loading test data once for the full benchmark...
+[LOG 2026-10-17 20:13:27 -03-0300] (elapsed 0.2s) Loading existing combined file 'CIC-IDS-2018-Combined.csv'...
+[LOG 2026-10-17 20:13:33 -03-0300] (elapsed 6.0s) Loaded 16232943 rows from 'CIC-IDS-2018-Combined.csv'.
+[LOG 2026-10-17 20:13:42 -03-0300] (elapsed 15.1s) Dropped 0 rows with NaN/Inf. Remaining: 16232943 rows.
+[LOG 2026-10-17 20:13:48 -03-0300] (elapsed 20.5s) Label distribution — benign: 13484708, attack: 2748235
+[LOG 2026-10-17 20:13:48 -03-0300] (elapsed 20.5s) Splitting data 80/20 (stratified)...
+[LOG 2026-10-17 20:14:10 -03-0300] (elapsed 43.2s) Test: 3246589. Released training split.
+[LOG 2026-10-17 20:14:16 -03-0300] (elapsed 48.5s) Sparse test matrix ready — (3246589, 64539).
+[LOG 2026-10-17 20:14:16 -03-0300] (elapsed 48.6s) Projecting test set with saved SVD from 'svd_cic_ids_2018_15.pkl'...
+[LOG 2026-10-17 20:14:16 -03-0300] (elapsed 48.6s) Projecting 3,246,589 x 64,539 -> 15 components in chunks of 50,000...
+[LOG 2026-10-17 20:14:16 -03-0300] (elapsed 48.6s) Projected rows 50,000 / 3,246,589
+[LOG 2026-10-17 20:14:16 -03-0300] (elapsed 48.7s) Projected rows 1,050,000 / 3,246,589
+[LOG 2026-10-17 20:14:16 -03-0300] (elapsed 48.8s) Projected rows 2,050,000 / 3,246,589
+[LOG 2026-10-17 20:14:16 -03-0300] (elapsed 48.8s) Projected rows 3,050,000 / 3,246,589
+[LOG 2026-10-17 20:14:16 -03-0300] (elapsed 49.0s) Test projection ready — (3246589, 15).
+[LOG 2026-10-17 20:14:16 -03-0300] (elapsed 49.0s) [n=2, d=2, svd=15] Starting clear (plaintext) prediction on 3246589 samples...
+[LOG 2026-10-17 20:14:18 -03-0300] (elapsed 50.7s) [n=2, d=2, svd=15] Clear prediction completed in 1.7s
+--- Model Evaluation ---
+Accuracy: 0.8710
+Precision: 0.9804
+Recall: 0.2432
+F1-Score: 0.3897
+
+--- Confusion Matrix ---
+[[2694266    2676]
+ [ 416000  133647]]
+
+--- Classification Report ---
+              precision    recall  f1-score   support
+
+           0       0.87      1.00      0.93   2696942
+           1       0.98      0.24      0.39    549647
+
+    accuracy                           0.87   3246589
+   macro avg       0.92      0.62      0.66   3246589
+weighted avg       0.89      0.87      0.84   3246589
+
+[LOG 2026-10-17 20:14:29 -03-0300] (elapsed 61.5s) [n=2, d=2, svd=15] Running single-record inference on 1000 records...
+[LOG 2026-10-17 20:14:29 -03-0300] (elapsed 61.6s) [n=2, d=2, svd=15] Processed 200/1000 records (avg 0.000337s/record)
+[LOG 2026-10-17 20:14:29 -03-0300] (elapsed 61.6s) [n=2, d=2, svd=15] Processed 400/1000 records (avg 0.000335s/record)
+[LOG 2026-10-17 20:14:29 -03-0300] (elapsed 61.7s) [n=2, d=2, svd=15] Processed 600/1000 records (avg 0.000333s/record)
+[LOG 2026-10-17 20:14:29 -03-0300] (elapsed 61.8s) [n=2, d=2, svd=15] Processed 800/1000 records (avg 0.000333s/record)
+[LOG 2026-10-17 20:14:29 -03-0300] (elapsed 61.8s) [n=2, d=2, svd=15] Processed 1000/1000 records (avg 0.000333s/record)
+[LOG 2026-10-17 20:14:29 -03-0300] (elapsed 61.8s) [n=2, d=2, svd=15] All 1000 single-record inferences complete.
+
+==================== PLAINTEXT LATENCY SUMMARY ====================
+Records measured: 1000
+Total inference time: 0.3327 s
+Mean inference time/record: 0.000333 s
+Std inference time/record:  0.000016 s
+======================================================================
+
+[LOG 2026-10-17 20:14:29 -03-0300] (elapsed 61.9s) === Configuration 2/26 ===
+
+============================================================
+  PLAINTEXT CONFIG: n_estimators=2, max_depth=4, svd=15
+============================================================
+[LOG 2026-10-17 20:14:29 -03-0300] (elapsed 61.9s) [n=2, d=4, svd=15] Starting plaintext inference benchmark
+[LOG 2026-10-17 20:14:29 -03-0300] (elapsed 61.9s) [n=2, d=4, svd=15] Loading Concrete ML model from 'plaintext_model_2_estimators_4_depth_svd_15.json'...
+[LOG 2026-10-17 20:14:29 -03-0300] (elapsed 62.0s) [n=2, d=4, svd=15] Model loaded.
+[LOG 2026-10-17 20:14:29 -03-0300] (elapsed 62.0s) [n=2, d=4, svd=15] Starting clear (plaintext) prediction on 3246589 samples...
+[LOG 2026-10-17 20:14:34 -03-0300] (elapsed 66.9s) [n=2, d=4, svd=15] Clear prediction completed in 4.9s
+--- Model Evaluation ---
+Accuracy: 0.9137
+Precision: 0.7396
+Recall: 0.7567
+F1-Score: 0.7481
+
+--- Confusion Matrix ---
+[[2550489  146453]
+ [ 133717  415930]]
+
+--- Classification Report ---
+              precision    recall  f1-score   support
+
+           0       0.95      0.95      0.95   2696942
+           1       0.74      0.76      0.75    549647
+
+    accuracy                           0.91   3246589
+   macro avg       0.84      0.85      0.85   3246589
+weighted avg       0.91      0.91      0.91   3246589
+
+[LOG 2026-10-17 20:14:46 -03-0300] (elapsed 78.4s) [n=2, d=4, svd=15] Running single-record inference on 1000 records...
+[LOG 2026-10-17 20:14:46 -03-0300] (elapsed 78.4s) [n=2, d=4, svd=15] Processed 200/1000 records (avg 0.000337s/record)
+[LOG 2026-10-17 20:14:46 -03-0300] (elapsed 78.5s) [n=2, d=4, svd=15] Processed 400/1000 records (avg 0.000336s/record)
+[LOG 2026-10-17 20:14:46 -03-0300] (elapsed 78.6s) [n=2, d=4, svd=15] Processed 600/1000 records (avg 0.000335s/record)
+[LOG 2026-10-17 20:14:46 -03-0300] (elapsed 78.6s) [n=2, d=4, svd=15] Processed 800/1000 records (avg 0.000335s/record)
+[LOG 2026-10-17 20:14:46 -03-0300] (elapsed 78.7s) [n=2, d=4, svd=15] Processed 1000/1000 records (avg 0.000335s/record)
+[LOG 2026-10-17 20:14:46 -03-0300] (elapsed 78.7s) [n=2, d=4, svd=15] All 1000 single-record inferences complete.
+
+==================== PLAINTEXT LATENCY SUMMARY ====================
+Records measured: 1000
+Total inference time: 0.3346 s
+Mean inference time/record: 0.000335 s
+Std inference time/record:  0.000015 s
+======================================================================
+
+[LOG 2026-10-17 20:14:46 -03-0300] (elapsed 78.8s) === Configuration 3/26 ===
+
+============================================================
+  PLAINTEXT CONFIG: n_estimators=4, max_depth=2, svd=15
+============================================================
+[LOG 2026-10-17 20:14:46 -03-0300] (elapsed 78.8s) [n=4, d=2, svd=15] Starting plaintext inference benchmark
+[LOG 2026-10-17 20:14:46 -03-0300] (elapsed 78.8s) [n=4, d=2, svd=15] Loading Concrete ML model from 'plaintext_model_4_estimators_2_depth_svd_15.json'...
+[LOG 2026-10-17 20:14:46 -03-0300] (elapsed 78.8s) [n=4, d=2, svd=15] Model loaded.
+[LOG 2026-10-17 20:14:46 -03-0300] (elapsed 78.8s) [n=4, d=2, svd=15] Starting clear (plaintext) prediction on 3246589 samples...
+[LOG 2026-10-17 20:14:49 -03-0300] (elapsed 81.4s) [n=4, d=2, svd=15] Clear prediction completed in 2.5s
+--- Model Evaluation ---
+Accuracy: 0.9048
+Precision: 0.7249
+Recall: 0.7058
+F1-Score: 0.7152
+
+--- Confusion Matrix ---
+[[2549735  147207]
+ [ 161709  387938]]
+
+--- Classification Report ---
+              precision    recall  f1-score   support
+
+           0       0.94      0.95      0.94   2696942
+           1       0.72      0.71      0.72    549647
+
+    accuracy                           0.90   3246589
+   macro avg       0.83      0.83      0.83   3246589
+weighted avg       0.90      0.90      0.90   3246589
+
+[LOG 2026-10-17 20:15:00 -03-0300] (elapsed 92.8s) [n=4, d=2, svd=15] Running single-record inference on 1000 records...
+[LOG 2026-10-17 20:15:00 -03-0300] (elapsed 92.9s) [n=4, d=2, svd=15] Processed 200/1000 records (avg 0.000337s/record)
+[LOG 2026-10-17 20:15:00 -03-0300] (elapsed 93.0s) [n=4, d=2, svd=15] Processed 400/1000 records (avg 0.000339s/record)
+[LOG 2026-10-17 20:15:00 -03-0300] (elapsed 93.0s) [n=4, d=2, svd=15] Processed 600/1000 records (avg 0.000337s/record)
+[LOG 2026-10-17 20:15:00 -03-0300] (elapsed 93.1s) [n=4, d=2, svd=15] Processed 800/1000 records (avg 0.000336s/record)
+[LOG 2026-10-17 20:15:00 -03-0300] (elapsed 93.2s) [n=4, d=2, svd=15] Processed 1000/1000 records (avg 0.000336s/record)
+[LOG 2026-10-17 20:15:00 -03-0300] (elapsed 93.2s) [n=4, d=2, svd=15] All 1000 single-record inferences complete.
+
+==================== PLAINTEXT LATENCY SUMMARY ====================
+Records measured: 1000
+Total inference time: 0.3358 s
+Mean inference time/record: 0.000336 s
+Std inference time/record:  0.000016 s
+======================================================================
+
+[LOG 2026-10-17 20:15:01 -03-0300] (elapsed 93.3s) === Configuration 4/26 ===
+
+============================================================
+  PLAINTEXT CONFIG: n_estimators=4, max_depth=4, svd=15
+============================================================
+[LOG 2026-10-17 20:15:01 -03-0300] (elapsed 93.3s) [n=4, d=4, svd=15] Starting plaintext inference benchmark
+[LOG 2026-10-17 20:15:01 -03-0300] (elapsed 93.3s) [n=4, d=4, svd=15] Loading Concrete ML model from 'plaintext_model_4_estimators_4_depth_svd_15.json'...
+[LOG 2026-10-17 20:15:01 -03-0300] (elapsed 93.3s) [n=4, d=4, svd=15] Model loaded.
+[LOG 2026-10-17 20:15:01 -03-0300] (elapsed 93.3s) [n=4, d=4, svd=15] Starting clear (plaintext) prediction on 3246589 samples...
+[LOG 2026-10-17 20:15:09 -03-0300] (elapsed 102.2s) [n=4, d=4, svd=15] Clear prediction completed in 8.9s
+--- Model Evaluation ---
+Accuracy: 0.9137
+Precision: 0.7395
+Recall: 0.7567
+F1-Score: 0.7480
+
+--- Confusion Matrix ---
+[[2550427  146515]
+ [ 133717  415930]]
+
+--- Classification Report ---
+              precision    recall  f1-score   support
+
+           0       0.95      0.95      0.95   2696942
+           1       0.74      0.76      0.75    549647
+
+    accuracy                           0.91   3246589
+   macro avg       0.84      0.85      0.85   3246589
+weighted avg       0.91      0.91      0.91   3246589
+
+[LOG 2026-10-17 20:15:21 -03-0300] (elapsed 113.7s) [n=4, d=4, svd=15] Running single-record inference on 1000 records...
+[LOG 2026-10-17 20:15:21 -03-0300] (elapsed 113.8s) [n=4, d=4, svd=15] Processed 200/1000 records (avg 0.000338s/record)
+[LOG 2026-10-17 20:15:21 -03-0300] (elapsed 113.8s) [n=4, d=4, svd=15] Processed 400/1000 records (avg 0.000336s/record)
+[LOG 2026-10-17 20:15:21 -03-0300] (elapsed 113.9s) [n=4, d=4, svd=15] Processed 600/1000 records (avg 0.000336s/record)
+[LOG 2026-10-17 20:15:21 -03-0300] (elapsed 114.0s) [n=4, d=4, svd=15] Processed 800/1000 records (avg 0.000336s/record)
+[LOG 2026-10-17 20:15:21 -03-0300] (elapsed 114.1s) [n=4, d=4, svd=15] Processed 1000/1000 records (avg 0.000336s/record)
+[LOG 2026-10-17 20:15:21 -03-0300] (elapsed 114.1s) [n=4, d=4, svd=15] All 1000 single-record inferences complete.
+
+==================== PLAINTEXT LATENCY SUMMARY ====================
+Records measured: 1000
+Total inference time: 0.3358 s
+Mean inference time/record: 0.000336 s
+Std inference time/record:  0.000017 s
+======================================================================
+
+[LOG 2026-10-17 20:15:21 -03-0300] (elapsed 114.1s) === Configuration 5/26 ===
+
+============================================================
+  PLAINTEXT CONFIG: n_estimators=2, max_depth=2, svd=25
+============================================================
+[LOG 2026-10-17 20:15:21 -03-0300] (elapsed 114.1s) [n=2, d=2, svd=25] Starting plaintext inference benchmark
+[LOG 2026-10-17 20:15:21 -03-0300] (elapsed 114.1s) [n=2, d=2, svd=25] Loading Concrete ML model from 'plaintext_model_2_estimators_2_depth_svd_25.json'...
+[LOG 2026-10-17 20:15:21 -03-0300] (elapsed 114.2s) [n=2, d=2, svd=25] Model loaded.
+[LOG 2026-10-17 20:15:22 -03-0300] (elapsed 114.3s) Projecting test set with saved SVD from 'svd_cic_ids_2018_25.pkl'...
+[LOG 2026-10-17 20:15:22 -03-0300] (elapsed 114.3s) Projecting 3,246,589 x 64,539 -> 25 components in chunks of 50,000...
+[LOG 2026-10-17 20:15:22 -03-0300] (elapsed 114.3s) Projected rows 50,000 / 3,246,589
+[LOG 2026-10-17 20:15:22 -03-0300] (elapsed 114.4s) Projected rows 1,050,000 / 3,246,589
+[LOG 2026-10-17 20:15:22 -03-0300] (elapsed 114.5s) Projected rows 2,050,000 / 3,246,589
+[LOG 2026-10-17 20:15:22 -03-0300] (elapsed 114.6s) Projected rows 3,050,000 / 3,246,589
+[LOG 2026-10-17 20:15:22 -03-0300] (elapsed 114.7s) Test projection ready — (3246589, 25).
+[LOG 2026-10-17 20:15:22 -03-0300] (elapsed 114.7s) [n=2, d=2, svd=25] Starting clear (plaintext) prediction on 3246589 samples...
+[LOG 2026-10-17 20:15:25 -03-0300] (elapsed 117.5s) [n=2, d=2, svd=25] Clear prediction completed in 2.8s
+--- Model Evaluation ---
+Accuracy: 0.9028
+Precision: 0.7164
+Recall: 0.7045
+F1-Score: 0.7104
+
+--- Confusion Matrix ---
+[[2543663  153279]
+ [ 162442  387205]]
+
+--- Classification Report ---
+              precision    recall  f1-score   support
+
+           0       0.94      0.94      0.94   2696942
+           1       0.72      0.70      0.71    549647
+
+    accuracy                           0.90   3246589
+   macro avg       0.83      0.82      0.83   3246589
+weighted avg       0.90      0.90      0.90   3246589
+
+[LOG 2026-10-17 20:15:36 -03-0300] (elapsed 129.0s) [n=2, d=2, svd=25] Running single-record inference on 1000 records...
+[LOG 2026-10-17 20:15:36 -03-0300] (elapsed 129.0s) [n=2, d=2, svd=25] Processed 200/1000 records (avg 0.000406s/record)
+[LOG 2026-10-17 20:15:36 -03-0300] (elapsed 129.1s) [n=2, d=2, svd=25] Processed 400/1000 records (avg 0.000405s/record)
+[LOG 2026-10-17 20:15:36 -03-0300] (elapsed 129.2s) [n=2, d=2, svd=25] Processed 600/1000 records (avg 0.000404s/record)
+[LOG 2026-10-17 20:15:37 -03-0300] (elapsed 129.3s) [n=2, d=2, svd=25] Processed 800/1000 records (avg 0.000404s/record)
+[LOG 2026-10-17 20:15:37 -03-0300] (elapsed 129.4s) [n=2, d=2, svd=25] Processed 1000/1000 records (avg 0.000403s/record)
+[LOG 2026-10-17 20:15:37 -03-0300] (elapsed 129.4s) [n=2, d=2, svd=25] All 1000 single-record inferences complete.
+
+==================== PLAINTEXT LATENCY SUMMARY ====================
+Records measured: 1000
+Total inference time: 0.4033 s
+Mean inference time/record: 0.000403 s
+Std inference time/record:  0.000016 s
+======================================================================
+
+[LOG 2026-10-17 20:15:37 -03-0300] (elapsed 129.5s) === Configuration 6/26 ===
+
+============================================================
+  PLAINTEXT CONFIG: n_estimators=2, max_depth=4, svd=25
+============================================================
+[LOG 2026-10-17 20:15:37 -03-0300] (elapsed 129.5s) [n=2, d=4, svd=25] Starting plaintext inference benchmark
+[LOG 2026-10-17 20:15:37 -03-0300] (elapsed 129.5s) [n=2, d=4, svd=25] Loading Concrete ML model from 'plaintext_model_2_estimators_4_depth_svd_25.json'...
+[LOG 2026-10-17 20:15:37 -03-0300] (elapsed 129.5s) [n=2, d=4, svd=25] Model loaded.
+[LOG 2026-10-17 20:15:37 -03-0300] (elapsed 129.5s) [n=2, d=4, svd=25] Starting clear (plaintext) prediction on 3246589 samples...
+[LOG 2026-10-17 20:15:43 -03-0300] (elapsed 136.2s) [n=2, d=4, svd=25] Clear prediction completed in 6.7s
+--- Model Evaluation ---
+Accuracy: 0.9135
+Precision: 0.7389
+Recall: 0.7562
+F1-Score: 0.7474
+
+--- Confusion Matrix ---
+[[2550068  146874]
+ [ 134007  415640]]
+
+--- Classification Report ---
+              precision    recall  f1-score   support
+
+           0       0.95      0.95      0.95   2696942
+           1       0.74      0.76      0.75    549647
+
+    accuracy                           0.91   3246589
+   macro avg       0.84      0.85      0.85   3246589
+weighted avg       0.91      0.91      0.91   3246589
+
+[LOG 2026-10-17 20:15:55 -03-0300] (elapsed 147.6s) [n=2, d=4, svd=25] Running single-record inference on 1000 records...
+[LOG 2026-10-17 20:15:55 -03-0300] (elapsed 147.7s) [n=2, d=4, svd=25] Processed 200/1000 records (avg 0.000407s/record)
+[LOG 2026-10-17 20:15:55 -03-0300] (elapsed 147.8s) [n=2, d=4, svd=25] Processed 400/1000 records (avg 0.000405s/record)
+[LOG 2026-10-17 20:15:55 -03-0300] (elapsed 147.8s) [n=2, d=4, svd=25] Processed 600/1000 records (avg 0.000404s/record)
+[LOG 2026-10-17 20:15:55 -03-0300] (elapsed 147.9s) [n=2, d=4, svd=25] Processed 800/1000 records (avg 0.000404s/record)
+[LOG 2026-10-17 20:15:55 -03-0300] (elapsed 148.0s) [n=2, d=4, svd=25] Processed 1000/1000 records (avg 0.000404s/record)
+[LOG 2026-10-17 20:15:55 -03-0300] (elapsed 148.0s) [n=2, d=4, svd=25] All 1000 single-record inferences complete.
+
+==================== PLAINTEXT LATENCY SUMMARY ====================
+Records measured: 1000
+Total inference time: 0.4037 s
+Mean inference time/record: 0.000404 s
+Std inference time/record:  0.000017 s
+======================================================================
+
+[LOG 2026-10-17 20:15:55 -03-0300] (elapsed 148.1s) === Configuration 7/26 ===
+
+============================================================
+  PLAINTEXT CONFIG: n_estimators=4, max_depth=2, svd=25
+============================================================
+[LOG 2026-10-17 20:15:55 -03-0300] (elapsed 148.1s) [n=4, d=2, svd=25] Starting plaintext inference benchmark
+[LOG 2026-10-17 20:15:55 -03-0300] (elapsed 148.1s) [n=4, d=2, svd=25] Loading Concrete ML model from 'plaintext_model_4_estimators_2_depth_svd_25.json'...
+[LOG 2026-10-17 20:15:55 -03-0300] (elapsed 148.1s) [n=4, d=2, svd=25] Model loaded.
+[LOG 2026-10-17 20:15:55 -03-0300] (elapsed 148.1s) [n=4, d=2, svd=25] Starting clear (plaintext) prediction on 3246589 samples...
+[LOG 2026-10-17 20:15:59 -03-0300] (elapsed 151.9s) [n=4, d=2, svd=25] Clear prediction completed in 3.8s
+--- Model Evaluation ---
+Accuracy: 0.8974
+Precision: 0.7069
+Recall: 0.6724
+F1-Score: 0.6893
+
+--- Confusion Matrix ---
+[[2543723  153219]
+ [ 180038  369609]]
+
+--- Classification Report ---
+              precision    recall  f1-score   support
+
+           0       0.93      0.94      0.94   2696942
+           1       0.71      0.67      0.69    549647
+
+    accuracy                           0.90   3246589
+   macro avg       0.82      0.81      0.81   3246589
+weighted avg       0.90      0.90      0.90   3246589
+
+[LOG 2026-10-17 20:16:11 -03-0300] (elapsed 163.4s) [n=4, d=2, svd=25] Running single-record inference on 1000 records...
+[LOG 2026-10-17 20:16:11 -03-0300] (elapsed 163.5s) [n=4, d=2, svd=25] Processed 200/1000 records (avg 0.000407s/record)
+[LOG 2026-10-17 20:16:11 -03-0300] (elapsed 163.6s) [n=4, d=2, svd=25] Processed 400/1000 records (avg 0.000405s/record)
+[LOG 2026-10-17 20:16:11 -03-0300] (elapsed 163.7s) [n=4, d=2, svd=25] Processed 600/1000 records (avg 0.000404s/record)
+[LOG 2026-10-17 20:16:11 -03-0300] (elapsed 163.7s) [n=4, d=2, svd=25] Processed 800/1000 records (avg 0.000404s/record)
+[LOG 2026-10-17 20:16:11 -03-0300] (elapsed 163.8s) [n=4, d=2, svd=25] Processed 1000/1000 records (avg 0.000404s/record)
+[LOG 2026-10-17 20:16:11 -03-0300] (elapsed 163.8s) [n=4, d=2, svd=25] All 1000 single-record inferences complete.
+
+==================== PLAINTEXT LATENCY SUMMARY ====================
+Records measured: 1000
+Total inference time: 0.4039 s
+Mean inference time/record: 0.000404 s
+Std inference time/record:  0.000016 s
+======================================================================
+
+[LOG 2026-10-17 20:16:11 -03-0300] (elapsed 163.9s) === Configuration 8/26 ===
+
+============================================================
+  PLAINTEXT CONFIG: n_estimators=4, max_depth=4, svd=25
+============================================================
+[LOG 2026-10-17 20:16:11 -03-0300] (elapsed 163.9s) [n=4, d=4, svd=25] Starting plaintext inference benchmark
+[LOG 2026-10-17 20:16:11 -03-0300] (elapsed 163.9s) [n=4, d=4, svd=25] Loading Concrete ML model from 'plaintext_model_4_estimators_4_depth_svd_25.json'...
+[LOG 2026-10-17 20:16:11 -03-0300] (elapsed 164.0s) [n=4, d=4, svd=25] Model loaded.
+[LOG 2026-10-17 20:16:11 -03-0300] (elapsed 164.0s) [n=4, d=4, svd=25] Starting clear (plaintext) prediction on 3246589 samples...
+[LOG 2026-10-17 20:16:23 -03-0300] (elapsed 175.5s) [n=4, d=4, svd=25] Clear prediction completed in 11.6s
+--- Model Evaluation ---
+Accuracy: 0.9136
+Precision: 0.7393
+Recall: 0.7568
+F1-Score: 0.7480
+
+--- Confusion Matrix ---
+[[2550262  146680]
+ [ 133666  415981]]
+
+--- Classification Report ---
+              precision    recall  f1-score   support
+
+           0       0.95      0.95      0.95   2696942
+           1       0.74      0.76      0.75    549647
+
+    accuracy                           0.91   3246589
+   macro avg       0.84      0.85      0.85   3246589
+weighted avg       0.91      0.91      0.91   3246589
+
+[LOG 2026-10-17 20:16:34 -03-0300] (elapsed 187.0s) [n=4, d=4, svd=25] Running single-record inference on 1000 records...
+[LOG 2026-10-17 20:16:34 -03-0300] (elapsed 187.1s) [n=4, d=4, svd=25] Processed 200/1000 records (avg 0.000412s/record)
+[LOG 2026-10-17 20:16:34 -03-0300] (elapsed 187.2s) [n=4, d=4, svd=25] Processed 400/1000 records (avg 0.000410s/record)
+[LOG 2026-10-17 20:16:35 -03-0300] (elapsed 187.3s) [n=4, d=4, svd=25] Processed 600/1000 records (avg 0.000410s/record)
+[LOG 2026-10-17 20:16:35 -03-0300] (elapsed 187.4s) [n=4, d=4, svd=25] Processed 800/1000 records (avg 0.000410s/record)
+[LOG 2026-10-17 20:16:35 -03-0300] (elapsed 187.4s) [n=4, d=4, svd=25] Processed 1000/1000 records (avg 0.000410s/record)
+[LOG 2026-10-17 20:16:35 -03-0300] (elapsed 187.4s) [n=4, d=4, svd=25] All 1000 single-record inferences complete.
+
+==================== PLAINTEXT LATENCY SUMMARY ====================
+Records measured: 1000
+Total inference time: 0.4096 s
+Mean inference time/record: 0.000410 s
+Std inference time/record:  0.000015 s
+======================================================================
+
+[LOG 2026-10-17 20:16:35 -03-0300] (elapsed 187.5s) === Configuration 9/26 ===
+
+============================================================
+  PLAINTEXT CONFIG: n_estimators=2, max_depth=2, svd=40
+============================================================
+[LOG 2026-10-17 20:16:35 -03-0300] (elapsed 187.5s) [n=2, d=2, svd=40] Starting plaintext inference benchmark
+[LOG 2026-10-17 20:16:35 -03-0300] (elapsed 187.5s) [n=2, d=2, svd=40] Loading Concrete ML model from 'plaintext_model_2_estimators_2_depth_svd_40.json'...
+[LOG 2026-10-17 20:16:35 -03-0300] (elapsed 187.6s) [n=2, d=2, svd=40] Model loaded.
+[LOG 2026-10-17 20:16:35 -03-0300] (elapsed 187.7s) Projecting test set with saved SVD from 'svd_cic_ids_2018_40.pkl'...
+[LOG 2026-10-17 20:16:35 -03-0300] (elapsed 187.7s) Projecting 3,246,589 x 64,539 -> 40 components in chunks of 50,000...
+[LOG 2026-10-17 20:16:35 -03-0300] (elapsed 187.7s) Projected rows 50,000 / 3,246,589
+[LOG 2026-10-17 20:16:35 -03-0300] (elapsed 187.8s) Projected rows 1,050,000 / 3,246,589
+[LOG 2026-10-17 20:16:35 -03-0300] (elapsed 187.9s) Projected rows 2,050,000 / 3,246,589
+[LOG 2026-10-17 20:16:35 -03-0300] (elapsed 188.0s) Projected rows 3,050,000 / 3,246,589
+[LOG 2026-10-17 20:16:35 -03-0300] (elapsed 188.2s) Test projection ready — (3246589, 40).
+[LOG 2026-10-17 20:16:35 -03-0300] (elapsed 188.2s) [n=2, d=2, svd=40] Starting clear (plaintext) prediction on 3246589 samples...
+[LOG 2026-10-17 20:16:40 -03-0300] (elapsed 192.5s) [n=2, d=2, svd=40] Clear prediction completed in 4.3s
+--- Model Evaluation ---
+Accuracy: 0.8585
+Precision: 0.9507
+Recall: 0.1733
+F1-Score: 0.2932
+
+--- Confusion Matrix ---
+[[2692000    4942]
+ [ 454386   95261]]
+
+--- Classification Report ---
+              precision    recall  f1-score   support
+
+           0       0.86      1.00      0.92   2696942
+           1       0.95      0.17      0.29    549647
+
+    accuracy                           0.86   3246589
+   macro avg       0.90      0.59      0.61   3246589
+weighted avg       0.87      0.86      0.82   3246589
+
+[LOG 2026-10-17 20:16:50 -03-0300] (elapsed 203.2s) [n=2, d=2, svd=40] Running single-record inference on 1000 records...
+[LOG 2026-10-17 20:16:51 -03-0300] (elapsed 203.3s) [n=2, d=2, svd=40] Processed 200/1000 records (avg 0.000511s/record)
+[LOG 2026-10-17 20:16:51 -03-0300] (elapsed 203.4s) [n=2, d=2, svd=40] Processed 400/1000 records (avg 0.000509s/record)
+[LOG 2026-10-17 20:16:51 -03-0300] (elapsed 203.5s) [n=2, d=2, svd=40] Processed 600/1000 records (avg 0.000509s/record)
+[LOG 2026-10-17 20:16:51 -03-0300] (elapsed 203.6s) [n=2, d=2, svd=40] Processed 800/1000 records (avg 0.000508s/record)
+[LOG 2026-10-17 20:16:51 -03-0300] (elapsed 203.7s) [n=2, d=2, svd=40] Processed 1000/1000 records (avg 0.000508s/record)
+[LOG 2026-10-17 20:16:51 -03-0300] (elapsed 203.7s) [n=2, d=2, svd=40] All 1000 single-record inferences complete.
+
+==================== PLAINTEXT LATENCY SUMMARY ====================
+Records measured: 1000
+Total inference time: 0.5083 s
+Mean inference time/record: 0.000508 s
+Std inference time/record:  0.000016 s
+======================================================================
+
+[LOG 2026-10-17 20:16:51 -03-0300] (elapsed 203.8s) === Configuration 10/26 ===
+
+============================================================
+  PLAINTEXT CONFIG: n_estimators=2, max_depth=4, svd=40
+============================================================
+[LOG 2026-10-17 20:16:51 -03-0300] (elapsed 203.8s) [n=2, d=4, svd=40] Starting plaintext inference benchmark
+[LOG 2026-10-17 20:16:51 -03-0300] (elapsed 203.8s) [n=2, d=4, svd=40] Loading Concrete ML model from 'plaintext_model_2_estimators_4_depth_svd_40.json'...
+[LOG 2026-10-17 20:16:51 -03-0300] (elapsed 203.8s) [n=2, d=4, svd=40] Model loaded.
+[LOG 2026-10-17 20:16:51 -03-0300] (elapsed 203.8s) [n=2, d=4, svd=40] Starting clear (plaintext) prediction on 3246589 samples...
+[LOG 2026-10-17 20:16:59 -03-0300] (elapsed 212.2s) [n=2, d=4, svd=40] Clear prediction completed in 8.3s
+--- Model Evaluation ---
+Accuracy: 0.9009
+Precision: 0.7160
+Recall: 0.6870
+F1-Score: 0.7012
+
+--- Confusion Matrix ---
+[[2547168  149774]
+ [ 172065  377582]]
+
+--- Classification Report ---
+              precision    recall  f1-score   support
+
+           0       0.94      0.94      0.94   2696942
+           1       0.72      0.69      0.70    549647
+
+    accuracy                           0.90   3246589
+   macro avg       0.83      0.82      0.82   3246589
+weighted avg       0.90      0.90      0.90   3246589
+
+[LOG 2026-10-17 20:17:11 -03-0300] (elapsed 223.6s) [n=2, d=4, svd=40] Running single-record inference on 1000 records...
+[LOG 2026-10-17 20:17:11 -03-0300] (elapsed 223.7s) [n=2, d=4, svd=40] Processed 200/1000 records (avg 0.000515s/record)
+[LOG 2026-10-17 20:17:11 -03-0300] (elapsed 223.8s) [n=2, d=4, svd=40] Processed 400/1000 records (avg 0.000512s/record)
+[LOG 2026-10-17 20:17:11 -03-0300] (elapsed 223.9s) [n=2, d=4, svd=40] Processed 600/1000 records (avg 0.000511s/record)
+[LOG 2026-10-17 20:17:11 -03-0300] (elapsed 224.0s) [n=2, d=4, svd=40] Processed 800/1000 records (avg 0.000511s/record)
+[LOG 2026-10-17 20:17:11 -03-0300] (elapsed 224.1s) [n=2, d=4, svd=40] Processed 1000/1000 records (avg 0.000511s/record)
+[LOG 2026-10-17 20:17:11 -03-0300] (elapsed 224.1s) [n=2, d=4, svd=40] All 1000 single-record inferences complete.
+
+==================== PLAINTEXT LATENCY SUMMARY ====================
+Records measured: 1000
+Total inference time: 0.5108 s
+Mean inference time/record: 0.000511 s
+Std inference time/record:  0.000016 s
+======================================================================
+
+[LOG 2026-10-17 20:17:11 -03-0300] (elapsed 224.2s) === Configuration 11/26 ===
+
+============================================================
+  PLAINTEXT CONFIG: n_estimators=4, max_depth=2, svd=40
+============================================================
+[LOG 2026-10-17 20:17:11 -03-0300] (elapsed 224.2s) [n=4, d=2, svd=40] Starting plaintext inference benchmark
+[LOG 2026-10-17 20:17:11 -03-0300] (elapsed 224.2s) [n=4, d=2, svd=40] Loading Concrete ML model from 'plaintext_model_4_estimators_2_depth_svd_40.json'...
+[LOG 2026-10-17 20:17:12 -03-0300] (elapsed 224.3s) [n=4, d=2, svd=40] Model loaded.
+[LOG 2026-10-17 20:17:12 -03-0300] (elapsed 224.3s) [n=4, d=2, svd=40] Starting clear (plaintext) prediction on 3246589 samples...
+[LOG 2026-10-17 20:17:17 -03-0300] (elapsed 229.9s) [n=4, d=2, svd=40] Clear prediction completed in 5.6s
+--- Model Evaluation ---
+Accuracy: 0.9024
+Precision: 0.7229
+Recall: 0.6864
+F1-Score: 0.7042
+
+--- Confusion Matrix ---
+[[2552312  144630]
+ [ 172343  377304]]
+
+--- Classification Report ---
+              precision    recall  f1-score   support
+
+           0       0.94      0.95      0.94   2696942
+           1       0.72      0.69      0.70    549647
+
+    accuracy                           0.90   3246589
+   macro avg       0.83      0.82      0.82   3246589
+weighted avg       0.90      0.90      0.90   3246589
+
+[LOG 2026-10-17 20:17:29 -03-0300] (elapsed 241.6s) [n=4, d=2, svd=40] Running single-record inference on 1000 records...
+[LOG 2026-10-17 20:17:29 -03-0300] (elapsed 241.7s) [n=4, d=2, svd=40] Processed 200/1000 records (avg 0.000511s/record)
+[LOG 2026-10-17 20:17:29 -03-0300] (elapsed 241.8s) [n=4, d=2, svd=40] Processed 400/1000 records (avg 0.000510s/record)
+[LOG 2026-10-17 20:17:29 -03-0300] (elapsed 241.9s) [n=4, d=2, svd=40] Processed 600/1000 records (avg 0.000509s/record)
+[LOG 2026-10-17 20:17:29 -03-0300] (elapsed 242.0s) [n=4, d=2, svd=40] Processed 800/1000 records (avg 0.000508s/record)
+[LOG 2026-10-17 20:17:29 -03-0300] (elapsed 242.1s) [n=4, d=2, svd=40] Processed 1000/1000 records (avg 0.000508s/record)
+[LOG 2026-10-17 20:17:29 -03-0300] (elapsed 242.1s) [n=4, d=2, svd=40] All 1000 single-record inferences complete.
+
+==================== PLAINTEXT LATENCY SUMMARY ====================
+Records measured: 1000
+Total inference time: 0.5081 s
+Mean inference time/record: 0.000508 s
+Std inference time/record:  0.000016 s
+======================================================================
+
+[LOG 2026-10-17 20:17:29 -03-0300] (elapsed 242.2s) === Configuration 12/26 ===
+
+============================================================
+  PLAINTEXT CONFIG: n_estimators=4, max_depth=4, svd=40
+============================================================
+[LOG 2026-10-17 20:17:29 -03-0300] (elapsed 242.2s) [n=4, d=4, svd=40] Starting plaintext inference benchmark
+[LOG 2026-10-17 20:17:29 -03-0300] (elapsed 242.2s) [n=4, d=4, svd=40] Loading Concrete ML model from 'plaintext_model_4_estimators_4_depth_svd_40.json'...
+[LOG 2026-10-17 20:17:29 -03-0300] (elapsed 242.2s) [n=4, d=4, svd=40] Model loaded.
+[LOG 2026-10-17 20:17:29 -03-0300] (elapsed 242.2s) [n=4, d=4, svd=40] Starting clear (plaintext) prediction on 3246589 samples...
+[LOG 2026-10-17 20:17:44 -03-0300] (elapsed 256.9s) [n=4, d=4, svd=40] Clear prediction completed in 14.7s
+--- Model Evaluation ---
+Accuracy: 0.9025
+Precision: 0.7226
+Recall: 0.6882
+F1-Score: 0.7050
+
+--- Confusion Matrix ---
+[[2551766  145176]
+ [ 171402  378245]]
+
+--- Classification Report ---
+              precision    recall  f1-score   support
+
+           0       0.94      0.95      0.94   2696942
+           1       0.72      0.69      0.70    549647
+
+    accuracy                           0.90   3246589
+   macro avg       0.83      0.82      0.82   3246589
+weighted avg       0.90      0.90      0.90   3246589
+
+[LOG 2026-10-17 20:17:56 -03-0300] (elapsed 268.4s) [n=4, d=4, svd=40] Running single-record inference on 1000 records...
+[LOG 2026-10-17 20:17:56 -03-0300] (elapsed 268.5s) [n=4, d=4, svd=40] Processed 200/1000 records (avg 0.000519s/record)
+[LOG 2026-10-17 20:17:56 -03-0300] (elapsed 268.6s) [n=4, d=4, svd=40] Processed 400/1000 records (avg 0.000517s/record)
+[LOG 2026-10-17 20:17:56 -03-0300] (elapsed 268.7s) [n=4, d=4, svd=40] Processed 600/1000 records (avg 0.000516s/record)
+[LOG 2026-10-17 20:17:56 -03-0300] (elapsed 268.8s) [n=4, d=4, svd=40] Processed 800/1000 records (avg 0.000516s/record)
+[LOG 2026-10-17 20:17:56 -03-0300] (elapsed 268.9s) [n=4, d=4, svd=40] Processed 1000/1000 records (avg 0.000516s/record)
+[LOG 2026-10-17 20:17:56 -03-0300] (elapsed 268.9s) [n=4, d=4, svd=40] All 1000 single-record inferences complete.
+
+==================== PLAINTEXT LATENCY SUMMARY ====================
+Records measured: 1000
+Total inference time: 0.5161 s
+Mean inference time/record: 0.000516 s
+Std inference time/record:  0.000016 s
+======================================================================
+
+[LOG 2026-10-17 20:17:56 -03-0300] (elapsed 269.0s) === Configuration 13/26 ===
+
+============================================================
+  PLAINTEXT CONFIG: n_estimators=2, max_depth=2, svd=100
+============================================================
+[LOG 2026-10-17 20:17:56 -03-0300] (elapsed 269.0s) [n=2, d=2, svd=100] Starting plaintext inference benchmark
+[LOG 2026-10-17 20:17:56 -03-0300] (elapsed 269.0s) [n=2, d=2, svd=100] Loading Concrete ML model from 'plaintext_model_2_estimators_2_depth_svd_100.json'...
+[LOG 2026-10-17 20:17:56 -03-0300] (elapsed 269.0s) [n=2, d=2, svd=100] Model loaded.
+[LOG 2026-10-17 20:17:56 -03-0300] (elapsed 269.1s) Projecting test set with saved SVD from 'svd_cic_ids_2018_100.pkl'...
+[LOG 2026-10-17 20:17:56 -03-0300] (elapsed 269.2s) Projecting 3,246,589 x 64,539 -> 100 components in chunks of 50,000...
+[LOG 2026-10-17 20:17:57 -03-0300] (elapsed 269.3s) Projected rows 50,000 / 3,246,589
+[LOG 2026-10-17 20:17:57 -03-0300] (elapsed 269.5s) Projected rows 1,050,000 / 3,246,589
+[LOG 2026-10-17 20:17:57 -03-0300] (elapsed 269.7s) Projected rows 2,050,000 / 3,246,589
+[LOG 2026-10-17 20:17:57 -03-0300] (elapsed 269.9s) Projected rows 3,050,000 / 3,246,589
+[LOG 2026-10-17 20:17:57 -03-0300] (elapsed 270.1s) Test projection ready — (3246589, 100).
+[LOG 2026-10-17 20:17:57 -03-0300] (elapsed 270.1s) [n=2, d=2, svd=100] Starting clear (plaintext) prediction on 3246589 samples...
+[LOG 2026-10-17 20:18:07 -03-0300] (elapsed 279.8s) [n=2, d=2, svd=100] Clear prediction completed in 9.7s
+--- Model Evaluation ---
+Accuracy: 0.8307
+Precision: 0.0000
+Recall: 0.0000
+F1-Score: 0.0000
+
+--- Confusion Matrix ---
+[[2696942       0]
+ [ 549647       0]]
+
+--- Classification Report ---
+              precision    recall  f1-score   support
+
+           0       0.83      1.00      0.91   2696942
+           1       0.00      0.00      0.00    549647
+
+    accuracy                           0.83   3246589
+   macro avg       0.42      0.50      0.45   3246589
+weighted avg       0.69      0.83      0.75   3246589
+
+[LOG 2026-10-17 20:18:14 -03-0300] (elapsed 287.1s) [n=2, d=2, svd=100] Running single-record inference on 1000 records...
+[LOG 2026-10-17 20:18:14 -03-0300] (elapsed 287.3s) [n=2, d=2, svd=100] Processed 200/1000 records (avg 0.000929s/record)
+[LOG 2026-10-17 20:18:15 -03-0300] (elapsed 287.4s) [n=2, d=2, svd=100] Processed 400/1000 records (avg 0.000929s/record)
+[LOG 2026-10-17 20:18:15 -03-0300] (elapsed 287.6s) [n=2, d=2, svd=100] Processed 600/1000 records (avg 0.000928s/record)
+[LOG 2026-10-17 20:18:15 -03-0300] (elapsed 287.8s) [n=2, d=2, svd=100] Processed 800/1000 records (avg 0.000928s/record)
+[LOG 2026-10-17 20:18:15 -03-0300] (elapsed 288.0s) [n=2, d=2, svd=100] Processed 1000/1000 records (avg 0.000931s/record)
+[LOG 2026-10-17 20:18:15 -03-0300] (elapsed 288.0s) [n=2, d=2, svd=100] All 1000 single-record inferences complete.
+
+==================== PLAINTEXT LATENCY SUMMARY ====================
+Records measured: 1000
+Total inference time: 0.9305 s
+Mean inference time/record: 0.000931 s
+Std inference time/record:  0.000023 s
+======================================================================
+
+[LOG 2026-10-17 20:18:15 -03-0300] (elapsed 288.1s) === Configuration 14/26 ===
+[LOG 2026-10-17 20:18:15 -03-0300] (elapsed 288.1s) === Configuration 15/26 ===
+[LOG 2026-10-17 20:18:15 -03-0300] (elapsed 288.1s) === Configuration 16/26 ===
+[LOG 2026-10-17 20:18:15 -03-0300] (elapsed 288.1s) === Configuration 17/26 ===
+[LOG 2026-10-17 20:18:15 -03-0300] (elapsed 288.1s) === Configuration 18/26 ===
+[LOG 2026-10-17 20:18:15 -03-0300] (elapsed 288.1s) === Configuration 19/26 ===
+[LOG 2026-10-17 20:18:15 -03-0300] (elapsed 288.1s) === Configuration 20/26 ===
+[LOG 2026-10-17 20:18:15 -03-0300] (elapsed 288.1s) === Configuration 21/26 ===
+[LOG 2026-10-17 20:18:15 -03-0300] (elapsed 288.1s) === Configuration 22/26 ===
+[LOG 2026-10-17 20:18:15 -03-0300] (elapsed 288.1s) === Configuration 23/26 ===
+[LOG 2026-10-17 20:18:15 -03-0300] (elapsed 288.1s) === Configuration 24/26 ===
+[LOG 2026-10-17 20:18:15 -03-0300] (elapsed 288.1s) === Configuration 25/26 ===
+[LOG 2026-10-17 20:18:15 -03-0300] (elapsed 288.1s) === Configuration 26/26 ===
+
+======================================================================
+  PLAINTEXT SUMMARY
+======================================================================
+                        Config | Batch Pred (s) | Mean Inf (s) |  Std Inf (s)
+----------------------------------------------------------------------------
+              n=2, d=2, svd=15 |            1.7 |     0.000333 |     0.000016
+              n=2, d=4, svd=15 |            4.9 |     0.000335 |     0.000015
+              n=4, d=2, svd=15 |            2.5 |     0.000336 |     0.000016
+              n=4, d=4, svd=15 |            8.9 |     0.000336 |     0.000017
+              n=2, d=2, svd=25 |            2.8 |     0.000403 |     0.000016
+              n=2, d=4, svd=25 |            6.7 |     0.000404 |     0.000017
+              n=4, d=2, svd=25 |            3.8 |     0.000404 |     0.000016
+              n=4, d=4, svd=25 |           11.6 |     0.000410 |     0.000015
+              n=2, d=2, svd=40 |            4.3 |     0.000508 |     0.000016
+              n=2, d=4, svd=40 |            8.3 |     0.000511 |     0.000016
+              n=4, d=2, svd=40 |            5.6 |     0.000508 |     0.000016
+              n=4, d=4, svd=40 |           14.7 |     0.000516 |     0.000016
+             n=2, d=2, svd=100 |            9.7 |     0.000931 |     0.000023
+
+[LOG 2026-10-17 20:18:15 -03-0300] (elapsed 288.1s) Phase 1 complete — all plaintext variants evaluated.
+
+######################################################################
+#  PHASE 2: FHE INFERENCE BENCHMARK
+######################################################################
+[LOG 2026-10-17 20:18:15 -03-0300] (elapsed 288.1s) === FHE Configuration ===
+
+============================================================
+  FHE CONFIG: n_estimators=2, max_depth=2, svd=15
+============================================================
+[LOG 2026-10-17 20:18:15 -03-0300] (elapsed 288.1s) [n=2, d=2, svd=15] Starting FHE inference benchmark
+[LOG 2026-10-17 20:18:15 -03-0300] (elapsed 288.1s) [n=2, d=2, svd=15] [STEP 1/3] Preparing data using saved artifacts...
+[LOG 2026-10-17 20:18:15 -03-0300] (elapsed 288.2s) Projecting test set with saved SVD from 'svd_cic_ids_2018_15.pkl'...
+[LOG 2026-10-17 20:18:15 -03-0300] (elapsed 288.2s) Projecting 3,246,589 x 64,539 -> 15 components in chunks of 50,000...
+[LOG 2026-10-17 20:18:15 -03-0300] (elapsed 288.2s) Projected rows 50,000 / 3,246,589
+[LOG 2026-10-17 20:18:15 -03-0300] (elapsed 288.3s) Projected rows 1,050,000 / 3,246,589
+[LOG 2026-10-17 20:18:16 -03-0300] (elapsed 288.3s) Projected rows 2,050,000 / 3,246,589
+[LOG 2026-10-17 20:18:16 -03-0300] (elapsed 288.4s) Projected rows 3,050,000 / 3,246,589
+[LOG 2026-10-17 20:18:16 -03-0300] (elapsed 288.6s) Test projection ready — (3246589, 15).
+[LOG 2026-10-17 20:18:16 -03-0300] (elapsed 288.6s) [n=2, d=2, svd=15] 3246589 test records available, processing 1000.
+[LOG 2026-10-17 20:18:16 -03-0300] (elapsed 288.6s) [n=2, d=2, svd=15] [STEP 2/3] Measuring encrypt / inference / decrypt...
+[LOG 2026-10-17 20:18:16 -03-0300] (elapsed 288.6s) [n=2, d=2, svd=15] Loading FHE client/server from './fhe_model_2_estimators_2_depth_svd_15_components/' for latency measurement...
+[LOG 2026-10-17 20:18:16 -03-0300] (elapsed 288.6s) [n=2, d=2, svd=15] Model compiled for device='cpu' (from fhe_device.txt).
+[LOG 2026-10-17 20:18:18 -03-0300] (elapsed 290.7s) [n=2, d=2, svd=15] Generating evaluation keys...
+[LOG 2026-10-17 20:18:20 -03-0300] (elapsed 292.9s) [n=2, d=2, svd=15] Evaluation keys ready in 2.251s (58,653,592 bytes).
+[LOG 2026-10-17 20:18:20 -03-0300] (elapsed 292.9s) [n=2, d=2, svd=15] Measuring encrypt / inference / decrypt on 1,000 records...
+[LOG 2026-10-17 20:20:14 -03-0300] (elapsed 406.4s) [n=2, d=2, svd=15]   100/1000 — avg encrypt=0.005216s, avg infer=1.127921s, avg decrypt=0.001545s
+[LOG 2026-10-17 20:22:06 -03-0300] (elapsed 518.3s) [n=2, d=2, svd=15]   200/1000 — avg encrypt=0.005279s, avg infer=1.120050s, avg decrypt=0.001535s
+[LOG 2026-10-17 20:23:57 -03-0300] (elapsed 630.1s) [n=2, d=2, svd=15]   300/1000 — avg encrypt=0.005227s, avg infer=1.117073s, avg decrypt=0.001532s
+[LOG 2026-10-17 20:25:49 -03-0300] (elapsed 742.0s) [n=2, d=2, svd=15]   400/1000 — avg encrypt=0.005231s, avg infer=1.115895s, avg decrypt=0.001532s
+[LOG 2026-10-17 20:27:41 -03-0300] (elapsed 854.1s) [n=2, d=2, svd=15]   500/1000 — avg encrypt=0.005214s, avg infer=1.115544s, avg decrypt=0.001533s
+[LOG 2026-10-17 20:29:33 -03-0300] (elapsed 966.3s) [n=2, d=2, svd=15]   600/1000 — avg encrypt=0.005205s, avg infer=1.115454s, avg decrypt=0.001532s
+[LOG 2026-10-17 20:31:25 -03-0300] (elapsed 1,078.3s) [n=2, d=2, svd=15]   700/1000 — avg encrypt=0.005230s, avg infer=1.115114s, avg decrypt=0.001531s
+[LOG 2026-10-17 20:33:18 -03-0300] (elapsed 1,190.4s) [n=2, d=2, svd=15]   800/1000 — avg encrypt=0.005220s, avg infer=1.115008s, avg decrypt=0.001544s
+[LOG 2026-10-17 20:35:10 -03-0300] (elapsed 1,302.4s) [n=2, d=2, svd=15]   900/1000 — avg encrypt=0.005211s, avg infer=1.114910s, avg decrypt=0.001543s
+[LOG 2026-10-17 20:37:02 -03-0300] (elapsed 1,414.4s) [n=2, d=2, svd=15]   1000/1000 — avg encrypt=0.005205s, avg infer=1.114699s, avg decrypt=0.001541s
+[LOG 2026-10-17 20:37:02 -03-0300] (elapsed 1,414.4s) [n=2, d=2, svd=15] [STEP 3/3] Computing FHE metrics...
+[LOG 2026-10-17 20:37:02 -03-0300] (elapsed 1,414.4s) [n=2, d=2, svd=15] FHE metrics:
+--- Model Evaluation ---
+Accuracy: 0.8010
+Precision: 0.4524
+Recall: 0.7778
+F1-Score: 0.5720
+
+--- Confusion Matrix ---
+[[668 161]
+ [ 38 133]]
+
+--- Classification Report ---
+              precision    recall  f1-score   support
+
+           0       0.95      0.81      0.87       829
+           1       0.45      0.78      0.57       171
+
+    accuracy                           0.80      1000
+   macro avg       0.70      0.79      0.72      1000
+weighted avg       0.86      0.80      0.82      1000
+
+
+==================== FHE LATENCY (n=2, d=2, svd=15) ====================
+Records measured: 1000
+Key generation:   2.2507 s (once)
+       Phase |    Total (s) |     Mean (s) |      Std (s)
+----------------------------------------------------------
+     encrypt |       5.2055 |     0.005205 |     0.000764
+   inference |    1114.6990 |     1.114699 |     0.016326
+     decrypt |       1.5412 |     0.001541 |     0.000347
+  end-to-end |    1121.4456 |     1.121446 |          n/a
+======================================================================
+
+[LOG 2026-10-17 20:37:02 -03-0300] (elapsed 1,414.5s) === FHE Configuration ===
+
+============================================================
+  FHE CONFIG: n_estimators=2, max_depth=4, svd=15
+============================================================
+[LOG 2026-10-17 20:37:02 -03-0300] (elapsed 1,414.5s) [n=2, d=4, svd=15] Starting FHE inference benchmark
+[LOG 2026-10-17 20:37:02 -03-0300] (elapsed 1,414.5s) [n=2, d=4, svd=15] [STEP 1/3] Preparing data using saved artifacts...
+[LOG 2026-10-17 20:37:02 -03-0300] (elapsed 1,414.5s) [n=2, d=4, svd=15] 3246589 test records available, processing 1000.
+[LOG 2026-10-17 20:37:02 -03-0300] (elapsed 1,414.5s) [n=2, d=4, svd=15] [STEP 2/3] Measuring encrypt / inference / decrypt...
+[LOG 2026-10-17 20:37:02 -03-0300] (elapsed 1,414.5s) [n=2, d=4, svd=15] Loading FHE client/server from './fhe_model_2_estimators_4_depth_svd_15_components/' for latency measurement...
+[LOG 2026-10-17 20:37:02 -03-0300] (elapsed 1,414.5s) [n=2, d=4, svd=15] Model compiled for device='cpu' (from fhe_device.txt).
+[LOG 2026-10-17 20:37:03 -03-0300] (elapsed 1,416.2s) [n=2, d=4, svd=15] Generating evaluation keys...
+[LOG 2026-10-17 20:37:06 -03-0300] (elapsed 1,419.0s) [n=2, d=4, svd=15] Evaluation keys ready in 2.764s (77,269,912 bytes).
+[LOG 2026-10-17 20:37:06 -03-0300] (elapsed 1,419.0s) [n=2, d=4, svd=15] Measuring encrypt / inference / decrypt on 1,000 records...
+[LOG 2026-10-17 20:40:17 -03-0300] (elapsed 1,609.6s) [n=2, d=4, svd=15]   100/1000 — avg encrypt=0.005138s, avg infer=1.900027s, avg decrypt=0.001547s
+[LOG 2026-10-17 20:43:27 -03-0300] (elapsed 1,800.1s) [n=2, d=4, svd=15]   200/1000 — avg encrypt=0.005138s, avg infer=1.898874s, avg decrypt=0.001571s
+[LOG 2026-10-17 20:46:38 -03-0300] (elapsed 1,990.9s) [n=2, d=4, svd=15]   300/1000 — avg encrypt=0.005139s, avg infer=1.899761s, avg decrypt=0.001561s
+[LOG 2026-10-17 20:49:49 -03-0300] (elapsed 2,181.9s) [n=2, d=4, svd=15]   400/1000 — avg encrypt=0.005133s, avg infer=1.900520s, avg decrypt=0.001581s
+[LOG 2026-10-17 20:52:59 -03-0300] (elapsed 2,372.0s) [n=2, d=4, svd=15]   500/1000 — avg encrypt=0.005191s, avg infer=1.899299s, avg decrypt=0.001573s
+[LOG 2026-10-17 20:56:10 -03-0300] (elapsed 2,562.5s) [n=2, d=4, svd=15]   600/1000 — avg encrypt=0.005192s, avg infer=1.899172s, avg decrypt=0.001565s
+[LOG 2026-10-17 20:59:21 -03-0300] (elapsed 2,753.5s) [n=2, d=4, svd=15]   700/1000 — avg encrypt=0.005181s, avg infer=1.899791s, avg decrypt=0.001558s
+[LOG 2026-10-17 21:02:31 -03-0300] (elapsed 2,944.1s) [n=2, d=4, svd=15]   800/1000 — avg encrypt=0.005197s, avg infer=1.899706s, avg decrypt=0.001552s
+[LOG 2026-10-17 21:05:42 -03-0300] (elapsed 3,135.0s) [n=2, d=4, svd=15]   900/1000 — avg encrypt=0.005186s, avg infer=1.899935s, avg decrypt=0.001547s
+[LOG 2026-10-17 21:08:54 -03-0300] (elapsed 3,326.4s) [n=2, d=4, svd=15]   1000/1000 — avg encrypt=0.005190s, avg infer=1.900675s, avg decrypt=0.001545s
+[LOG 2026-10-17 21:08:54 -03-0300] (elapsed 3,326.4s) [n=2, d=4, svd=15] [STEP 3/3] Computing FHE metrics...
+[LOG 2026-10-17 21:08:54 -03-0300] (elapsed 3,326.4s) [n=2, d=4, svd=15] FHE metrics:
+--- Model Evaluation ---
+Accuracy: 0.8780
+Precision: 0.5904
+Recall: 0.9357
+F1-Score: 0.7240
+
+--- Confusion Matrix ---
+[[718 111]
+ [ 11 160]]
+
+--- Classification Report ---
+              precision    recall  f1-score   support
+
+           0       0.98      0.87      0.92       829
+           1       0.59      0.94      0.72       171
+
+    accuracy                           0.88      1000
+   macro avg       0.79      0.90      0.82      1000
+weighted avg       0.92      0.88      0.89      1000
+
+
+==================== FHE LATENCY (n=2, d=4, svd=15) ====================
+Records measured: 1000
+Key generation:   2.7644 s (once)
+       Phase |    Total (s) |     Mean (s) |      Std (s)
+----------------------------------------------------------
+     encrypt |       5.1896 |     0.005190 |     0.000870
+   inference |    1900.6752 |     1.900675 |     0.013963
+     decrypt |       1.5448 |     0.001545 |     0.000386
+  end-to-end |    1907.4096 |     1.907410 |          n/a
+======================================================================
+
+[LOG 2026-10-17 21:08:54 -03-0300] (elapsed 3,326.5s) === FHE Configuration ===
+
+============================================================
+  FHE CONFIG: n_estimators=4, max_depth=2, svd=15
+============================================================
+[LOG 2026-10-17 21:08:54 -03-0300] (elapsed 3,326.5s) [n=4, d=2, svd=15] Starting FHE inference benchmark
+[LOG 2026-10-17 21:08:54 -03-0300] (elapsed 3,326.5s) [n=4, d=2, svd=15] [STEP 1/3] Preparing data using saved artifacts...
+[LOG 2026-10-17 21:08:54 -03-0300] (elapsed 3,326.5s) [n=4, d=2, svd=15] 3246589 test records available, processing 1000.
+[LOG 2026-10-17 21:08:54 -03-0300] (elapsed 3,326.5s) [n=4, d=2, svd=15] [STEP 2/3] Measuring encrypt / inference / decrypt...
+[LOG 2026-10-17 21:08:54 -03-0300] (elapsed 3,326.5s) [n=4, d=2, svd=15] Loading FHE client/server from './fhe_model_4_estimators_2_depth_svd_15_components/' for latency measurement...
+[LOG 2026-10-17 21:08:54 -03-0300] (elapsed 3,326.5s) [n=4, d=2, svd=15] Model compiled for device='cpu' (from fhe_device.txt).
+[LOG 2026-10-17 21:08:56 -03-0300] (elapsed 3,328.4s) [n=4, d=2, svd=15] Generating evaluation keys...
+[LOG 2026-10-17 21:08:58 -03-0300] (elapsed 3,330.6s) [n=4, d=2, svd=15] Evaluation keys ready in 2.263s (58,653,592 bytes).
+[LOG 2026-10-17 21:08:58 -03-0300] (elapsed 3,330.6s) [n=4, d=2, svd=15] Measuring encrypt / inference / decrypt on 1,000 records...
+[LOG 2026-10-17 21:11:06 -03-0300] (elapsed 3,458.4s) [n=4, d=2, svd=15]   100/1000 — avg encrypt=0.005244s, avg infer=1.270465s, avg decrypt=0.001662s
+[LOG 2026-10-17 21:13:13 -03-0300] (elapsed 3,585.5s) [n=4, d=2, svd=15]   200/1000 — avg encrypt=0.005248s, avg infer=1.267404s, avg decrypt=0.001663s
+[LOG 2026-10-17 21:15:21 -03-0300] (elapsed 3,713.3s) [n=4, d=2, svd=15]   300/1000 — avg encrypt=0.005219s, avg infer=1.268544s, avg decrypt=0.001669s
+[LOG 2026-10-17 21:17:28 -03-0300] (elapsed 3,841.0s) [n=4, d=2, svd=15]   400/1000 — avg encrypt=0.005212s, avg infer=1.268928s, avg decrypt=0.001670s
+[LOG 2026-10-17 21:19:36 -03-0300] (elapsed 3,968.6s) [n=4, d=2, svd=15]   500/1000 — avg encrypt=0.005241s, avg infer=1.269002s, avg decrypt=0.001671s
+[LOG 2026-10-17 21:21:44 -03-0300] (elapsed 4,096.4s) [n=4, d=2, svd=15]   600/1000 — avg encrypt=0.005228s, avg infer=1.269288s, avg decrypt=0.001672s
+[LOG 2026-10-17 21:23:51 -03-0300] (elapsed 4,224.2s) [n=4, d=2, svd=15]   700/1000 — avg encrypt=0.005233s, avg infer=1.269654s, avg decrypt=0.001672s
+[LOG 2026-10-17 21:25:59 -03-0300] (elapsed 4,352.2s) [n=4, d=2, svd=15]   800/1000 — avg encrypt=0.005234s, avg infer=1.270077s, avg decrypt=0.001673s
+[LOG 2026-10-17 21:28:07 -03-0300] (elapsed 4,480.2s) [n=4, d=2, svd=15]   900/1000 — avg encrypt=0.005259s, avg infer=1.270386s, avg decrypt=0.001673s
+[LOG 2026-10-17 21:30:15 -03-0300] (elapsed 4,608.0s) [n=4, d=2, svd=15]   1000/1000 — avg encrypt=0.005251s, avg infer=1.270418s, avg decrypt=0.001673s
+[LOG 2026-10-17 21:30:15 -03-0300] (elapsed 4,608.0s) [n=4, d=2, svd=15] [STEP 3/3] Computing FHE metrics...
+[LOG 2026-10-17 21:30:15 -03-0300] (elapsed 4,608.0s) [n=4, d=2, svd=15] FHE metrics:
+--- Model Evaluation ---
+Accuracy: 0.8020
+Precision: 0.4539
+Recall: 0.7778
+F1-Score: 0.5733
+
+--- Confusion Matrix ---
+[[669 160]
+ [ 38 133]]
+
+--- Classification Report ---
+              precision    recall  f1-score   support
+
+           0       0.95      0.81      0.87       829
+           1       0.45      0.78      0.57       171
+
+    accuracy                           0.80      1000
+   macro avg       0.70      0.79      0.72      1000
+weighted avg       0.86      0.80      0.82      1000
+
+
+==================== FHE LATENCY (n=4, d=2, svd=15) ====================
+Records measured: 1000
+Key generation:   2.2627 s (once)
+       Phase |    Total (s) |     Mean (s) |      Std (s)
+----------------------------------------------------------
+     encrypt |       5.2506 |     0.005251 |     0.000984
+   inference |    1270.4183 |     1.270418 |     0.011962
+     decrypt |       1.6731 |     0.001673 |     0.000059
+  end-to-end |    1277.3420 |     1.277342 |          n/a
+======================================================================
+
+[LOG 2026-10-17 21:30:15 -03-0300] (elapsed 4,608.1s) === FHE Configuration ===
+
+============================================================
+  FHE CONFIG: n_estimators=4, max_depth=4, svd=15
+============================================================
+[LOG 2026-10-17 21:30:15 -03-0300] (elapsed 4,608.1s) [n=4, d=4, svd=15] Starting FHE inference benchmark
+[LOG 2026-10-17 21:30:15 -03-0300] (elapsed 4,608.1s) [n=4, d=4, svd=15] [STEP 1/3] Preparing data using saved artifacts...
+[LOG 2026-10-17 21:30:15 -03-0300] (elapsed 4,608.1s) [n=4, d=4, svd=15] 3246589 test records available, processing 1000.
+[LOG 2026-10-17 21:30:15 -03-0300] (elapsed 4,608.1s) [n=4, d=4, svd=15] [STEP 2/3] Measuring encrypt / inference / decrypt...
+[LOG 2026-10-17 21:30:15 -03-0300] (elapsed 4,608.1s) [n=4, d=4, svd=15] Loading FHE client/server from './fhe_model_4_estimators_4_depth_svd_15_components/' for latency measurement...
+[LOG 2026-10-17 21:30:15 -03-0300] (elapsed 4,608.1s) [n=4, d=4, svd=15] Model compiled for device='cpu' (from fhe_device.txt).
+[LOG 2026-10-17 21:30:17 -03-0300] (elapsed 4,609.8s) [n=4, d=4, svd=15] Generating evaluation keys...
+[LOG 2026-10-17 21:30:20 -03-0300] (elapsed 4,612.5s) [n=4, d=4, svd=15] Evaluation keys ready in 2.699s (77,269,912 bytes).
+[LOG 2026-10-17 21:30:20 -03-0300] (elapsed 4,612.5s) [n=4, d=4, svd=15] Measuring encrypt / inference / decrypt on 1,000 records...
+[LOG 2026-10-17 21:34:59 -03-0300] (elapsed 4,891.8s) [n=4, d=4, svd=15]   100/1000 — avg encrypt=0.005138s, avg infer=2.786235s, avg decrypt=0.001655s
+[LOG 2026-10-17 21:39:38 -03-0300] (elapsed 5,171.0s) [n=4, d=4, svd=15]   200/1000 — avg encrypt=0.005135s, avg infer=2.785803s, avg decrypt=0.001643s
+[LOG 2026-10-17 21:44:19 -03-0300] (elapsed 5,451.7s) [n=4, d=4, svd=15]   300/1000 — avg encrypt=0.005128s, avg infer=2.790620s, avg decrypt=0.001636s
+[LOG 2026-10-17 21:48:59 -03-0300] (elapsed 5,731.6s) [n=4, d=4, svd=15]   400/1000 — avg encrypt=0.005130s, avg infer=2.790871s, avg decrypt=0.001631s
+[LOG 2026-10-17 21:53:38 -03-0300] (elapsed 6,011.1s) [n=4, d=4, svd=15]   500/1000 — avg encrypt=0.005149s, avg infer=2.790442s, avg decrypt=0.001628s
+[LOG 2026-10-17 21:58:18 -03-0300] (elapsed 6,290.6s) [n=4, d=4, svd=15]   600/1000 — avg encrypt=0.005150s, avg infer=2.789988s, avg decrypt=0.001630s
+[LOG 2026-10-17 22:02:58 -03-0300] (elapsed 6,570.4s) [n=4, d=4, svd=15]   700/1000 — avg encrypt=0.005146s, avg infer=2.790137s, avg decrypt=0.001645s
+[LOG 2026-10-17 22:07:37 -03-0300] (elapsed 6,849.3s) [n=4, d=4, svd=15]   800/1000 — avg encrypt=0.005144s, avg infer=2.789233s, avg decrypt=0.001645s
+[LOG 2026-10-17 22:12:17 -03-0300] (elapsed 7,129.3s) [n=4, d=4, svd=15]   900/1000 — avg encrypt=0.005141s, avg infer=2.789651s, avg decrypt=0.001642s
+[LOG 2026-10-17 22:16:55 -03-0300] (elapsed 7,408.0s) [n=4, d=4, svd=15]   1000/1000 — avg encrypt=0.005139s, avg infer=2.788689s, avg decrypt=0.001640s
+[LOG 2026-10-17 22:16:55 -03-0300] (elapsed 7,408.0s) [n=4, d=4, svd=15] [STEP 3/3] Computing FHE metrics...
+[LOG 2026-10-17 22:16:55 -03-0300] (elapsed 7,408.0s) [n=4, d=4, svd=15] FHE metrics:
+--- Model Evaluation ---
+Accuracy: 0.8790
+Precision: 0.5926
+Recall: 0.9357
+F1-Score: 0.7256
+
+--- Confusion Matrix ---
+[[719 110]
+ [ 11 160]]
+
+--- Classification Report ---
+              precision    recall  f1-score   support
+
+           0       0.98      0.87      0.92       829
+           1       0.59      0.94      0.73       171
+
+    accuracy                           0.88      1000
+   macro avg       0.79      0.90      0.82      1000
+weighted avg       0.92      0.88      0.89      1000
+
+
+==================== FHE LATENCY (n=4, d=4, svd=15) ====================
+Records measured: 1000
+Key generation:   2.6992 s (once)
+       Phase |    Total (s) |     Mean (s) |      Std (s)
+----------------------------------------------------------
+     encrypt |       5.1390 |     0.005139 |     0.000354
+   inference |    2788.6886 |     2.788689 |     0.017219
+     decrypt |       1.6398 |     0.001640 |     0.000334
+  end-to-end |    2795.4674 |     2.795467 |          n/a
+======================================================================
+
+[LOG 2026-10-17 22:16:55 -03-0300] (elapsed 7,408.1s) === FHE Configuration ===
+
+============================================================
+  FHE CONFIG: n_estimators=2, max_depth=2, svd=25
+============================================================
+[LOG 2026-10-17 22:16:55 -03-0300] (elapsed 7,408.1s) [n=2, d=2, svd=25] Starting FHE inference benchmark
+[LOG 2026-10-17 22:16:55 -03-0300] (elapsed 7,408.1s) [n=2, d=2, svd=25] [STEP 1/3] Preparing data using saved artifacts...
+[LOG 2026-10-17 22:16:55 -03-0300] (elapsed 7,408.2s) Projecting test set with saved SVD from 'svd_cic_ids_2018_25.pkl'...
+[LOG 2026-10-17 22:16:55 -03-0300] (elapsed 7,408.2s) Projecting 3,246,589 x 64,539 -> 25 components in chunks of 50,000...
+[LOG 2026-10-17 22:16:55 -03-0300] (elapsed 7,408.2s) Projected rows 50,000 / 3,246,589
+[LOG 2026-10-17 22:16:56 -03-0300] (elapsed 7,408.3s) Projected rows 1,050,000 / 3,246,589
+[LOG 2026-10-17 22:16:56 -03-0300] (elapsed 7,408.4s) Projected rows 2,050,000 / 3,246,589
+[LOG 2026-10-17 22:16:56 -03-0300] (elapsed 7,408.4s) Projected rows 3,050,000 / 3,246,589
+[LOG 2026-10-17 22:16:56 -03-0300] (elapsed 7,408.6s) Test projection ready — (3246589, 25).
+[LOG 2026-10-17 22:16:56 -03-0300] (elapsed 7,408.6s) [n=2, d=2, svd=25] 3246589 test records available, processing 1000.
+[LOG 2026-10-17 22:16:56 -03-0300] (elapsed 7,408.6s) [n=2, d=2, svd=25] [STEP 2/3] Measuring encrypt / inference / decrypt...
+[LOG 2026-10-17 22:16:56 -03-0300] (elapsed 7,408.6s) [n=2, d=2, svd=25] Loading FHE client/server from './fhe_model_2_estimators_2_depth_svd_25_components/' for latency measurement...
+[LOG 2026-10-17 22:16:56 -03-0300] (elapsed 7,408.6s) [n=2, d=2, svd=25] Model compiled for device='cpu' (from fhe_device.txt).
+[LOG 2026-10-17 22:16:58 -03-0300] (elapsed 7,410.5s) [n=2, d=2, svd=25] Generating evaluation keys...
+[LOG 2026-10-17 22:17:00 -03-0300] (elapsed 7,412.7s) [n=2, d=2, svd=25] Evaluation keys ready in 2.270s (58,653,592 bytes).
+[LOG 2026-10-17 22:17:00 -03-0300] (elapsed 7,412.7s) [n=2, d=2, svd=25] Measuring encrypt / inference / decrypt on 1,000 records...
+[LOG 2026-10-17 22:18:48 -03-0300] (elapsed 7,520.5s) [n=2, d=2, svd=25]   100/1000 — avg encrypt=0.006753s, avg infer=1.069894s, avg decrypt=0.001496s
+[LOG 2026-10-17 22:20:36 -03-0300] (elapsed 7,628.5s) [n=2, d=2, svd=25]   200/1000 — avg encrypt=0.006773s, avg infer=1.070310s, avg decrypt=0.001502s
+[LOG 2026-10-17 22:22:23 -03-0300] (elapsed 7,736.1s) [n=2, d=2, svd=25]   300/1000 — avg encrypt=0.006771s, avg infer=1.069725s, avg decrypt=0.001501s
+[LOG 2026-10-17 22:24:12 -03-0300] (elapsed 7,844.3s) [n=2, d=2, svd=25]   400/1000 — avg encrypt=0.006743s, avg infer=1.070693s, avg decrypt=0.001502s
+[LOG 2026-10-17 22:25:59 -03-0300] (elapsed 7,952.1s) [n=2, d=2, svd=25]   500/1000 — avg encrypt=0.006779s, avg infer=1.070400s, avg decrypt=0.001503s
+[LOG 2026-10-17 22:27:47 -03-0300] (elapsed 8,059.6s) [n=2, d=2, svd=25]   600/1000 — avg encrypt=0.006777s, avg infer=1.069815s, avg decrypt=0.001504s
+[LOG 2026-10-17 22:29:35 -03-0300] (elapsed 8,167.8s) [n=2, d=2, svd=25]   700/1000 — avg encrypt=0.006761s, avg infer=1.070321s, avg decrypt=0.001505s
+[LOG 2026-10-17 22:31:23 -03-0300] (elapsed 8,276.0s) [n=2, d=2, svd=25]   800/1000 — avg encrypt=0.006762s, avg infer=1.070773s, avg decrypt=0.001505s
+[LOG 2026-10-17 22:33:11 -03-0300] (elapsed 8,383.7s) [n=2, d=2, svd=25]   900/1000 — avg encrypt=0.006764s, avg infer=1.070593s, avg decrypt=0.001504s
+[LOG 2026-10-17 22:34:59 -03-0300] (elapsed 8,491.7s) [n=2, d=2, svd=25]   1000/1000 — avg encrypt=0.006785s, avg infer=1.070700s, avg decrypt=0.001505s
+[LOG 2026-10-17 22:34:59 -03-0300] (elapsed 8,491.7s) [n=2, d=2, svd=25] [STEP 3/3] Computing FHE metrics...
+[LOG 2026-10-17 22:34:59 -03-0300] (elapsed 8,491.7s) [n=2, d=2, svd=25] FHE metrics:
+--- Model Evaluation ---
+Accuracy: 0.9040
+Precision: 0.7095
+Recall: 0.7427
+F1-Score: 0.7257
+
+--- Confusion Matrix ---
+[[777  52]
+ [ 44 127]]
+
+--- Classification Report ---
+              precision    recall  f1-score   support
+
+           0       0.95      0.94      0.94       829
+           1       0.71      0.74      0.73       171
+
+    accuracy                           0.90      1000
+   macro avg       0.83      0.84      0.83      1000
+weighted avg       0.91      0.90      0.90      1000
+
+
+==================== FHE LATENCY (n=2, d=2, svd=25) ====================
+Records measured: 1000
+Key generation:   2.2697 s (once)
+       Phase |    Total (s) |     Mean (s) |      Std (s)
+----------------------------------------------------------
+     encrypt |       6.7845 |     0.006785 |     0.001101
+   inference |    1070.7002 |     1.070700 |     0.010530
+     decrypt |       1.5046 |     0.001505 |     0.000063
+  end-to-end |    1078.9893 |     1.078989 |          n/a
+======================================================================
+
+[LOG 2026-10-17 22:34:59 -03-0300] (elapsed 8,491.9s) === FHE Configuration ===
+
+============================================================
+  FHE CONFIG: n_estimators=2, max_depth=4, svd=25
+============================================================
+[LOG 2026-10-17 22:34:59 -03-0300] (elapsed 8,491.9s) [n=2, d=4, svd=25] Starting FHE inference benchmark
+[LOG 2026-10-17 22:34:59 -03-0300] (elapsed 8,491.9s) [n=2, d=4, svd=25] [STEP 1/3] Preparing data using saved artifacts...
+[LOG 2026-10-17 22:34:59 -03-0300] (elapsed 8,491.9s) [n=2, d=4, svd=25] 3246589 test records available, processing 1000.
+[LOG 2026-10-17 22:34:59 -03-0300] (elapsed 8,491.9s) [n=2, d=4, svd=25] [STEP 2/3] Measuring encrypt / inference / decrypt...
+[LOG 2026-10-17 22:34:59 -03-0300] (elapsed 8,491.9s) [n=2, d=4, svd=25] Loading FHE client/server from './fhe_model_2_estimators_4_depth_svd_25_components/' for latency measurement...
+[LOG 2026-10-17 22:34:59 -03-0300] (elapsed 8,491.9s) [n=2, d=4, svd=25] Model compiled for device='cpu' (from fhe_device.txt).
+[LOG 2026-10-17 22:35:01 -03-0300] (elapsed 8,493.6s) [n=2, d=4, svd=25] Generating evaluation keys...
+[LOG 2026-10-17 22:35:04 -03-0300] (elapsed 8,496.3s) [n=2, d=4, svd=25] Evaluation keys ready in 2.701s (77,269,912 bytes).
+[LOG 2026-10-17 22:35:04 -03-0300] (elapsed 8,496.3s) [n=2, d=4, svd=25] Measuring encrypt / inference / decrypt on 1,000 records...
+[LOG 2026-10-17 22:38:13 -03-0300] (elapsed 8,686.2s) [n=2, d=4, svd=25]   100/1000 — avg encrypt=0.006660s, avg infer=1.891494s, avg decrypt=0.001506s
+[LOG 2026-10-17 22:41:23 -03-0300] (elapsed 8,875.6s) [n=2, d=4, svd=25]   200/1000 — avg encrypt=0.006724s, avg infer=1.888518s, avg decrypt=0.001507s
+[LOG 2026-10-17 22:44:32 -03-0300] (elapsed 9,064.7s) [n=2, d=4, svd=25]   300/1000 — avg encrypt=0.006780s, avg infer=1.886565s, avg decrypt=0.001504s
+[LOG 2026-10-17 22:47:41 -03-0300] (elapsed 9,254.1s) [n=2, d=4, svd=25]   400/1000 — avg encrypt=0.006773s, avg infer=1.886223s, avg decrypt=0.001507s
+[LOG 2026-10-17 22:50:50 -03-0300] (elapsed 9,443.3s) [n=2, d=4, svd=25]   500/1000 — avg encrypt=0.006788s, avg infer=1.885671s, avg decrypt=0.001508s
+[LOG 2026-10-17 22:53:59 -03-0300] (elapsed 9,632.0s) [n=2, d=4, svd=25]   600/1000 — avg encrypt=0.006815s, avg infer=1.884578s, avg decrypt=0.001505s
+[LOG 2026-10-17 22:57:08 -03-0300] (elapsed 9,820.6s) [n=2, d=4, svd=25]   700/1000 — avg encrypt=0.006808s, avg infer=1.883525s, avg decrypt=0.001509s
+[LOG 2026-10-17 23:00:16 -03-0300] (elapsed 10,008.8s) [n=2, d=4, svd=25]   800/1000 — avg encrypt=0.006784s, avg infer=1.882338s, avg decrypt=0.001507s
+[LOG 2026-10-17 23:03:25 -03-0300] (elapsed 10,198.0s) [n=2, d=4, svd=25]   900/1000 — avg encrypt=0.006768s, avg infer=1.882555s, avg decrypt=0.001505s
+[LOG 2026-10-17 23:06:36 -03-0300] (elapsed 10,388.4s) [n=2, d=4, svd=25]   1000/1000 — avg encrypt=0.006754s, avg infer=1.883906s, avg decrypt=0.001503s
+[LOG 2026-10-17 23:06:36 -03-0300] (elapsed 10,388.4s) [n=2, d=4, svd=25] [STEP 3/3] Computing FHE metrics...
+[LOG 2026-10-17 23:06:36 -03-0300] (elapsed 10,388.4s) [n=2, d=4, svd=25] FHE metrics:
+--- Model Evaluation ---
+Accuracy: 0.9130
+Precision: 0.7333
+Recall: 0.7719
+F1-Score: 0.7521
+
+--- Confusion Matrix ---
+[[781  48]
+ [ 39 132]]
+
+--- Classification Report ---
+              precision    recall  f1-score   support
+
+           0       0.95      0.94      0.95       829
+           1       0.73      0.77      0.75       171
+
+    accuracy                           0.91      1000
+   macro avg       0.84      0.86      0.85      1000
+weighted avg       0.91      0.91      0.91      1000
+
+
+==================== FHE LATENCY (n=2, d=4, svd=25) ====================
+Records measured: 1000
+Key generation:   2.7012 s (once)
+       Phase |    Total (s) |     Mean (s) |      Std (s)
+----------------------------------------------------------
+     encrypt |       6.7542 |     0.006754 |     0.001098
+   inference |    1883.9064 |     1.883906 |     0.013741
+     decrypt |       1.5031 |     0.001503 |     0.000063
+  end-to-end |    1892.1637 |     1.892164 |          n/a
+======================================================================
+
+[LOG 2026-10-17 23:06:36 -03-0300] (elapsed 10,388.6s) === FHE Configuration ===
+
+============================================================
+  FHE CONFIG: n_estimators=4, max_depth=2, svd=25
+============================================================
+[LOG 2026-10-17 23:06:36 -03-0300] (elapsed 10,388.6s) [n=4, d=2, svd=25] Starting FHE inference benchmark
+[LOG 2026-10-17 23:06:36 -03-0300] (elapsed 10,388.6s) [n=4, d=2, svd=25] [STEP 1/3] Preparing data using saved artifacts...
+[LOG 2026-10-17 23:06:36 -03-0300] (elapsed 10,388.6s) [n=4, d=2, svd=25] 3246589 test records available, processing 1000.
+[LOG 2026-10-17 23:06:36 -03-0300] (elapsed 10,388.6s) [n=4, d=2, svd=25] [STEP 2/3] Measuring encrypt / inference / decrypt...
+[LOG 2026-10-17 23:06:36 -03-0300] (elapsed 10,388.6s) [n=4, d=2, svd=25] Loading FHE client/server from './fhe_model_4_estimators_2_depth_svd_25_components/' for latency measurement...
+[LOG 2026-10-17 23:06:36 -03-0300] (elapsed 10,388.6s) [n=4, d=2, svd=25] Model compiled for device='cpu' (from fhe_device.txt).
+[LOG 2026-10-17 23:06:38 -03-0300] (elapsed 10,390.4s) [n=4, d=2, svd=25] Generating evaluation keys...
+[LOG 2026-10-17 23:06:40 -03-0300] (elapsed 10,392.7s) [n=4, d=2, svd=25] Evaluation keys ready in 2.262s (58,653,592 bytes).
+[LOG 2026-10-17 23:06:40 -03-0300] (elapsed 10,392.7s) [n=4, d=2, svd=25] Measuring encrypt / inference / decrypt on 1,000 records...
+[LOG 2026-10-17 23:08:43 -03-0300] (elapsed 10,515.8s) [n=4, d=2, svd=25]   100/1000 — avg encrypt=0.006806s, avg infer=1.223215s, avg decrypt=0.001627s
+[LOG 2026-10-17 23:10:46 -03-0300] (elapsed 10,638.4s) [n=4, d=2, svd=25]   200/1000 — avg encrypt=0.006748s, avg infer=1.220401s, avg decrypt=0.001631s
+[LOG 2026-10-17 23:12:49 -03-0300] (elapsed 10,761.7s) [n=4, d=2, svd=25]   300/1000 — avg encrypt=0.006779s, avg infer=1.221653s, avg decrypt=0.001634s
+[LOG 2026-10-17 23:14:52 -03-0300] (elapsed 10,884.8s) [n=4, d=2, svd=25]   400/1000 — avg encrypt=0.006755s, avg infer=1.221847s, avg decrypt=0.001628s
+[LOG 2026-10-17 23:16:55 -03-0300] (elapsed 11,008.0s) [n=4, d=2, svd=25]   500/1000 — avg encrypt=0.006742s, avg infer=1.222343s, avg decrypt=0.001626s
+[LOG 2026-10-17 23:18:58 -03-0300] (elapsed 11,131.2s) [n=4, d=2, svd=25]   600/1000 — avg encrypt=0.006747s, avg infer=1.222529s, avg decrypt=0.001624s
+[LOG 2026-10-17 23:21:01 -03-0300] (elapsed 11,254.1s) [n=4, d=2, svd=25]   700/1000 — avg encrypt=0.006753s, avg infer=1.222174s, avg decrypt=0.001625s
+[LOG 2026-10-17 23:23:04 -03-0300] (elapsed 11,376.7s) [n=4, d=2, svd=25]   800/1000 — avg encrypt=0.006745s, avg infer=1.221609s, avg decrypt=0.001625s
+[LOG 2026-10-17 23:25:07 -03-0300] (elapsed 11,499.7s) [n=4, d=2, svd=25]   900/1000 — avg encrypt=0.006740s, avg infer=1.221658s, avg decrypt=0.001626s
+[LOG 2026-10-17 23:27:09 -03-0300] (elapsed 11,622.2s) [n=4, d=2, svd=25]   1000/1000 — avg encrypt=0.006734s, avg infer=1.221186s, avg decrypt=0.001626s
+[LOG 2026-10-17 23:27:09 -03-0300] (elapsed 11,622.2s) [n=4, d=2, svd=25] [STEP 3/3] Computing FHE metrics...
+[LOG 2026-10-17 23:27:09 -03-0300] (elapsed 11,622.2s) [n=4, d=2, svd=25] FHE metrics:
+--- Model Evaluation ---
+Accuracy: 0.8950
+Precision: 0.6941
+Recall: 0.6901
+F1-Score: 0.6921
+
+--- Confusion Matrix ---
+[[777  52]
+ [ 53 118]]
+
+--- Classification Report ---
+              precision    recall  f1-score   support
+
+           0       0.94      0.94      0.94       829
+           1       0.69      0.69      0.69       171
+
+    accuracy                           0.90      1000
+   macro avg       0.82      0.81      0.81      1000
+weighted avg       0.89      0.90      0.89      1000
+
+
+==================== FHE LATENCY (n=4, d=2, svd=25) ====================
+Records measured: 1000
+Key generation:   2.2618 s (once)
+       Phase |    Total (s) |     Mean (s) |      Std (s)
+----------------------------------------------------------
+     encrypt |       6.7341 |     0.006734 |     0.000712
+   inference |    1221.1858 |     1.221186 |     0.010817
+     decrypt |       1.6264 |     0.001626 |     0.000064
+  end-to-end |    1229.5464 |     1.229546 |          n/a
+======================================================================
+
+[LOG 2026-10-17 23:27:10 -03-0300] (elapsed 11,622.3s) === FHE Configuration ===
+
+============================================================
+  FHE CONFIG: n_estimators=4, max_depth=4, svd=25
+============================================================
+[LOG 2026-10-17 23:27:10 -03-0300] (elapsed 11,622.3s) [n=4, d=4, svd=25] Starting FHE inference benchmark
+[LOG 2026-10-17 23:27:10 -03-0300] (elapsed 11,622.3s) [n=4, d=4, svd=25] [STEP 1/3] Preparing data using saved artifacts...
+[LOG 2026-10-17 23:27:10 -03-0300] (elapsed 11,622.3s) [n=4, d=4, svd=25] 3246589 test records available, processing 1000.
+[LOG 2026-10-17 23:27:10 -03-0300] (elapsed 11,622.3s) [n=4, d=4, svd=25] [STEP 2/3] Measuring encrypt / inference / decrypt...
+[LOG 2026-10-17 23:27:10 -03-0300] (elapsed 11,622.3s) [n=4, d=4, svd=25] Loading FHE client/server from './fhe_model_4_estimators_4_depth_svd_25_components/' for latency measurement...
+[LOG 2026-10-17 23:27:10 -03-0300] (elapsed 11,622.3s) [n=4, d=4, svd=25] Model compiled for device='cpu' (from fhe_device.txt).
+[LOG 2026-10-17 23:27:11 -03-0300] (elapsed 11,624.0s) [n=4, d=4, svd=25] Generating evaluation keys...
+[LOG 2026-10-17 23:27:14 -03-0300] (elapsed 11,626.7s) [n=4, d=4, svd=25] Evaluation keys ready in 2.701s (77,269,912 bytes).
+[LOG 2026-10-17 23:27:14 -03-0300] (elapsed 11,626.7s) [n=4, d=4, svd=25] Measuring encrypt / inference / decrypt on 1,000 records...
+[LOG 2026-10-17 23:31:50 -03-0300] (elapsed 11,903.1s) [n=4, d=4, svd=25]   100/1000 — avg encrypt=0.006772s, avg infer=2.754914s, avg decrypt=0.001739s
+[LOG 2026-10-17 23:36:27 -03-0300] (elapsed 12,179.9s) [n=4, d=4, svd=25]   200/1000 — avg encrypt=0.006773s, avg infer=2.757147s, avg decrypt=0.001746s
+[LOG 2026-10-17 23:41:04 -03-0300] (elapsed 12,456.4s) [n=4, d=4, svd=25]   300/1000 — avg encrypt=0.006739s, avg infer=2.757152s, avg decrypt=0.001712s
+[LOG 2026-10-17 23:45:40 -03-0300] (elapsed 12,732.9s) [n=4, d=4, svd=25]   400/1000 — avg encrypt=0.006740s, avg infer=2.756968s, avg decrypt=0.001692s
+[LOG 2026-10-17 23:50:16 -03-0300] (elapsed 13,009.0s) [n=4, d=4, svd=25]   500/1000 — avg encrypt=0.006739s, avg infer=2.756097s, avg decrypt=0.001678s
+[LOG 2026-10-17 23:54:50 -03-0300] (elapsed 13,283.2s) [n=4, d=4, svd=25]   600/1000 — avg encrypt=0.006793s, avg infer=2.752239s, avg decrypt=0.001671s
+[LOG 2026-10-17 23:59:25 -03-0300] (elapsed 13,558.2s) [n=4, d=4, svd=25]   700/1000 — avg encrypt=0.006772s, avg infer=2.750797s, avg decrypt=0.001665s
+[LOG 2026-10-18 00:04:02 -03-0300] (elapsed 13,835.0s) [n=4, d=4, svd=25]   800/1000 — avg encrypt=0.006765s, avg infer=2.751869s, avg decrypt=0.001661s
+[LOG 2026-10-18 00:08:38 -03-0300] (elapsed 14,110.9s) [n=4, d=4, svd=25]   900/1000 — avg encrypt=0.006765s, avg infer=2.751737s, avg decrypt=0.001670s
+[LOG 2026-10-18 00:13:13 -03-0300] (elapsed 14,385.9s) [n=4, d=4, svd=25]   1000/1000 — avg encrypt=0.006753s, avg infer=2.750700s, avg decrypt=0.001677s
+[LOG 2026-10-18 00:13:13 -03-0300] (elapsed 14,385.9s) [n=4, d=4, svd=25] [STEP 3/3] Computing FHE metrics...
+[LOG 2026-10-18 00:13:13 -03-0300] (elapsed 14,385.9s) [n=4, d=4, svd=25] FHE metrics:
+--- Model Evaluation ---
+Accuracy: 0.9130
+Precision: 0.7333
+Recall: 0.7719
+F1-Score: 0.7521
+
+--- Confusion Matrix ---
+[[781  48]
+ [ 39 132]]
+
+--- Classification Report ---
+              precision    recall  f1-score   support
+
+           0       0.95      0.94      0.95       829
+           1       0.73      0.77      0.75       171
+
+    accuracy                           0.91      1000
+   macro avg       0.84      0.86      0.85      1000
+weighted avg       0.91      0.91      0.91      1000
+
+
+==================== FHE LATENCY (n=4, d=4, svd=25) ====================
+Records measured: 1000
+Key generation:   2.7014 s (once)
+       Phase |    Total (s) |     Mean (s) |      Std (s)
+----------------------------------------------------------
+     encrypt |       6.7526 |     0.006753 |     0.001016
+   inference |    2750.7001 |     2.750700 |     0.021003
+     decrypt |       1.6771 |     0.001677 |     0.000662
+  end-to-end |    2759.1298 |     2.759130 |          n/a
+======================================================================
+
+[LOG 2026-10-18 00:13:13 -03-0300] (elapsed 14,386.0s) === FHE Configuration ===
+
+============================================================
+  FHE CONFIG: n_estimators=2, max_depth=2, svd=40
+============================================================
+[LOG 2026-10-18 00:13:13 -03-0300] (elapsed 14,386.0s) [n=2, d=2, svd=40] Starting FHE inference benchmark
+[LOG 2026-10-18 00:13:13 -03-0300] (elapsed 14,386.0s) [n=2, d=2, svd=40] [STEP 1/3] Preparing data using saved artifacts...
+[LOG 2026-10-18 00:13:13 -03-0300] (elapsed 14,386.1s) Projecting test set with saved SVD from 'svd_cic_ids_2018_40.pkl'...
+[LOG 2026-10-18 00:13:13 -03-0300] (elapsed 14,386.1s) Projecting 3,246,589 x 64,539 -> 40 components in chunks of 50,000...
+[LOG 2026-10-18 00:13:13 -03-0300] (elapsed 14,386.1s) Projected rows 50,000 / 3,246,589
+[LOG 2026-10-18 00:13:13 -03-0300] (elapsed 14,386.2s) Projected rows 1,050,000 / 3,246,589
+[LOG 2026-10-18 00:13:14 -03-0300] (elapsed 14,386.3s) Projected rows 2,050,000 / 3,246,589
+[LOG 2026-10-18 00:13:14 -03-0300] (elapsed 14,386.4s) Projected rows 3,050,000 / 3,246,589
+[LOG 2026-10-18 00:13:14 -03-0300] (elapsed 14,386.6s) Test projection ready — (3246589, 40).
+[LOG 2026-10-18 00:13:14 -03-0300] (elapsed 14,386.6s) [n=2, d=2, svd=40] 3246589 test records available, processing 1000.
+[LOG 2026-10-18 00:13:14 -03-0300] (elapsed 14,386.6s) [n=2, d=2, svd=40] [STEP 2/3] Measuring encrypt / inference / decrypt...
+[LOG 2026-10-18 00:13:14 -03-0300] (elapsed 14,386.6s) [n=2, d=2, svd=40] Loading FHE client/server from './fhe_model_2_estimators_2_depth_svd_40_components/' for latency measurement...
+[LOG 2026-10-18 00:13:14 -03-0300] (elapsed 14,386.6s) [n=2, d=2, svd=40] Model compiled for device='cpu' (from fhe_device.txt).
+[LOG 2026-10-18 00:13:16 -03-0300] (elapsed 14,388.4s) [n=2, d=2, svd=40] Generating evaluation keys...
+[LOG 2026-10-18 00:13:18 -03-0300] (elapsed 14,390.7s) [n=2, d=2, svd=40] Evaluation keys ready in 2.271s (58,653,592 bytes).
+[LOG 2026-10-18 00:13:18 -03-0300] (elapsed 14,390.7s) [n=2, d=2, svd=40] Measuring encrypt / inference / decrypt on 1,000 records...
+[LOG 2026-10-18 00:15:05 -03-0300] (elapsed 14,497.4s) [n=2, d=2, svd=40]   100/1000 — avg encrypt=0.008938s, avg infer=1.056009s, avg decrypt=0.001490s
+[LOG 2026-10-18 00:16:51 -03-0300] (elapsed 14,604.0s) [n=2, d=2, svd=40]   200/1000 — avg encrypt=0.009066s, avg infer=1.055585s, avg decrypt=0.001493s
+[LOG 2026-10-18 00:18:38 -03-0300] (elapsed 14,710.8s) [n=2, d=2, svd=40]   300/1000 — avg encrypt=0.009038s, avg infer=1.056445s, avg decrypt=0.001494s
+[LOG 2026-10-18 00:20:25 -03-0300] (elapsed 14,817.9s) [n=2, d=2, svd=40]   400/1000 — avg encrypt=0.009046s, avg infer=1.057455s, avg decrypt=0.001495s
+[LOG 2026-10-18 00:22:13 -03-0300] (elapsed 14,925.3s) [n=2, d=2, svd=40]   500/1000 — avg encrypt=0.009094s, avg infer=1.058477s, avg decrypt=0.001517s
+[LOG 2026-10-18 00:24:00 -03-0300] (elapsed 15,032.4s) [n=2, d=2, svd=40]   600/1000 — avg encrypt=0.009114s, avg infer=1.058792s, avg decrypt=0.001510s
+[LOG 2026-10-18 00:25:47 -03-0300] (elapsed 15,139.3s) [n=2, d=2, svd=40]   700/1000 — avg encrypt=0.009116s, avg infer=1.058761s, avg decrypt=0.001523s
+[LOG 2026-10-18 00:27:33 -03-0300] (elapsed 15,246.2s) [n=2, d=2, svd=40]   800/1000 — avg encrypt=0.009097s, avg infer=1.058716s, avg decrypt=0.001518s
+[LOG 2026-10-18 00:29:20 -03-0300] (elapsed 15,353.0s) [n=2, d=2, svd=40]   900/1000 — avg encrypt=0.009092s, avg infer=1.058572s, avg decrypt=0.001526s
+[LOG 2026-10-18 00:31:07 -03-0300] (elapsed 15,459.6s) [n=2, d=2, svd=40]   1000/1000 — avg encrypt=0.009117s, avg infer=1.058265s, avg decrypt=0.001525s
+[LOG 2026-10-18 00:31:07 -03-0300] (elapsed 15,459.6s) [n=2, d=2, svd=40] [STEP 3/3] Computing FHE metrics...
+[LOG 2026-10-18 00:31:07 -03-0300] (elapsed 15,459.6s) [n=2, d=2, svd=40] FHE metrics:
+--- Model Evaluation ---
+Accuracy: 0.8570
+Precision: 0.9375
+Recall: 0.1754
+F1-Score: 0.2956
+
+--- Confusion Matrix ---
+[[827   2]
+ [141  30]]
+
+--- Classification Report ---
+              precision    recall  f1-score   support
+
+           0       0.85      1.00      0.92       829
+           1       0.94      0.18      0.30       171
+
+    accuracy                           0.86      1000
+   macro avg       0.90      0.59      0.61      1000
+weighted avg       0.87      0.86      0.81      1000
+
+
+==================== FHE LATENCY (n=2, d=2, svd=40) ====================
+Records measured: 1000
+Key generation:   2.2709 s (once)
+       Phase |    Total (s) |     Mean (s) |      Std (s)
+----------------------------------------------------------
+     encrypt |       9.1169 |     0.009117 |     0.001264
+   inference |    1058.2652 |     1.058265 |     0.009407
+     decrypt |       1.5247 |     0.001525 |     0.000582
+  end-to-end |    1068.9068 |     1.068907 |          n/a
+======================================================================
+
+[LOG 2026-10-18 00:31:07 -03-0300] (elapsed 15,459.8s) === FHE Configuration ===
+
+============================================================
+  FHE CONFIG: n_estimators=2, max_depth=4, svd=40
+============================================================
+[LOG 2026-10-18 00:31:07 -03-0300] (elapsed 15,459.8s) [n=2, d=4, svd=40] Starting FHE inference benchmark
+[LOG 2026-10-18 00:31:07 -03-0300] (elapsed 15,459.8s) [n=2, d=4, svd=40] [STEP 1/3] Preparing data using saved artifacts...
+[LOG 2026-10-18 00:31:07 -03-0300] (elapsed 15,459.8s) [n=2, d=4, svd=40] 3246589 test records available, processing 1000.
+[LOG 2026-10-18 00:31:07 -03-0300] (elapsed 15,459.8s) [n=2, d=4, svd=40] [STEP 2/3] Measuring encrypt / inference / decrypt...
+[LOG 2026-10-18 00:31:07 -03-0300] (elapsed 15,459.8s) [n=2, d=4, svd=40] Loading FHE client/server from './fhe_model_2_estimators_4_depth_svd_40_components/' for latency measurement...
+[LOG 2026-10-18 00:31:07 -03-0300] (elapsed 15,459.8s) [n=2, d=4, svd=40] Model compiled for device='cpu' (from fhe_device.txt).
+[LOG 2026-10-18 00:31:09 -03-0300] (elapsed 15,461.6s) [n=2, d=4, svd=40] Generating evaluation keys...
+[LOG 2026-10-18 00:31:11 -03-0300] (elapsed 15,463.9s) [n=2, d=4, svd=40] Evaluation keys ready in 2.295s (59,145,112 bytes).
+[LOG 2026-10-18 00:31:11 -03-0300] (elapsed 15,463.9s) [n=2, d=4, svd=40] Measuring encrypt / inference / decrypt on 1,000 records...
+[LOG 2026-10-18 00:33:49 -03-0300] (elapsed 15,621.9s) [n=2, d=4, svd=40]   100/1000 — avg encrypt=0.008959s, avg infer=1.569856s, avg decrypt=0.001616s
+[LOG 2026-10-18 00:36:27 -03-0300] (elapsed 15,779.3s) [n=2, d=4, svd=40]   200/1000 — avg encrypt=0.009015s, avg infer=1.566620s, avg decrypt=0.001561s
+[LOG 2026-10-18 00:39:04 -03-0300] (elapsed 15,936.6s) [n=2, d=4, svd=40]   300/1000 — avg encrypt=0.008995s, avg infer=1.565249s, avg decrypt=0.001546s
+[LOG 2026-10-18 00:41:42 -03-0300] (elapsed 16,095.0s) [n=2, d=4, svd=40]   400/1000 — avg encrypt=0.009007s, avg infer=1.567322s, avg decrypt=0.001536s
+[LOG 2026-10-18 00:44:20 -03-0300] (elapsed 16,252.9s) [n=2, d=4, svd=40]   500/1000 — avg encrypt=0.009018s, avg infer=1.567441s, avg decrypt=0.001533s
+[LOG 2026-10-18 00:46:58 -03-0300] (elapsed 16,411.0s) [n=2, d=4, svd=40]   600/1000 — avg encrypt=0.009011s, avg infer=1.567939s, avg decrypt=0.001551s
+[LOG 2026-10-18 00:49:37 -03-0300] (elapsed 16,569.3s) [n=2, d=4, svd=40]   700/1000 — avg encrypt=0.009035s, avg infer=1.568542s, avg decrypt=0.001562s
+[LOG 2026-10-18 00:52:14 -03-0300] (elapsed 16,726.4s) [n=2, d=4, svd=40]   800/1000 — avg encrypt=0.009066s, avg infer=1.567434s, avg decrypt=0.001556s
+[LOG 2026-10-18 00:54:51 -03-0300] (elapsed 16,884.1s) [n=2, d=4, svd=40]   900/1000 — avg encrypt=0.009084s, avg infer=1.567359s, avg decrypt=0.001552s
+[LOG 2026-10-18 00:57:30 -03-0300] (elapsed 17,042.6s) [n=2, d=4, svd=40]   1000/1000 — avg encrypt=0.009085s, avg infer=1.568100s, avg decrypt=0.001548s
+[LOG 2026-10-18 00:57:30 -03-0300] (elapsed 17,042.6s) [n=2, d=4, svd=40] [STEP 3/3] Computing FHE metrics...
+[LOG 2026-10-18 00:57:30 -03-0300] (elapsed 17,042.6s) [n=2, d=4, svd=40] FHE metrics:
+--- Model Evaluation ---
+Accuracy: 0.8980
+Precision: 0.7041
+Recall: 0.6959
+F1-Score: 0.7000
+
+--- Confusion Matrix ---
+[[779  50]
+ [ 52 119]]
+
+--- Classification Report ---
+              precision    recall  f1-score   support
+
+           0       0.94      0.94      0.94       829
+           1       0.70      0.70      0.70       171
+
+    accuracy                           0.90      1000
+   macro avg       0.82      0.82      0.82      1000
+weighted avg       0.90      0.90      0.90      1000
+
+
+==================== FHE LATENCY (n=2, d=4, svd=40) ====================
+Records measured: 1000
+Key generation:   2.2951 s (once)
+       Phase |    Total (s) |     Mean (s) |      Std (s)
+----------------------------------------------------------
+     encrypt |       9.0848 |     0.009085 |     0.001139
+   inference |    1568.1003 |     1.568100 |     0.013211
+     decrypt |       1.5485 |     0.001548 |     0.000596
+  end-to-end |    1578.7336 |     1.578734 |          n/a
+======================================================================
+
+[LOG 2026-10-18 00:57:30 -03-0300] (elapsed 17,042.8s) === FHE Configuration ===
+
+============================================================
+  FHE CONFIG: n_estimators=4, max_depth=2, svd=40
+============================================================
+[LOG 2026-10-18 00:57:30 -03-0300] (elapsed 17,042.8s) [n=4, d=2, svd=40] Starting FHE inference benchmark
+[LOG 2026-10-18 00:57:30 -03-0300] (elapsed 17,042.8s) [n=4, d=2, svd=40] [STEP 1/3] Preparing data using saved artifacts...
+[LOG 2026-10-18 00:57:30 -03-0300] (elapsed 17,042.8s) [n=4, d=2, svd=40] 3246589 test records available, processing 1000.
+[LOG 2026-10-18 00:57:30 -03-0300] (elapsed 17,042.8s) [n=4, d=2, svd=40] [STEP 2/3] Measuring encrypt / inference / decrypt...
+[LOG 2026-10-18 00:57:30 -03-0300] (elapsed 17,042.8s) [n=4, d=2, svd=40] Loading FHE client/server from './fhe_model_4_estimators_2_depth_svd_40_components/' for latency measurement...
+[LOG 2026-10-18 00:57:30 -03-0300] (elapsed 17,042.8s) [n=4, d=2, svd=40] Model compiled for device='cpu' (from fhe_device.txt).
+[LOG 2026-10-18 00:57:32 -03-0300] (elapsed 17,044.6s) [n=4, d=2, svd=40] Generating evaluation keys...
+[LOG 2026-10-18 00:57:34 -03-0300] (elapsed 17,046.8s) [n=4, d=2, svd=40] Evaluation keys ready in 2.251s (58,653,592 bytes).
+[LOG 2026-10-18 00:57:34 -03-0300] (elapsed 17,046.8s) [n=4, d=2, svd=40] Measuring encrypt / inference / decrypt on 1,000 records...
+[LOG 2026-10-18 00:59:37 -03-0300] (elapsed 17,169.8s) [n=4, d=2, svd=40]   100/1000 — avg encrypt=0.008933s, avg infer=1.219183s, avg decrypt=0.001581s
+[LOG 2026-10-18 01:01:40 -03-0300] (elapsed 17,292.6s) [n=4, d=2, svd=40]   200/1000 — avg encrypt=0.009039s, avg infer=1.217912s, avg decrypt=0.001592s
+[LOG 2026-10-18 01:03:43 -03-0300] (elapsed 17,415.6s) [n=4, d=2, svd=40]   300/1000 — avg encrypt=0.009014s, avg infer=1.218420s, avg decrypt=0.001592s
+[LOG 2026-10-18 01:05:46 -03-0300] (elapsed 17,538.8s) [n=4, d=2, svd=40]   400/1000 — avg encrypt=0.009023s, avg infer=1.219171s, avg decrypt=0.001591s
+[LOG 2026-10-18 01:07:50 -03-0300] (elapsed 17,662.5s) [n=4, d=2, svd=40]   500/1000 — avg encrypt=0.009044s, avg infer=1.220728s, avg decrypt=0.001607s
+[LOG 2026-10-18 01:09:53 -03-0300] (elapsed 17,785.9s) [n=4, d=2, svd=40]   600/1000 — avg encrypt=0.009044s, avg infer=1.221139s, avg decrypt=0.001602s
+[LOG 2026-10-18 01:11:57 -03-0300] (elapsed 17,909.3s) [n=4, d=2, svd=40]   700/1000 — avg encrypt=0.009039s, avg infer=1.221375s, avg decrypt=0.001613s
+[LOG 2026-10-18 01:14:00 -03-0300] (elapsed 18,032.8s) [n=4, d=2, svd=40]   800/1000 — avg encrypt=0.009042s, avg infer=1.221766s, avg decrypt=0.001610s
+[LOG 2026-10-18 01:16:04 -03-0300] (elapsed 18,156.4s) [n=4, d=2, svd=40]   900/1000 — avg encrypt=0.009043s, avg infer=1.222198s, avg decrypt=0.001606s
+[LOG 2026-10-18 01:18:07 -03-0300] (elapsed 18,279.7s) [n=4, d=2, svd=40]   1000/1000 — avg encrypt=0.009044s, avg infer=1.222223s, avg decrypt=0.001614s
+[LOG 2026-10-18 01:18:07 -03-0300] (elapsed 18,279.7s) [n=4, d=2, svd=40] [STEP 3/3] Computing FHE metrics...
+[LOG 2026-10-18 01:18:07 -03-0300] (elapsed 18,279.7s) [n=4, d=2, svd=40] FHE metrics:
+--- Model Evaluation ---
+Accuracy: 0.9000
+Precision: 0.7126
+Recall: 0.6959
+F1-Score: 0.7041
+
+--- Confusion Matrix ---
+[[781  48]
+ [ 52 119]]
+
+--- Classification Report ---
+              precision    recall  f1-score   support
+
+           0       0.94      0.94      0.94       829
+           1       0.71      0.70      0.70       171
+
+    accuracy                           0.90      1000
+   macro avg       0.83      0.82      0.82      1000
+weighted avg       0.90      0.90      0.90      1000
+
+
+==================== FHE LATENCY (n=4, d=2, svd=40) ====================
+Records measured: 1000
+Key generation:   2.2515 s (once)
+       Phase |    Total (s) |     Mean (s) |      Std (s)
+----------------------------------------------------------
+     encrypt |       9.0437 |     0.009044 |     0.001031
+   inference |    1222.2231 |     1.222223 |     0.010415
+     decrypt |       1.6141 |     0.001614 |     0.000563
+  end-to-end |    1232.8809 |     1.232881 |          n/a
+======================================================================
+
+[LOG 2026-10-18 01:18:07 -03-0300] (elapsed 18,279.9s) === FHE Configuration ===
+
+============================================================
+  FHE CONFIG: n_estimators=4, max_depth=4, svd=40
+============================================================
+[LOG 2026-10-18 01:18:07 -03-0300] (elapsed 18,279.9s) [n=4, d=4, svd=40] Starting FHE inference benchmark
+[LOG 2026-10-18 01:18:07 -03-0300] (elapsed 18,279.9s) [n=4, d=4, svd=40] [STEP 1/3] Preparing data using saved artifacts...
+[LOG 2026-10-18 01:18:07 -03-0300] (elapsed 18,279.9s) [n=4, d=4, svd=40] 3246589 test records available, processing 1000.
+[LOG 2026-10-18 01:18:07 -03-0300] (elapsed 18,279.9s) [n=4, d=4, svd=40] [STEP 2/3] Measuring encrypt / inference / decrypt...
+[LOG 2026-10-18 01:18:07 -03-0300] (elapsed 18,279.9s) [n=4, d=4, svd=40] Loading FHE client/server from './fhe_model_4_estimators_4_depth_svd_40_components/' for latency measurement...
+[LOG 2026-10-18 01:18:07 -03-0300] (elapsed 18,279.9s) [n=4, d=4, svd=40] Model compiled for device='cpu' (from fhe_device.txt).
+[LOG 2026-10-18 01:18:09 -03-0300] (elapsed 18,281.6s) [n=4, d=4, svd=40] Generating evaluation keys...
+[LOG 2026-10-18 01:18:11 -03-0300] (elapsed 18,284.2s) [n=4, d=4, svd=40] Evaluation keys ready in 2.697s (77,269,912 bytes).
+[LOG 2026-10-18 01:18:11 -03-0300] (elapsed 18,284.2s) [n=4, d=4, svd=40] Measuring encrypt / inference / decrypt on 1,000 records...
+[LOG 2026-10-18 01:22:37 -03-0300] (elapsed 18,549.5s) [n=4, d=4, svd=40]   100/1000 — avg encrypt=0.008947s, avg infer=2.642425s, avg decrypt=0.001597s
+[LOG 2026-10-18 01:27:01 -03-0300] (elapsed 18,813.7s) [n=4, d=4, svd=40]   200/1000 — avg encrypt=0.008934s, avg infer=2.636792s, avg decrypt=0.001585s
+[LOG 2026-10-18 01:31:26 -03-0300] (elapsed 19,078.8s) [n=4, d=4, svd=40]   300/1000 — avg encrypt=0.008976s, avg infer=2.637836s, avg decrypt=0.001587s
+[LOG 2026-10-18 01:35:52 -03-0300] (elapsed 19,344.3s) [n=4, d=4, svd=40]   400/1000 — avg encrypt=0.008989s, avg infer=2.639458s, avg decrypt=0.001585s
+[LOG 2026-10-18 01:40:17 -03-0300] (elapsed 19,610.0s) [n=4, d=4, svd=40]   500/1000 — avg encrypt=0.008975s, avg infer=2.641020s, avg decrypt=0.001583s
+[LOG 2026-10-18 01:44:42 -03-0300] (elapsed 19,875.1s) [n=4, d=4, svd=40]   600/1000 — avg encrypt=0.008983s, avg infer=2.640821s, avg decrypt=0.001583s
+[LOG 2026-10-18 01:49:08 -03-0300] (elapsed 20,141.0s) [n=4, d=4, svd=40]   700/1000 — avg encrypt=0.009003s, avg infer=2.641956s, avg decrypt=0.001582s
+[LOG 2026-10-18 01:53:35 -03-0300] (elapsed 20,407.7s) [n=4, d=4, svd=40]   800/1000 — avg encrypt=0.008992s, avg infer=2.643743s, avg decrypt=0.001581s
+[LOG 2026-10-18 01:58:02 -03-0300] (elapsed 20,675.1s) [n=4, d=4, svd=40]   900/1000 — avg encrypt=0.008983s, avg infer=2.645924s, avg decrypt=0.001578s
+[LOG 2026-10-18 02:02:27 -03-0300] (elapsed 20,939.6s) [n=4, d=4, svd=40]   1000/1000 — avg encrypt=0.008976s, avg infer=2.644730s, avg decrypt=0.001589s
+[LOG 2026-10-18 02:02:27 -03-0300] (elapsed 20,939.6s) [n=4, d=4, svd=40] [STEP 3/3] Computing FHE metrics...
+[LOG 2026-10-18 02:02:27 -03-0300] (elapsed 20,939.6s) [n=4, d=4, svd=40] FHE metrics:
+--- Model Evaluation ---
+Accuracy: 0.9000
+Precision: 0.7126
+Recall: 0.6959
+F1-Score: 0.7041
+
+--- Confusion Matrix ---
+[[781  48]
+ [ 52 119]]
+
+--- Classification Report ---
+              precision    recall  f1-score   support
+
+           0       0.94      0.94      0.94       829
+           1       0.71      0.70      0.70       171
+
+    accuracy                           0.90      1000
+   macro avg       0.83      0.82      0.82      1000
+weighted avg       0.90      0.90      0.90      1000
+
+
+==================== FHE LATENCY (n=4, d=4, svd=40) ====================
+Records measured: 1000
+Key generation:   2.6969 s (once)
+       Phase |    Total (s) |     Mean (s) |      Std (s)
+----------------------------------------------------------
+     encrypt |       8.9764 |     0.008976 |     0.000746
+   inference |    2644.7302 |     2.644730 |     0.023170
+     decrypt |       1.5887 |     0.001589 |     0.000350
+  end-to-end |    2655.2953 |     2.655295 |          n/a
+======================================================================
+
+[LOG 2026-10-18 02:02:27 -03-0300] (elapsed 20,939.7s) === FHE Configuration ===
+
+============================================================
+  FHE CONFIG: n_estimators=2, max_depth=2, svd=100
+============================================================
+[LOG 2026-10-18 02:02:27 -03-0300] (elapsed 20,939.7s) [n=2, d=2, svd=100] Starting FHE inference benchmark
+[LOG 2026-10-18 02:02:27 -03-0300] (elapsed 20,939.7s) [n=2, d=2, svd=100] ERROR: FHE model directory not found at './fhe_model_2_estimators_2_depth_svd_100_components/'.
+Please run a training script first to generate the FHE assets.
+
+======================================================================
+  FHE LATENCY SUMMARY (per-record means)
+======================================================================
+                        Config |  Encrypt (s) |    Infer (s) |  Decrypt (s) |      E2E (s)
+------------------------------------------------------------------------------------------
+              n=2, d=2, svd=15 |     0.005205 |     1.114699 |     0.001541 |     1.121446
+              n=2, d=4, svd=15 |     0.005190 |     1.900675 |     0.001545 |     1.907410
+              n=4, d=2, svd=15 |     0.005251 |     1.270418 |     0.001673 |     1.277342
+              n=4, d=4, svd=15 |     0.005139 |     2.788689 |     0.001640 |     2.795467
+              n=2, d=2, svd=25 |     0.006785 |     1.070700 |     0.001505 |     1.078989
+              n=2, d=4, svd=25 |     0.006754 |     1.883906 |     0.001503 |     1.892164
+              n=4, d=2, svd=25 |     0.006734 |     1.221186 |     0.001626 |     1.229546
+              n=4, d=4, svd=25 |     0.006753 |     2.750700 |     0.001677 |     2.759130
+              n=2, d=2, svd=40 |     0.009117 |     1.058265 |     0.001525 |     1.068907
+              n=2, d=4, svd=40 |     0.009085 |     1.568100 |     0.001548 |     1.578734
+              n=4, d=2, svd=40 |     0.009044 |     1.222223 |     0.001614 |     1.232881
+              n=4, d=4, svd=40 |     0.008976 |     2.644730 |     0.001589 |     2.655295
+
+[LOG 2026-10-18 02:02:27 -03-0300] (elapsed 20,939.7s) All 26 configurations complete.
+
+######################################################################
+# finished: 2026-10-18T02:02:27.890619-03:00
+# exit_code: 0
+# wall_time_s: 20946.576

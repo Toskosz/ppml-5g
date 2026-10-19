@@ -1,0 +1,14 @@
+# script: svd200_model.py
+# started: 2026-10-07T00:31:37.722732-03:00
+######################################################################
+[LOG 2026-10-07 00:31:40 -03-0300] (elapsed 0.0s) Starting svd200_model.py — scikit-learn 1.5.0
+[LOG 2026-10-07 00:31:40 -03-0300] (elapsed 0.0s) No combined file found. Assembling data from 'CIC-IDS-2018' folder...
+Traceback (most recent call last):
+  File "/home/thiago.tokarski/ppml-5g/cicids2018-kdd-models/svd200_model.py", line 104, in <module>
+    raise FileNotFoundError(
+FileNotFoundError: No CSV files found in 'CIC-IDS-2018'. Download with: aws s3 sync --no-sign-request s3://cse-cic-ids2018/ CIC-IDS-2018/
+
+######################################################################
+# finished: 2026-10-07T00:31:41.400131-03:00
+# exit_code: 1
+# wall_time_s: 3.678
