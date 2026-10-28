@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Run all cicunswnb15-models experiment scripts and write report.txt.
+Run all cicunswnb15-models experiment scripts and write a per-run report.
 
 Usage (from this directory):
     python run_all_and_report.py
@@ -8,8 +8,8 @@ Usage (from this directory):
     python run_all_and_report.py --only-inference     # single_record_inference.py only
     python run_all_and_report.py --report-only DIR    # rebuild report from existing logs
 
-Outputs:
-    report.txt
+Outputs (one directory per run, never overwritten):
+    run_logs/<timestamp>/report.txt
     run_logs/<timestamp>/<script>.log   (full stdout+stderr per script)
 """
 
@@ -50,6 +50,11 @@ def format_duration(seconds: float) -> str:
     if m:
         return f"{m}m {s}s"
     return f"{seconds:.1f}s"
+
+
+def report_path_for_log_dir(log_dir: Path, report: str) -> Path:
+    """Report file stored alongside that run's logs (basename of --report only)."""
+    return log_dir / Path(report).name
 
 
 def run_script(script: str, log_path: Path, python_exe: str) -> dict:
@@ -552,12 +557,12 @@ def main(argv=None) -> int:
     parser.add_argument(
         "--report-only",
         metavar="LOG_DIR",
-        help="Do not run scripts; rebuild report.txt from logs in LOG_DIR",
+        help="Do not run scripts; rebuild report in LOG_DIR from its logs",
     )
     parser.add_argument(
         "--report",
         default="report.txt",
-        help="Output report path (default: report.txt)",
+        help="Report filename inside the run log directory (default: report.txt)",
     )
     parser.add_argument(
         "--python",
@@ -613,7 +618,9 @@ def main(argv=None) -> int:
             "fhe_device": os.environ.get("PPML_FHE_DEVICE", "auto"),
             "total_elapsed_s": sum(r["elapsed_s"] for r in run_results),
         }
-        report_path = write_report(root / args.report, run_meta, run_results)
+        report_path = write_report(
+            report_path_for_log_dir(log_dir, args.report), run_meta, run_results
+        )
         print(f"Wrote {report_path}")
         return 0
 
@@ -673,7 +680,9 @@ def main(argv=None) -> int:
         "total_elapsed_s": total_elapsed,
     }
 
-    report_path = write_report(root / args.report, run_meta, run_results)
+    report_path = write_report(
+        report_path_for_log_dir(log_dir, args.report), run_meta, run_results
+    )
     print("\n" + "#" * 70)
     print(f"#  REPORT WRITTEN: {report_path}")
     print(f"#  LOGS: {log_dir}")
