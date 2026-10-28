@@ -1,16 +1,15 @@
 #!/usr/bin/env python3
 """
-Run all cicids2018-kdd-models experiment scripts and write report.txt.
+Run all cicids2018-kdd-models experiment scripts and write a per-run report.
 
 Usage (from this directory):
     python run_all_and_report.py
     python run_all_and_report.py --device cuda        # full suite, 20 GiB RAM cap
-    python run_all_and_report.py --skip-fast          # svd_model.py (SVD 15/25/40/100) + inference
     python run_all_and_report.py --only-inference     # best_model_single_record.py only
     python run_all_and_report.py --report-only DIR    # rebuild report from existing logs
 
-Outputs:
-    report.txt
+Outputs (one directory per run, never overwritten):
+    run_logs/<timestamp>/report.txt
     run_logs/<timestamp>/<script>.log   (full stdout+stderr per script)
 """
 
@@ -31,7 +30,6 @@ from gpu_utils import apply_memory_limit
 # Runnable experiment scripts (fhe_latency.py is a helper module, not listed).
 ALL_SCRIPTS = [
     "svd_model.py",
-    "svd_model_fast.py",
     "best_model_single_record.py",
 ]
 
@@ -51,6 +49,11 @@ def format_duration(seconds: float) -> str:
     if m:
         return f"{m}m {s}s"
     return f"{seconds:.1f}s"
+
+
+def report_path_for_log_dir(log_dir: Path, report: str) -> Path:
+    """Report file stored alongside that run's logs (basename of --report only)."""
+    return log_dir / Path(report).name
 
 
 def run_script(script: str, log_path: Path, python_exe: str) -> dict:
@@ -105,10 +108,15 @@ def run_script(script: str, log_path: Path, python_exe: str) -> dict:
 # ---------------------------------------------------------------------------
 
 CONFIG_RE = re.compile(
-    r"CONFIG[^:]*:\s*n_estimators=(?P<n>\d+),\s*max_depth=(?P<d>\d+),\s*svd=(?P<svd>\d+)",
+    r"CONFIG[^:]*:\s*n_estimators=(?P<n>\d+),\s*max_depth=(?P<d>\d+),\s*svd=(?P<svd>\d+)"
+    r"(?:,\s*n_bits=\d+)?(?:,\s*family=(?P<fam>fast))?",
     re.IGNORECASE,
 )
-CONFIG_TAG_RE = re.compile(r"n=(?P<n>\d+),\s*d=(?P<d>\d+),\s*svd=(?P<svd>\d+)")
+CONFIG_TAG_RE = re.compile(
+    r"n=(?P<n>\d+),\s*d=(?P<d>\d+),\s*svd=(?P<svd>\d+)(?:,\s*(?P<fam>fast))?"
+)
+# Full tag, including the optional fast-family suffix used by best_model_single_record.py.
+_TAG = r"n=\d+,\s*d=\d+,\s*svd=\d+(?:,\s*fast)?"
 METRICS_RE = re.compile(
     r"Accuracy:\s*(?P<acc>[\d.]+).*?"
     r"Precision:\s*(?P<prec>[\d.]+).*?"
@@ -133,19 +141,19 @@ DEVICE_RE = re.compile(
     re.IGNORECASE,
 )
 TRAIN_DONE_RE = re.compile(
-    r"\[(?P<tag>n=\d+,\s*d=\d+,\s*svd=\d+)\]\s*Training completed in\s*(?P<t>[\d,.]+)s"
+    rf"\[(?P<tag>{_TAG})\]\s*Training completed in\s*(?P<t>[\d,.]+)s"
 )
 PRED_DONE_RE = re.compile(
-    r"\[(?P<tag>n=\d+,\s*d=\d+,\s*svd=\d+)\]\s*Clear prediction completed in\s*(?P<t>[\d,.]+)s"
+    rf"\[(?P<tag>{_TAG})\]\s*Clear prediction completed in\s*(?P<t>[\d,.]+)s"
 )
 COMPILE_DONE_RE = re.compile(
-    r"\[(?P<tag>n=\d+,\s*d=\d+,\s*svd=\d+)\]\s*FHE compilation completed in\s*(?P<t>[\d,.]+)s"
+    rf"\[(?P<tag>{_TAG})\]\s*FHE compilation completed in\s*(?P<t>[\d,.]+)s"
 )
 FHE_SIM_DONE_RE = re.compile(
-    r"\[(?P<tag>n=\d+,\s*d=\d+,\s*svd=\d+)\]\s*FHE simulation completed in\s*(?P<t>[\d,.]+)s"
+    rf"\[(?P<tag>{_TAG})\]\s*FHE simulation completed in\s*(?P<t>[\d,.]+)s"
 )
 SUMMARY_ROW_RE = re.compile(
-    r"(?P<tag>n=\d+,\s*d=\d+,\s*svd=\d+)\s*\|\s*"
+    rf"(?P<tag>{_TAG})\s*\|\s*"
     r"(?P<train>[\d.]+)\s*\|\s*"
     r"(?P<pred>[\d.]+)\s*\|\s*"
     r"(?P<compile>[\d.]+)\s*\|\s*"
@@ -162,13 +170,21 @@ PLAINTEXT_LAT_RE = re.compile(
     re.DOTALL | re.IGNORECASE,
 )
 BENCH_FHE_ROW_RE = re.compile(
-    r"(?P<tag>n=\d+,\s*d=\d+,\s*svd=\d+)\s*\|\s*"
+    rf"(?P<tag>{_TAG})\s*\|\s*"
     r"(?P<enc>[\d.]+)\s*\|\s*(?P<inf>[\d.]+)\s*\|\s*(?P<dec>[\d.]+)\s*\|\s*(?P<e2e>[\d.]+)"
 )
 
 
 def _parse_float(s: str) -> float:
     return float(s.replace(",", ""))
+
+
+def _config_from_match(m) -> str:
+    config = f"n={m.group('n')}, d={m.group('d')}, svd={m.group('svd')}"
+    fam = m.groupdict().get("fam")
+    if fam:
+        config += f", {fam}"
+    return config
 
 
 def _metric_kind(text_before: str) -> str:
@@ -221,11 +237,9 @@ def parse_log(text: str, script: str) -> dict:
         cfg_m = list(CONFIG_RE.finditer(before))
         tag_m = list(CONFIG_TAG_RE.finditer(before))
         if cfg_m:
-            last = cfg_m[-1]
-            config = f"n={last.group('n')}, d={last.group('d')}, svd={last.group('svd')}"
+            config = _config_from_match(cfg_m[-1])
         elif tag_m:
-            last = tag_m[-1]
-            config = f"n={last.group('n')}, d={last.group('d')}, svd={last.group('svd')}"
+            config = _config_from_match(tag_m[-1])
         result["model_metrics"].append({
             "config": config or "unknown",
             "kind": kind,
@@ -260,8 +274,7 @@ def parse_log(text: str, script: str) -> dict:
         tags = list(CONFIG_TAG_RE.finditer(before))
         config = "unknown"
         if tags:
-            last = tags[-1]
-            config = f"n={last.group('n')}, d={last.group('d')}, svd={last.group('svd')}"
+            config = _config_from_match(tags[-1])
         result["plaintext_latency"].append({
             "config": config,
             "n_records": int(m.group("nrec")),
@@ -354,9 +367,7 @@ def build_report(run_meta: dict, run_results: list[dict], parsed: list[dict]) ->
     lines.append(f"Total wall time: {format_duration(run_meta['total_elapsed_s'])}")
     lines.append("")
     lines.append(
-        "Note: svd*_model.py and svd*_model_fast.py write the same artifact paths; "
-        "later scripts overwrite earlier FHE/plaintext artifacts. Metrics below are "
-        "captured per script run before overwrite."
+        "Note: svd_model.py trains the 5-bit models. Artifact paths use the _fast suffix."
     )
 
     lines.append(_section("1. RUN INVENTORY"))
@@ -532,16 +543,6 @@ def write_report(report_path: Path, run_meta: dict, run_results: list[dict]) -> 
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument(
-        "--skip-fast",
-        action="store_true",
-        help="Skip svd_model_fast.py",
-    )
-    parser.add_argument(
-        "--only-fast",
-        action="store_true",
-        help="Run only the *_fast trainers + best_model_single_record.py",
-    )
-    parser.add_argument(
         "--only-inference",
         action="store_true",
         help="Run only best_model_single_record.py (expects existing artifacts)",
@@ -549,17 +550,17 @@ def main(argv=None) -> int:
     parser.add_argument(
         "--scripts",
         nargs="+",
-        help="Explicit script list to run (overrides --skip-fast/--only-*)",
+        help="Explicit script list to run (overrides --only-inference)",
     )
     parser.add_argument(
         "--report-only",
         metavar="LOG_DIR",
-        help="Do not run scripts; rebuild report.txt from logs in LOG_DIR",
+        help="Do not run scripts; rebuild report in LOG_DIR from its logs",
     )
     parser.add_argument(
         "--report",
         default="report.txt",
-        help="Output report path (default: report.txt)",
+        help="Report filename inside the run log directory (default: report.txt)",
     )
     parser.add_argument(
         "--python",
@@ -624,7 +625,9 @@ def main(argv=None) -> int:
             "fhe_device": os.environ.get("PPML_FHE_DEVICE", "auto"),
             "total_elapsed_s": sum(r["elapsed_s"] for r in run_results),
         }
-        report_path = write_report(root / args.report, run_meta, run_results)
+        report_path = write_report(
+            report_path_for_log_dir(log_dir, args.report), run_meta, run_results
+        )
         print(f"Wrote {report_path}")
         return 0
 
@@ -632,16 +635,6 @@ def main(argv=None) -> int:
         scripts = args.scripts
     elif args.only_inference:
         scripts = ["best_model_single_record.py"]
-    elif args.only_fast:
-        scripts = [
-            "svd_model_fast.py",
-            "best_model_single_record.py",
-        ]
-    elif args.skip_fast:
-        scripts = [
-            "svd_model.py",
-            "best_model_single_record.py",
-        ]
     else:
         scripts = list(DEFAULT_SCRIPTS)
 
@@ -685,7 +678,9 @@ def main(argv=None) -> int:
         "total_elapsed_s": total_elapsed,
     }
 
-    report_path = write_report(root / args.report, run_meta, run_results)
+    report_path = write_report(
+        report_path_for_log_dir(log_dir, args.report), run_meta, run_results
+    )
     print("\n" + "#" * 70)
     print(f"#  REPORT WRITTEN: {report_path}")
     print(f"#  LOGS: {log_dir}")

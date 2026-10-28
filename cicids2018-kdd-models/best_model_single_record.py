@@ -73,6 +73,8 @@ def log_model_metrics(y_test, y_pred):
 
 # FHE device: auto | cpu | cuda  (override with PPML_FHE_DEVICE)
 FHE_DEVICE = os.environ.get("PPML_FHE_DEVICE", "auto")
+# Per-record plaintext and FHE latency sample size.
+LATENCY_RECORDS = 100
 RESOLVED_FHE_DEVICE = None
 
 NUMERICAL_FEATURES = ['syn_flag_cnt', 'ack_flag_cnt', 'fin_flag_cnt', 'rst_flag_cnt', 'totlen_fwd_pkts']
@@ -156,18 +158,28 @@ def load_test_projection(n_components_svd):
     return _test_cache["X"], _test_cache["y"], _test_cache["labels"]
 
 
+def _config_tag(estimators, depth, n_components_svd):
+    return f"n={estimators}, d={depth}, svd={n_components_svd}"
+
+
 def predict_single_record_plaintext(estimators, depth, n_components_svd=100):
-    config_tag = f"n={estimators}, d={depth}, svd={n_components_svd}"
+    config_tag = _config_tag(estimators, depth, n_components_svd)
     print(f"\n{'='*60}")
-    print(f"  PLAINTEXT CONFIG: n_estimators={estimators}, max_depth={depth}, svd={n_components_svd}")
+    print(
+        f"  PLAINTEXT CONFIG: n_estimators={estimators}, max_depth={depth}, "
+        f"svd={n_components_svd}, n_bits=5"
+    )
     print(f"{'='*60}")
     sys.stdout.flush()
     log_time(f"[{config_tag}] Starting plaintext inference benchmark")
 
-    json_path = f"plaintext_model_{estimators}_estimators_{depth}_depth_svd_{n_components_svd}.json"
+    json_path = (
+        f"plaintext_model_{estimators}_estimators_{depth}_depth_svd_"
+        f"{n_components_svd}_fast.json"
+    )
     if not os.path.exists(json_path):
         log_time(f"[{config_tag}] ERROR: Serialized model not found at '{json_path}'.")
-        print("Please run svd_model.py (or svd_model_fast.py) first to generate the model artifacts.")
+        print("Please run svd_model.py first to generate the model artifacts.")
         return None
 
     log_time(f"[{config_tag}] Loading Concrete ML model from '{json_path}'...")
@@ -185,7 +197,7 @@ def predict_single_record_plaintext(estimators, depth, n_components_svd=100):
 
     log_model_metrics(y_test_full, y_pred)
 
-    n_single = min(1000, X_test_final.shape[0])
+    n_single = min(LATENCY_RECORDS, X_test_final.shape[0])
     log_time(f"[{config_tag}] Running single-record inference on {n_single} records...")
     inference_times = []
     report_interval = max(1, n_single // 5)
@@ -228,15 +240,23 @@ def predict_single_record_plaintext(estimators, depth, n_components_svd=100):
     return result
 
 
-def predict_single_record_with_comparison(estimators, depth, records=1000, n_components_svd=100):
-    config_tag = f"n={estimators}, d={depth}, svd={n_components_svd}"
+def predict_single_record_with_comparison(
+    estimators, depth, records=LATENCY_RECORDS, n_components_svd=100
+):
+    config_tag = _config_tag(estimators, depth, n_components_svd)
     print(f"\n{'='*60}")
-    print(f"  FHE CONFIG: n_estimators={estimators}, max_depth={depth}, svd={n_components_svd}")
+    print(
+        f"  FHE CONFIG: n_estimators={estimators}, max_depth={depth}, "
+        f"svd={n_components_svd}, n_bits=5"
+    )
     print(f"{'='*60}")
     sys.stdout.flush()
     log_time(f"[{config_tag}] Starting FHE inference benchmark")
 
-    model_base = f"./fhe_model_{estimators}_estimators_{depth}_depth_svd_{n_components_svd}_components"
+    model_base = (
+        f"./fhe_model_{estimators}_estimators_{depth}_depth_svd_"
+        f"{n_components_svd}_components_fast"
+    )
     model_dir, mismatch = circuit_reuse_status(
         model_base, RESOLVED_FHE_DEVICE, log_fn=log_time
     )
@@ -315,6 +335,7 @@ if __name__ == "__main__":
     _tree_configs = ((2, 2), (2, 4), (4, 2), (4, 4))
     _svd_components = (15, 25, 40)
     # SVD 100 only fits n_estimators=2, max_depth=2 (larger trees exit -9).
+    # Models are the 5-bit family saved with the _fast suffix.
     _model_configs = [
         (n_estimators, max_depth, n_components)
         for n_components in _svd_components
@@ -324,7 +345,7 @@ if __name__ == "__main__":
         ("plaintext", n_estimators, max_depth, n_components)
         for n_estimators, max_depth, n_components in _model_configs
     ] + [
-        ("fhe", n_estimators, max_depth, 1000, n_components)
+        ("fhe", n_estimators, max_depth, LATENCY_RECORDS, n_components)
         for n_estimators, max_depth, n_components in _model_configs
     ]
     total = len(configs)
@@ -338,7 +359,9 @@ if __name__ == "__main__":
     for idx, cfg in enumerate(configs, 1):
         log_time(f"=== Configuration {idx}/{total} ===")
         if cfg[0] == "plaintext":
-            result = predict_single_record_plaintext(cfg[1], cfg[2], n_components_svd=cfg[3])
+            result = predict_single_record_plaintext(
+                cfg[1], cfg[2], n_components_svd=cfg[3]
+            )
             if result:
                 plaintext_results.append(result)
 
@@ -365,7 +388,9 @@ if __name__ == "__main__":
     for idx, cfg in enumerate(configs, 1):
         if cfg[0] == "fhe":
             log_time(f"=== FHE Configuration ===")
-            result = predict_single_record_with_comparison(cfg[1], cfg[2], cfg[3], n_components_svd=cfg[4])
+            result = predict_single_record_with_comparison(
+                cfg[1], cfg[2], cfg[3], n_components_svd=cfg[4]
+            )
             if result:
                 fhe_results.append(result)
 

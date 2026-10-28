@@ -2,7 +2,8 @@
 # Replaces: KDD Cup 1999 / NSL-KDD (removed from CIC servers, deprecated)
 # Download: aws s3 sync --no-sign-request s3://cse-cic-ids2018/ CIC-IDS-2018/
 # Features: CICFlowMeter-V3 (83 features); model uses 5 numerical + 2 categorical
-# This script: SVD 15, 25, 40, and 100 components
+# This script: SVD 15, 25, 40, and 100 components (n_bits=5, p_error=0.01).
+# FHE simulation uses 50,000 test rows. Artifact names keep the _fast suffix.
 # Reruns reuse saved preprocessor, SVD, plaintext models, and FHE circuits
 # compiled for the requested device (PPML_FHE_DEVICE / --device).
 # Circuits are stored in <model_dir>/cpu and <model_dir>/cuda.
@@ -52,8 +53,12 @@ from gpu_utils import (
     save_projection,
 )
 
-# Real FHE encrypt/infer/decrypt timing sample size (simulate phase uses the full test set).
+# FHE simulation subset. Real encrypt/infer/decrypt timing is separate.
+FHE_SIM_SAMPLE_SIZE = 50_000
 FHE_LATENCY_SAMPLE_SIZE = 100
+# Per-PBS error. Concrete ML's default is 2**-40, which forces a much heavier
+# parameter set.
+FHE_P_ERROR = 0.01
 # FHE device: auto | cpu | cuda  (override with PPML_FHE_DEVICE)
 FHE_DEVICE = os.environ.get("PPML_FHE_DEVICE", "auto")
 
@@ -103,9 +108,35 @@ def fmt_opt(value, width, decimals):
     return f"{value:>{width}.{decimals}f}"
 
 
-def plaintext_json_path(n_estimators, max_depth, n_components):
+def family_n_bits(family):
+    return 5
+
+
+def family_suffix(family):
+    return "_fast" if family == "fast" else ""
+
+
+def make_config_tag(n_estimators, max_depth, n_components, family):
+    tag = f"n={n_estimators}, d={max_depth}, svd={n_components}"
+    if family == "fast":
+        tag += ", fast"
+    return tag
+
+
+def format_config(n_estimators, max_depth, n_components, family):
+    text = (
+        f"n_estimators={n_estimators}, max_depth={max_depth}, "
+        f"svd={n_components}, n_bits={family_n_bits(family)}"
+    )
+    if family == "fast":
+        text += ", family=fast"
+    return text
+
+
+def plaintext_json_path(n_estimators, max_depth, n_components, family):
     return (
-        f"plaintext_model_{n_estimators}_estimators_{max_depth}_depth_svd_{n_components}.json"
+        f"plaintext_model_{n_estimators}_estimators_{max_depth}_depth_svd_"
+        f"{n_components}{family_suffix(family)}.json"
     )
 
 
@@ -115,9 +146,10 @@ def plaintext_meta_path(json_path):
     return json_path[:-5] + ".meta.json"
 
 
-def fhe_model_dir(n_estimators, max_depth, n_components):
+def fhe_model_dir(n_estimators, max_depth, n_components, family):
     return (
-        f"./fhe_model_{n_estimators}_estimators_{max_depth}_depth_svd_{n_components}_components"
+        f"./fhe_model_{n_estimators}_estimators_{max_depth}_depth_svd_"
+        f"{n_components}_components{family_suffix(family)}"
     )
 
 
@@ -151,16 +183,18 @@ def latency_meta(latency):
     return {key: latency[key] for key in keys}
 
 
-def new_config_record(idx, n_estimators, max_depth, n_components):
-    json_path = plaintext_json_path(n_estimators, max_depth, n_components)
-    model_base = fhe_model_dir(n_estimators, max_depth, n_components)
+def new_config_record(idx, n_estimators, max_depth, n_components, family):
+    json_path = plaintext_json_path(n_estimators, max_depth, n_components, family)
+    model_base = fhe_model_dir(n_estimators, max_depth, n_components, family)
     matched = compiled_circuit_dir(model_base, RESOLVED_FHE_DEVICE, log_fn=log_time)
     return {
         "idx": idx,
         "n_estimators": n_estimators,
         "max_depth": max_depth,
         "n_components_svd": n_components,
-        "config_tag": f"n={n_estimators}, d={max_depth}, svd={n_components}",
+        "family": family,
+        "n_bits": family_n_bits(family),
+        "config_tag": make_config_tag(n_estimators, max_depth, n_components, family),
         "json_path": json_path,
         "model_base": model_base,
         "model_dir": matched or model_base,
@@ -175,6 +209,7 @@ def new_config_record(idx, n_estimators, max_depth, n_components):
         "mean_e2e_s": None,
         "plaintext_metrics": None,
         "fhe_metrics": None,
+        "n_sim": None,
         "latency": None,
     }
 
@@ -196,6 +231,7 @@ def fill_saved_meta(cfg):
         cfg["compile_dur"] = meta.get("compile_dur")
         cfg["fhe_dur"] = meta.get("fhe_dur")
         cfg["fhe_metrics"] = meta.get("metrics")
+        cfg["n_sim"] = meta.get("n_sim")
         if meta.get("fhe_device"):
             cfg["fhe_device"] = meta["fhe_device"]
         latency = meta.get("latency") or None
@@ -230,7 +266,10 @@ def replay_fhe(cfg):
     if cfg["fhe_dur"] is not None:
         log_time(f"[{tag}] FHE simulation completed in {cfg['fhe_dur']:,.1f}s")
     if cfg["fhe_metrics"]:
-        log_time(f"[{tag}] FHE metrics:")
+        if cfg.get("n_sim"):
+            log_time(f"[{tag}] FHE metrics (on {int(cfg['n_sim']):,} sample subset):")
+        else:
+            log_time(f"[{tag}] FHE metrics:")
         print_stored_metrics(cfg["fhe_metrics"])
     log_time(
         f"[{tag}] Reusing compiled FHE circuit '{cfg['model_dir']}' "
@@ -299,34 +338,62 @@ def print_global_summary(trained_configs):
     print()
 
 
-def config_is_complete(n_estimators, max_depth, n_components):
-    return plaintext_ready(
-        plaintext_json_path(n_estimators, max_depth, n_components)
-    ) and compiled_circuit_dir(
-        fhe_model_dir(n_estimators, max_depth, n_components),
+def config_is_complete(n_estimators, max_depth, n_components, family):
+    if not plaintext_ready(
+        plaintext_json_path(n_estimators, max_depth, n_components, family)
+    ):
+        return False
+    circuit = compiled_circuit_dir(
+        fhe_model_dir(n_estimators, max_depth, n_components, family),
         RESOLVED_FHE_DEVICE,
         log_fn=log_time,
-    ) is not None
+    )
+    if circuit is None:
+        return False
+    return saved_circuit_p_error(circuit, family) == FHE_P_ERROR
 
 
-# (n_estimators, max_depth, n_components_svd)
+def saved_circuit_p_error(model_dir, family):
+    """Return the p_error a saved circuit was compiled with.
+
+    Fast circuits written before p_error was stored were compiled at 0.01.
+    Base circuits from that era used Concrete's default, 2**-40.
+    """
+    meta_path = os.path.join(model_dir, "run_meta.json")
+    saved = None
+    if os.path.isfile(meta_path):
+        with open(meta_path, "r", encoding="utf-8") as f:
+            saved = json.load(f).get("p_error")
+    if saved is None and family == "fast":
+        return FHE_P_ERROR
+    return saved
+
+
+# (n_estimators, max_depth, n_components_svd, family)
 # SVD 100 only fits n_estimators=2, max_depth=2. The next config (2, 4, 100)
 # is killed during plaintext training (exit -9).
+# The only family is the 5-bit model. Paths keep the _fast suffix.
 _tree_configs = ((2, 2), (2, 4), (4, 2), (4, 4))
 _svd_components = (15, 25, 40)
-configs = [
+_families = ("fast",)
+_shapes = [
     (n_estimators, max_depth, n_components)
     for n_components in _svd_components
     for n_estimators, max_depth in _tree_configs
 ] + [(2, 2, 100)]
+configs = [
+    (n_estimators, max_depth, n_components, family)
+    for n_estimators, max_depth, n_components in _shapes
+    for family in _families
+]
 total_configs = len(configs)
 
-log_time(f"Starting svd_model.py — scikit-learn {sklearn.__version__}")
+log_time(f"Starting svd_model.py — scikit-learn {sklearn.__version__}, n_bits=5")
 apply_memory_limit(log_fn=log_time)
 RESOLVED_FHE_DEVICE = resolve_fhe_device(FHE_DEVICE, log_fn=log_time)
 
-for n_estimators, max_depth, n_components in configs:
-    model_base = fhe_model_dir(n_estimators, max_depth, n_components)
+for n_estimators, max_depth, n_components, family in configs:
+    model_base = fhe_model_dir(n_estimators, max_depth, n_components, family)
     for model_dir in fhe_circuit_dirs(model_base):
         recovered = recover_interrupted_fhe_save(model_dir)
         if recovered:
@@ -343,8 +410,10 @@ if all(config_is_complete(*cfg) for cfg in configs):
                 os.remove(path)
                 log_time(f"Deleted leftover projection '{path}'.")
     trained_configs = []
-    for idx, (n_estimators, max_depth, n_components) in enumerate(configs, 1):
-        cfg = fill_saved_meta(new_config_record(idx, n_estimators, max_depth, n_components))
+    for idx, (n_estimators, max_depth, n_components, family) in enumerate(configs, 1):
+        cfg = fill_saved_meta(
+            new_config_record(idx, n_estimators, max_depth, n_components, family)
+        )
         replay_plaintext(cfg)
         replay_fhe(cfg)
         trained_configs.append(cfg)
@@ -509,14 +578,13 @@ for svd_idx, n_components_svd in enumerate(svd_groups, 1):
         print("\n" + "#" * 70)
         print(f"#  PHASE 1: PLAINTEXT TRAINING & EVALUATION  (SVD {n_components_svd})")
         print("#" * 70)
-        for n_estimators, max_depth, _ in group_configs:
-            idx = configs.index((n_estimators, max_depth, n_components_svd)) + 1
-            cfg = fill_saved_meta(new_config_record(idx, n_estimators, max_depth, n_components_svd))
-            print(f"\n{'='*60}")
-            print(
-                f"  CONFIG {cfg['idx']}/{total_configs}: n_estimators={n_estimators}, "
-                f"max_depth={max_depth}, svd={n_components_svd}"
+        for n_estimators, max_depth, _, family in group_configs:
+            idx = configs.index((n_estimators, max_depth, n_components_svd, family)) + 1
+            cfg = fill_saved_meta(
+                new_config_record(idx, n_estimators, max_depth, n_components_svd, family)
             )
+            print(f"\n{'='*60}")
+            print(f"  CONFIG {cfg['idx']}/{total_configs}: {format_config(n_estimators, max_depth, n_components_svd, family)}")
             print(f"{'='*60}")
             sys.stdout.flush()
             replay_plaintext(cfg)
@@ -532,8 +600,7 @@ for svd_idx, n_components_svd in enumerate(svd_groups, 1):
             print(f"\n{'='*60}")
             print(
                 f"  FHE for CONFIG {cfg['idx']}/{total_configs}: "
-                f"n_estimators={cfg['n_estimators']}, max_depth={cfg['max_depth']}, "
-                f"svd={n_components_svd}"
+                f"{format_config(cfg['n_estimators'], cfg['max_depth'], n_components_svd, cfg['family'])}"
             )
             print(f"{'='*60}")
             sys.stdout.flush()
@@ -551,8 +618,8 @@ for svd_idx, n_components_svd in enumerate(svd_groups, 1):
 
     train_path, test_path = projection_paths[n_components_svd]
     needs_plaintext = any(
-        not plaintext_ready(plaintext_json_path(n_estimators, max_depth, n_components_svd))
-        for n_estimators, max_depth, _ in group_configs
+        not plaintext_ready(plaintext_json_path(*cfg))
+        for cfg in group_configs
     )
     X_train_final = None
     X_test_final = None
@@ -568,12 +635,12 @@ for svd_idx, n_components_svd in enumerate(svd_groups, 1):
     print(f"#  PHASE 1: PLAINTEXT TRAINING & EVALUATION  (SVD {n_components_svd})")
     print("#" * 70)
 
-    for n_estimators, max_depth, _ in group_configs:
-        idx = configs.index((n_estimators, max_depth, n_components_svd)) + 1
-        cfg = new_config_record(idx, n_estimators, max_depth, n_components_svd)
+    for n_estimators, max_depth, _, family in group_configs:
+        idx = configs.index((n_estimators, max_depth, n_components_svd, family)) + 1
+        cfg = new_config_record(idx, n_estimators, max_depth, n_components_svd, family)
         config_tag = cfg["config_tag"]
         print(f"\n{'='*60}")
-        print(f"  CONFIG {idx}/{total_configs}: n_estimators={n_estimators}, max_depth={max_depth}, svd={n_components_svd}")
+        print(f"  CONFIG {idx}/{total_configs}: {format_config(n_estimators, max_depth, n_components_svd, family)}")
         print(f"{'='*60}")
         sys.stdout.flush()
 
@@ -588,7 +655,8 @@ for svd_idx, n_components_svd in enumerate(svd_groups, 1):
         classifier = RandomForestClassifier(
             n_estimators=n_estimators,
             max_depth=max_depth,
-            random_state=42
+            random_state=42,
+            n_bits=cfg["n_bits"],
         )
         classifier.fit(X_train_final, y_train_final)
         train_dur = _time.time() - t0
@@ -612,6 +680,7 @@ for svd_idx, n_components_svd in enumerate(svd_groups, 1):
             {
                 "train_dur": train_dur,
                 "pred_dur": pred_dur,
+                "n_bits": cfg["n_bits"],
                 "metrics": plaintext_metrics,
             },
         )
@@ -648,13 +717,24 @@ for svd_idx, n_components_svd in enumerate(svd_groups, 1):
         max_depth = cfg['max_depth']
 
         print(f"\n{'='*60}")
-        print(f"  FHE for CONFIG {cfg['idx']}/{total_configs}: n_estimators={n_estimators}, max_depth={max_depth}, svd={n_components_svd}")
+        print(
+            f"  FHE for CONFIG {cfg['idx']}/{total_configs}: "
+            f"{format_config(n_estimators, max_depth, n_components_svd, cfg['family'])}"
+        )
         print(f"{'='*60}")
         sys.stdout.flush()
 
         matched, mismatch = circuit_reuse_status(
             cfg["model_base"], RESOLVED_FHE_DEVICE, log_fn=log_time
         )
+        if matched:
+            saved_p_error = saved_circuit_p_error(matched, cfg["family"])
+            if saved_p_error != FHE_P_ERROR:
+                mismatch = (
+                    f"Saved circuit p_error={saved_p_error} does not match "
+                    f"p_error={FHE_P_ERROR}."
+                )
+                matched = None
         if matched:
             cfg["model_dir"] = matched
             fill_saved_meta(cfg)
@@ -677,6 +757,7 @@ for svd_idx, n_components_svd in enumerate(svd_groups, 1):
             classifier,
             X_train_final,
             device=FHE_DEVICE,
+            p_error=FHE_P_ERROR,
             log_fn=lambda msg: log_time(f"[{config_tag}] {msg}"),
         )
         compile_dur = _time.time() - t0
@@ -686,19 +767,25 @@ for svd_idx, n_components_svd in enumerate(svd_groups, 1):
 
         log_time(f"[{config_tag}] Loading test projection for FHE simulation...")
         X_test_final = np.load(test_path)
+        n_sim = min(FHE_SIM_SAMPLE_SIZE, X_test_final.shape[0])
+        sim_idx = np.random.default_rng(42).choice(X_test_final.shape[0], n_sim, replace=False)
+        X_test_sim = np.ascontiguousarray(X_test_final[sim_idx])
+        y_test_sim = y_test_final[sim_idx]
+        n_latency = min(FHE_LATENCY_SAMPLE_SIZE, X_test_final.shape[0])
+        X_latency = np.array(X_test_final[:n_latency], dtype=np.float32, copy=True)
+        del X_test_final, sim_idx
+        release_memory()
+        log_time(f"[{config_tag}] Subsampled {n_sim:,} rows for FHE simulation...")
+
         t0 = _time.time()
-        log_time(f"[{config_tag}] Starting FHE simulation prediction on {X_test_final.shape[0]} samples...")
-        y_pred_fhe = classifier.predict(X_test_final, fhe="simulate")
+        log_time(f"[{config_tag}] Starting FHE simulation prediction on {n_sim:,} samples...")
+        y_pred_fhe = classifier.predict(X_test_sim, fhe="simulate")
         fhe_dur = _time.time() - t0
         log_time(f"[{config_tag}] FHE simulation completed in {fhe_dur:,.1f}s")
 
-        log_time(f"[{config_tag}] FHE metrics:")
-        fhe_metrics = log_model_metrics(y_test_final, y_pred_fhe)
-        del y_pred_fhe
-
-        n_latency = min(FHE_LATENCY_SAMPLE_SIZE, X_test_final.shape[0])
-        X_latency = np.array(X_test_final[:n_latency], dtype=np.float32, copy=True)
-        del X_test_final
+        log_time(f"[{config_tag}] FHE metrics (on {n_sim:,} sample subset):")
+        fhe_metrics = log_model_metrics(y_test_sim, y_pred_fhe)
+        del X_test_sim, y_test_sim, y_pred_fhe
         release_memory()
 
         model_dir = circuit_save_dir(cfg["model_base"], fhe_device, log_fn=log_time)
@@ -708,6 +795,9 @@ for svd_idx, n_components_svd in enumerate(svd_groups, 1):
             "compile_dur": compile_dur,
             "fhe_dur": fhe_dur,
             "fhe_device": fhe_device,
+            "p_error": FHE_P_ERROR,
+            "n_bits": cfg["n_bits"],
+            "n_sim": int(n_sim),
             "metrics": fhe_metrics,
         }
         save_fhe_model(model_dir, classifier, fhe_device, meta=run_meta)
@@ -736,6 +826,7 @@ for svd_idx, n_components_svd in enumerate(svd_groups, 1):
         cfg['fhe_dur'] = fhe_dur
         cfg['fhe_device'] = fhe_device
         cfg['fhe_metrics'] = fhe_metrics
+        cfg['n_sim'] = int(n_sim)
         cfg['latency'] = run_meta["latency"]
         cfg['mean_encrypt_s'] = latency['mean_encrypt_s']
         cfg['mean_inference_s'] = latency['mean_inference_s']
