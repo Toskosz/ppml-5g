@@ -24,10 +24,11 @@ FHE device (both model dirs): `PPML_FHE_DEVICE=auto|cpu|cuda` or `run_all_and_re
 **Training / FHE circuit compilation** (run from inside each model directory — scripts use relative paths):
 
 ```bash
-cd cicids2018-kdd-models && PPML_FHE_DEVICE=auto python svd_model_fast.py
+cd cicids2018-kdd-models && PPML_FHE_DEVICE=auto python svd_model.py
 cd cicunswnb15-models && PPML_FHE_DEVICE=auto python svd100_model_fast.py
-# Full suite + report.txt from either directory:
-python run_all_and_report.py --device auto --only-fast
+# Full suite + run_logs/<timestamp>/report.txt from inside the model directory.
+# cicunswnb15: --only-fast runs the *_fast trainers.
+python run_all_and_report.py --device auto
 ```
 
 **Single-record inference timing:**
@@ -53,7 +54,7 @@ Training scripts expect data at the working directory (e.g. `CIC-IDS-2018/` fold
 ## Architecture
 
 - No package structure, no tests, no CI, no linter/formatter — each directory is a standalone experiment.
-- `cicids2018-kdd-models/` is a **binary** classifier (benign/attack), training with `TruncatedSVD` at 15, 25, 40, and 100 components (`svd_model.py` / `svd_model_fast.py`).
+- `cicids2018-kdd-models/` is a **binary** classifier (benign/attack), training with `TruncatedSVD` at 15, 25, 40, and 100 components (`svd_model.py`, 5-bit quantization).
 - `cicunswnb15-models/` is a **binary** classifier (benign/attack), with `svd100_model.py` / `svd200_model.py` plus `*_fast.py` variants, latency helpers, GPU support, and `run_all_and_report.py`.
 - Both share the same 7-feature CICFlowMeter schema: `syn_flag_cnt`, `ack_flag_cnt`, `fin_flag_cnt`, `rst_flag_cnt`, `totlen_fwd_pkts` (numerical) + `protocol`, `dst_port` (categorical).
 - Preprocessing pipeline: `MinMaxScaler` + `OneHotEncoder` → `TruncatedSVD(n_components)` → saved as `.pkl`.

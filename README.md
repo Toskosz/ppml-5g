@@ -143,13 +143,15 @@ Both should print `True` after installing `requirements-gpu.txt` on a machine wi
 ### Training (compiles FHE circuits)
 
 ```bash
-# cicids2018-kdd-models/ — SVD 15, 25, 40, and 100 (CWD matters):
-PPML_FHE_DEVICE=auto python svd_model_fast.py      # auto|cpu|cuda
+# cicids2018-kdd-models/ — SVD 15, 25, 40, and 100, n_bits=5 (CWD matters):
+PPML_FHE_DEVICE=auto python svd_model.py           # auto|cpu|cuda
 # cicunswnb15-models/:
 PPML_FHE_DEVICE=auto python svd100_model_fast.py   # auto|cpu|cuda
 PPML_FHE_DEVICE=cuda python svd200_model_fast.py
 
-# Full suite + report.txt (either model directory):
+# cicids2018-kdd-models report:
+python run_all_and_report.py --device cuda
+# cicunswnb15-models report:
 python run_all_and_report.py --device cuda --only-fast
 ```
 
