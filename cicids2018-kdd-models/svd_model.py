@@ -3,7 +3,9 @@
 # Download: aws s3 sync --no-sign-request s3://cse-cic-ids2018/ CIC-IDS-2018/
 # Features: CICFlowMeter-V3 (83 features); model uses 5 numerical + 2 categorical
 # This script: SVD 15, 25, 40, and 100 components
-# Reruns reuse saved preprocessor, SVD, plaintext models, and compiled FHE circuits.
+# Reruns reuse saved preprocessor, SVD, plaintext models, and FHE circuits
+# compiled for the requested device (PPML_FHE_DEVICE / --device).
+# Circuits are stored in <model_dir>/cpu and <model_dir>/cuda.
 
 from concrete.ml.sklearn.rf import RandomForestClassifier
 from concrete.ml.common.serialization.dumpers import dump
@@ -34,11 +36,17 @@ from zoneinfo import ZoneInfo
 from data_load import clean_col_names, load_or_assemble_cic_ids_2018
 from fhe_latency import measure_fhe_roundtrip, print_latency_summary
 from gpu_utils import (
+    any_fhe_assets,
+    circuit_reuse_status,
+    circuit_save_dir,
     compile_for_device,
+    compiled_circuit_dir,
+    fhe_circuit_dirs,
     fhe_assets_ready,
     read_fhe_device,
     recover_interrupted_fhe_save,
     release_memory,
+    resolve_fhe_device,
     save_fhe_model,
     save_projection,
 )
@@ -144,6 +152,8 @@ def latency_meta(latency):
 
 def new_config_record(idx, n_estimators, max_depth, n_components):
     json_path = plaintext_json_path(n_estimators, max_depth, n_components)
+    model_base = fhe_model_dir(n_estimators, max_depth, n_components)
+    matched = compiled_circuit_dir(model_base, RESOLVED_FHE_DEVICE, log_fn=log_time)
     return {
         "idx": idx,
         "n_estimators": n_estimators,
@@ -151,7 +161,8 @@ def new_config_record(idx, n_estimators, max_depth, n_components):
         "n_components_svd": n_components,
         "config_tag": f"n={n_estimators}, d={max_depth}, svd={n_components}",
         "json_path": json_path,
-        "model_dir": fhe_model_dir(n_estimators, max_depth, n_components),
+        "model_base": model_base,
+        "model_dir": matched or model_base,
         "train_dur": None,
         "pred_dur": None,
         "compile_dur": None,
@@ -290,7 +301,11 @@ def print_global_summary(trained_configs):
 def config_is_complete(n_estimators, max_depth, n_components):
     return plaintext_ready(
         plaintext_json_path(n_estimators, max_depth, n_components)
-    ) and fhe_assets_ready(fhe_model_dir(n_estimators, max_depth, n_components))
+    ) and compiled_circuit_dir(
+        fhe_model_dir(n_estimators, max_depth, n_components),
+        RESOLVED_FHE_DEVICE,
+        log_fn=log_time,
+    ) is not None
 
 
 # (n_estimators, max_depth, n_components_svd)
@@ -306,15 +321,20 @@ configs = [
 total_configs = len(configs)
 
 log_time(f"Starting svd_model.py — scikit-learn {sklearn.__version__}")
+RESOLVED_FHE_DEVICE = resolve_fhe_device(FHE_DEVICE, log_fn=log_time)
 
 for n_estimators, max_depth, n_components in configs:
-    model_dir = fhe_model_dir(n_estimators, max_depth, n_components)
-    recovered = recover_interrupted_fhe_save(model_dir)
-    if recovered:
-        log_time(f"Recovered interrupted FHE save at '{model_dir}' ({recovered}).")
+    model_base = fhe_model_dir(n_estimators, max_depth, n_components)
+    for model_dir in fhe_circuit_dirs(model_base):
+        recovered = recover_interrupted_fhe_save(model_dir)
+        if recovered:
+            log_time(f"Recovered interrupted FHE save at '{model_dir}' ({recovered}).")
 
 if all(config_is_complete(*cfg) for cfg in configs):
-    log_time("Every config already has a plaintext model and a compiled FHE circuit.")
+    log_time(
+        "Every config already has a plaintext model and an FHE circuit "
+        f"compiled for device='{RESOLVED_FHE_DEVICE}'."
+    )
     for n_components in sorted({c[2] for c in configs}):
         for path in (f"X_train_svd_{n_components}.npy", f"X_test_svd_{n_components}.npy"):
             if os.path.isfile(path):
@@ -411,7 +431,8 @@ for svd_idx, n_components_svd in enumerate(svd_groups, 1):
     group_configs = [c for c in configs if c[2] == n_components_svd]
     if all(config_is_complete(*cfg) for cfg in group_configs):
         log_time(
-            f"SVD {n_components_svd} artifacts already complete. Skipping projection."
+            f"SVD {n_components_svd} artifacts already complete for device='{RESOLVED_FHE_DEVICE}'. "
+            "Skipping projection."
         )
         continue
 
@@ -420,7 +441,7 @@ for svd_idx, n_components_svd in enumerate(svd_groups, 1):
     test_path = f"X_test_svd_{n_components_svd}.npy"
     projection_paths[n_components_svd] = (train_path, test_path)
     saved_models = any(
-        plaintext_ready(plaintext_json_path(*cfg)) or fhe_assets_ready(fhe_model_dir(*cfg))
+        plaintext_ready(plaintext_json_path(*cfg)) or any_fhe_assets(fhe_model_dir(*cfg))
         for cfg in group_configs
     )
     if os.path.isfile(svd_pkl_path):
@@ -480,7 +501,7 @@ for svd_idx, n_components_svd in enumerate(svd_groups, 1):
     group_configs = [c for c in configs if c[2] == n_components_svd]
     if all(config_is_complete(*cfg) for cfg in group_configs):
         log_time(
-            f"SVD {n_components_svd} artifacts already complete. "
+            f"SVD {n_components_svd} artifacts already complete for device='{RESOLVED_FHE_DEVICE}'. "
             "Skipping plaintext training and FHE compilation."
         )
         print("\n" + "#" * 70)
@@ -623,17 +644,24 @@ for svd_idx, n_components_svd in enumerate(svd_groups, 1):
         config_tag = cfg['config_tag']
         n_estimators = cfg['n_estimators']
         max_depth = cfg['max_depth']
-        model_dir = cfg['model_dir']
 
         print(f"\n{'='*60}")
         print(f"  FHE for CONFIG {cfg['idx']}/{total_configs}: n_estimators={n_estimators}, max_depth={max_depth}, svd={n_components_svd}")
         print(f"{'='*60}")
         sys.stdout.flush()
 
-        if fhe_assets_ready(model_dir):
+        matched, mismatch = circuit_reuse_status(
+            cfg["model_base"], RESOLVED_FHE_DEVICE, log_fn=log_time
+        )
+        if matched:
+            cfg["model_dir"] = matched
             fill_saved_meta(cfg)
             replay_fhe(cfg)
             continue
+        if mismatch:
+            log_time(
+                f"[{config_tag}] {mismatch} Compiling for device='{RESOLVED_FHE_DEVICE}'."
+            )
 
         log_time(f"[{config_tag}] Loading plaintext model from '{cfg['json_path']}'...")
         with open(cfg['json_path'], "r") as f:
@@ -671,6 +699,8 @@ for svd_idx, n_components_svd in enumerate(svd_groups, 1):
         del X_test_final
         release_memory()
 
+        model_dir = circuit_save_dir(cfg["model_base"], fhe_device, log_fn=log_time)
+        cfg["model_dir"] = model_dir
         log_time(f"[{config_tag}] Saving compiled FHE circuit to '{model_dir}'...")
         run_meta = {
             "compile_dur": compile_dur,

@@ -157,6 +157,130 @@ def read_fhe_device(model_dir: str) -> str:
         return f.read().strip() or "unknown"
 
 
+def _runtime_device(device: str) -> str:
+    device = (device or "").strip().lower()
+    if device not in {"cpu", "cuda"}:
+        raise ValueError(
+            f"Invalid compiled-circuit device '{device}'. Expected 'cpu' or 'cuda'."
+        )
+    return device
+
+
+def device_circuit_dir(model_dir: str, device: str) -> str:
+    """``<model_dir>/cpu`` or ``<model_dir>/cuda``."""
+    device = _runtime_device(device)
+    return os.path.join(model_dir.rstrip("/"), device)
+
+
+def fhe_circuit_dirs(model_dir: str) -> tuple[str, str, str]:
+    """Legacy flat directory, then the cpu and cuda folders."""
+    base = model_dir.rstrip("/")
+    return (
+        base,
+        device_circuit_dir(base, "cpu"),
+        device_circuit_dir(base, "cuda"),
+    )
+
+
+def migrate_legacy_circuit(model_dir: str, log_fn=None) -> str | None:
+    """Move a flat circuit directory into ``<model_dir>/<device>/``.
+
+    Older runs stored the circuit files directly in the model directory.
+    Returns the device folder, or None when the directory is not a flat circuit.
+    """
+    base = model_dir.rstrip("/")
+    if not fhe_assets_ready(base):
+        return None
+    device = read_fhe_device(base)
+    if device not in {"cpu", "cuda"}:
+        return None
+    dest = device_circuit_dir(base, device)
+    if fhe_assets_ready(dest):
+        return dest
+    if os.path.lexists(dest):
+        return None
+    staging = base + ".layout"
+    if os.path.lexists(staging):
+        return None
+    if log_fn is not None:
+        log_fn(f"Moving FHE circuit '{base}' to '{dest}' (device='{device}').")
+    os.rename(base, staging)
+    try:
+        os.makedirs(base)
+        os.rename(staging, dest)
+    except Exception:
+        if os.path.isdir(base) and not os.listdir(base):
+            os.rmdir(base)
+        if os.path.isdir(staging) and not os.path.isdir(base):
+            os.rename(staging, base)
+        raise
+    return dest
+
+
+def compiled_circuit_dir(model_dir: str, device: str, log_fn=None) -> str | None:
+    """Return ``<model_dir>/<device>`` when a finished circuit for `device` exists.
+
+    A flat circuit from an older run is moved into that device folder first.
+    """
+    device = _runtime_device(device)
+    base = model_dir.rstrip("/")
+    migrate_legacy_circuit(base, log_fn=log_fn)
+    specific = device_circuit_dir(base, device)
+    if fhe_assets_ready(specific) and read_fhe_device(specific) == device:
+        return specific
+    if fhe_assets_ready(base) and read_fhe_device(base) == device:
+        return base
+    return None
+
+
+def circuit_save_dir(model_dir: str, device: str, log_fn=None) -> str:
+    """Folder where a circuit for `device` is written: ``<model_dir>/<device>``."""
+    device = _runtime_device(device)
+    base = model_dir.rstrip("/")
+    migrate_legacy_circuit(base, log_fn=log_fn)
+    if fhe_assets_ready(base):
+        saved = read_fhe_device(base)
+        raise RuntimeError(
+            f"FHE circuit '{base}' is still in the flat layout "
+            f"(device='{saved}') and could not be moved into "
+            f"'{device_circuit_dir(base, saved)}'."
+        )
+    return device_circuit_dir(base, device)
+
+
+def any_fhe_assets(model_dir: str) -> bool:
+    """True when a finished circuit exists for either runtime device."""
+    return any(fhe_assets_ready(path) for path in fhe_circuit_dirs(model_dir))
+
+
+def circuit_reuse_status(model_dir: str, device: str, log_fn=None) -> tuple[str | None, str | None]:
+    """Return ``(matched_dir, None)`` or ``(None, mismatch_reason)``.
+
+    ``mismatch_reason`` is None when no circuit is saved. A reason means a
+    saved circuit was compiled for a different device.
+    """
+    device = _runtime_device(device)
+    matched = compiled_circuit_dir(model_dir, device, log_fn=log_fn)
+    if matched is not None:
+        return matched, None
+    others = []
+    for path in fhe_circuit_dirs(model_dir):
+        if not fhe_assets_ready(path):
+            continue
+        saved = read_fhe_device(path)
+        if saved == device:
+            continue
+        others.append(f"'{path}' (device='{saved}')")
+    if not others:
+        return None, None
+    listed = ", ".join(others)
+    noun = "circuit" if len(others) == 1 else "circuits"
+    verb = "does" if len(others) == 1 else "do"
+    return None, (
+        f"Saved FHE {noun} {listed} {verb} not match device='{device}'."
+    )
+
+
 FHE_ASSET_NAMES = ("client.zip", "server.zip", "fhe_device.txt")
 
 

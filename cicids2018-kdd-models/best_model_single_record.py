@@ -25,7 +25,12 @@ from zoneinfo import ZoneInfo
 
 from data_load import clean_col_names, load_or_assemble_cic_ids_2018
 from fhe_latency import measure_fhe_roundtrip, print_latency_summary
-from gpu_utils import project_sparse_svd, release_memory
+from gpu_utils import (
+    circuit_reuse_status,
+    project_sparse_svd,
+    release_memory,
+    resolve_fhe_device,
+)
 
 _wall_start = _time.time()
 
@@ -64,6 +69,10 @@ def log_model_metrics(y_test, y_pred):
     report = classification_report(y_test, y_pred)
     print(report)
 
+
+# FHE device: auto | cpu | cuda  (override with PPML_FHE_DEVICE)
+FHE_DEVICE = os.environ.get("PPML_FHE_DEVICE", "auto")
+RESOLVED_FHE_DEVICE = None
 
 NUMERICAL_FEATURES = ['syn_flag_cnt', 'ack_flag_cnt', 'fin_flag_cnt', 'rst_flag_cnt', 'totlen_fwd_pkts']
 CATEGORICAL_FEATURES = ['protocol', 'dst_port']
@@ -226,11 +235,25 @@ def predict_single_record_with_comparison(estimators, depth, records=1000, n_com
     sys.stdout.flush()
     log_time(f"[{config_tag}] Starting FHE inference benchmark")
 
-    model_dir = f"./fhe_model_{estimators}_estimators_{depth}_depth_svd_{n_components_svd}_components/"
-    if not os.path.isdir(model_dir):
-        log_time(f"[{config_tag}] ERROR: FHE model directory not found at '{model_dir}'.")
-        print("Please run a training script first to generate the FHE assets.")
+    model_base = f"./fhe_model_{estimators}_estimators_{depth}_depth_svd_{n_components_svd}_components"
+    model_dir, mismatch = circuit_reuse_status(
+        model_base, RESOLVED_FHE_DEVICE, log_fn=log_time
+    )
+    if model_dir is None:
+        if mismatch:
+            log_time(f"[{config_tag}] ERROR: {mismatch}")
+        else:
+            log_time(
+                f"[{config_tag}] ERROR: no FHE circuit compiled for device='{RESOLVED_FHE_DEVICE}'."
+            )
+        print(
+            "Run svd_model.py with this device first so the FHE circuit matches "
+            f"device='{RESOLVED_FHE_DEVICE}'."
+        )
         return
+    log_time(
+        f"[{config_tag}] Using FHE circuit '{model_dir}' (device='{RESOLVED_FHE_DEVICE}')."
+    )
 
     log_time(f"[{config_tag}] [STEP 1/3] Preparing data using saved artifacts...")
     X_test_final, _, test_labels = load_test_projection(n_components_svd)
@@ -285,6 +308,7 @@ def predict_single_record_with_comparison(estimators, depth, records=1000, n_com
 
 if __name__ == "__main__":
     log_time(f"Starting best_model_single_record.py — scikit-learn {sklearn.__version__}")
+    RESOLVED_FHE_DEVICE = resolve_fhe_device(FHE_DEVICE, log_fn=log_time)
 
     _tree_configs = ((2, 2), (2, 4), (4, 2), (4, 4))
     _svd_components = (15, 25, 40)
