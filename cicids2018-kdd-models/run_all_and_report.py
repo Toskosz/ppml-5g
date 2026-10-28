@@ -4,6 +4,7 @@ Run all cicids2018-kdd-models experiment scripts and write report.txt.
 
 Usage (from this directory):
     python run_all_and_report.py
+    python run_all_and_report.py --device cuda        # full suite, 20 GiB RAM cap
     python run_all_and_report.py --skip-fast          # svd_model.py (SVD 15/25/40/100) + inference
     python run_all_and_report.py --only-inference     # best_model_single_record.py only
     python run_all_and_report.py --report-only DIR    # rebuild report from existing logs
@@ -24,6 +25,8 @@ import sys
 import time
 from pathlib import Path
 from zoneinfo import ZoneInfo
+
+from gpu_utils import apply_memory_limit
 
 # Runnable experiment scripts (fhe_latency.py is a helper module, not listed).
 ALL_SCRIPTS = [
@@ -347,6 +350,7 @@ def build_report(run_meta: dict, run_results: list[dict], parsed: list[dict]) ->
     lines.append(f"Host cwd:  {run_meta['cwd']}")
     lines.append(f"Python:    {run_meta['python']}")
     lines.append(f"FHE device request: {run_meta.get('fhe_device', 'auto')}")
+    lines.append(f"RAM cap (GiB): {run_meta.get('memory_limit_gb', '20')}")
     lines.append(f"Total wall time: {format_duration(run_meta['total_elapsed_s'])}")
     lines.append("")
     lines.append(
@@ -569,6 +573,13 @@ def main(argv=None) -> int:
         help="FHE compile/runtime device (sets PPML_FHE_DEVICE for child scripts). "
              "Default: keep existing env or 'auto'.",
     )
+    parser.add_argument(
+        "--memory-gb",
+        type=float,
+        default=None,
+        help="Cap host RAM for this run and its child scripts, in GiB "
+             "(default: PPML_MEMORY_LIMIT_GB or 20). Use 0 to disable.",
+    )
     args = parser.parse_args(argv)
 
     root = Path(__file__).resolve().parent
@@ -577,6 +588,8 @@ def main(argv=None) -> int:
     if args.device is not None:
         os.environ["PPML_FHE_DEVICE"] = args.device
         print(f"PPML_FHE_DEVICE={args.device}")
+    if args.memory_gb is not None:
+        os.environ["PPML_MEMORY_LIMIT_GB"] = str(args.memory_gb)
 
     if args.report_only:
         log_dir = Path(args.report_only).resolve()
@@ -637,6 +650,8 @@ def main(argv=None) -> int:
             print(f"ERROR: script not found: {script}", file=sys.stderr)
             return 1
 
+    apply_memory_limit(log_fn=print)
+
     stamp = now_brasilia().strftime("%Y%m%d_%H%M%S")
     log_dir = root / "run_logs" / stamp
     log_dir.mkdir(parents=True, exist_ok=True)
@@ -666,6 +681,7 @@ def main(argv=None) -> int:
         "cwd": str(root),
         "python": args.python,
         "fhe_device": os.environ.get("PPML_FHE_DEVICE", "auto"),
+        "memory_limit_gb": os.environ.get("PPML_MEMORY_LIMIT_GB", "20"),
         "total_elapsed_s": total_elapsed,
     }
 

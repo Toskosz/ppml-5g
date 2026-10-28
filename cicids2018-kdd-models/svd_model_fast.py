@@ -39,6 +39,7 @@ from data_load import clean_col_names, load_or_assemble_cic_ids_2018
 from fhe_latency import measure_fhe_roundtrip, print_latency_summary
 from gpu_utils import (
     any_fhe_assets,
+    apply_memory_limit,
     circuit_reuse_status,
     circuit_save_dir,
     compile_for_device,
@@ -329,6 +330,7 @@ configs = [
 total_configs = len(configs)
 
 log_time(f"Starting svd_model_fast.py — scikit-learn {sklearn.__version__}")
+apply_memory_limit(log_fn=log_time)
 RESOLVED_FHE_DEVICE = resolve_fhe_device(FHE_DEVICE, log_fn=log_time)
 
 for n_estimators, max_depth, n_components in configs:

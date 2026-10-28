@@ -26,6 +26,7 @@ from zoneinfo import ZoneInfo
 from data_load import clean_col_names, load_or_assemble_cic_ids_2018
 from fhe_latency import measure_fhe_roundtrip, print_latency_summary
 from gpu_utils import (
+    apply_memory_limit,
     circuit_reuse_status,
     project_sparse_svd,
     release_memory,
@@ -308,6 +309,7 @@ def predict_single_record_with_comparison(estimators, depth, records=1000, n_com
 
 if __name__ == "__main__":
     log_time(f"Starting best_model_single_record.py — scikit-learn {sklearn.__version__}")
+    apply_memory_limit(log_fn=log_time)
     RESOLVED_FHE_DEVICE = resolve_fhe_device(FHE_DEVICE, log_fn=log_time)
 
     _tree_configs = ((2, 2), (2, 4), (4, 2), (4, 4))

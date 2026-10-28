@@ -440,3 +440,203 @@ def release_memory() -> None:
         ctypes.CDLL("libc.so.6").malloc_trim(0)
     except (OSError, AttributeError):
         pass
+
+
+# Host RAM ceiling for a training / FHE run. GPU device memory is separate.
+# Override with PPML_MEMORY_LIMIT_GB=0 to disable, or pass --memory-gb.
+MEMORY_LIMIT_ENV = "PPML_MEMORY_LIMIT_GB"
+DEFAULT_MEMORY_LIMIT_GB = 20
+_MEM_CGROUP_NAME = "ppml-mem"
+
+
+def memory_limit_gb_from_env() -> float | None:
+    """Return the configured RAM cap in GiB, or None when the cap is disabled."""
+    raw = os.environ.get(MEMORY_LIMIT_ENV, str(DEFAULT_MEMORY_LIMIT_GB)).strip().lower()
+    if raw in {"", "0", "none", "off", "unlimited"}:
+        return None
+    gb = float(raw)
+    if gb <= 0:
+        return None
+    return gb
+
+
+def _self_cgroup_dir() -> str | None:
+    """Absolute cgroup v2 directory for this process."""
+    try:
+        text = open("/proc/self/cgroup", encoding="utf-8").read()
+    except OSError:
+        return None
+    for line in text.splitlines():
+        parts = line.strip().split(":", 2)
+        if len(parts) == 3 and parts[0] == "0":
+            rel = parts[2] if parts[2].startswith("/") else "/" + parts[2]
+            return "/sys/fs/cgroup" if rel == "/" else "/sys/fs/cgroup" + rel
+    return None
+
+
+def _read_memory_max(cgroup_dir: str) -> int | None:
+    raw = open(os.path.join(cgroup_dir, "memory.max"), encoding="utf-8").read().strip()
+    if raw == "max":
+        return None
+    return int(raw)
+
+
+def _cgroup_procs(cgroup_dir: str) -> list[int]:
+    procs = []
+    with open(os.path.join(cgroup_dir, "cgroup.procs"), encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if line:
+                procs.append(int(line))
+    return procs
+
+
+def _move_pid(cgroup_dir: str, pid: int) -> None:
+    with open(os.path.join(cgroup_dir, "cgroup.procs"), "w", encoding="utf-8") as f:
+        f.write(str(pid))
+
+
+def _write_memory_limit(cgroup_dir: str, nbytes: int) -> None:
+    with open(os.path.join(cgroup_dir, "memory.max"), "w", encoding="utf-8") as f:
+        f.write(str(nbytes))
+    high_path = os.path.join(cgroup_dir, "memory.high")
+    try:
+        with open(high_path, "w", encoding="utf-8") as f:
+            f.write(str(nbytes))
+    except OSError:
+        pass
+
+
+def _enable_memory_controller(current: str, log) -> bool:
+    """Delegate the memory controller when this process is alone in `current`."""
+    del log
+    controllers_path = os.path.join(current, "cgroup.controllers")
+    controllers = set(open(controllers_path, encoding="utf-8").read().split())
+    if "memory" not in controllers:
+        return False
+    others = [pid for pid in _cgroup_procs(current) if pid != os.getpid()]
+    if others:
+        return False
+    hold = os.path.join(current, "ppml-mem-hold")
+    os.makedirs(hold, exist_ok=True)
+    _move_pid(hold, os.getpid())
+    try:
+        with open(os.path.join(current, "cgroup.subtree_control"), "w", encoding="utf-8") as f:
+            f.write("+memory\n")
+    except OSError:
+        _move_pid(current, os.getpid())
+        try:
+            os.rmdir(hold)
+        except OSError:
+            pass
+        raise
+    return True
+
+
+def _systemd_user_running() -> bool:
+    if shutil.which("systemd-run") is None or shutil.which("systemctl") is None:
+        return False
+    import subprocess
+
+    probe = subprocess.run(
+        ["systemctl", "--user", "is-system-running"],
+        capture_output=True,
+        text=True,
+    )
+    return (probe.stdout or "").strip() in {"running", "degraded"}
+
+
+def _reexec_under_systemd(gb: float, log) -> int | None:
+    """Re-run this command inside a systemd user scope limited to `gb` GiB.
+
+    Returns the child exit code, or None when systemd cannot take over.
+    """
+    if os.environ.get("PPML_MEMORY_CGROUP_REEXEC") == "1":
+        return None
+    if not _systemd_user_running():
+        return None
+    import subprocess
+
+    log(f"Restarting under a {gb:g} GiB systemd scope.")
+    env = os.environ.copy()
+    env["PPML_MEMORY_CGROUP_REEXEC"] = "1"
+    return subprocess.call(
+        [
+            "systemd-run",
+            "--user",
+            "--scope",
+            "--quiet",
+            "--collect",
+            "-p", f"MemoryMax={gb:g}G",
+            "-p", f"MemoryHigh={gb:g}G",
+            "--",
+            sys.executable,
+            *sys.argv,
+        ],
+        env=env,
+    )
+
+
+def apply_memory_limit(gb: float | None = None, log_fn=None) -> bool:
+    """Keep this process and its children at or below `gb` GiB of host RAM.
+
+    Uses a cgroup v2 memory.max so the cap tracks resident memory. A virtual
+    address-space rlimit is not used: CUDA reserves large virtual ranges and
+    would fail the run before any model is compiled. Pass gb=0 or set
+    PPML_MEMORY_LIMIT_GB=0 to leave the process uncapped.
+    """
+    log = log_fn or (lambda msg: print(msg, flush=True))
+    if gb is None:
+        gb = memory_limit_gb_from_env()
+    if gb is None or gb <= 0:
+        log("RAM cap disabled.")
+        return False
+
+    nbytes = int(gb * 1024**3)
+    current = _self_cgroup_dir()
+    if current is None:
+        log("WARNING: RAM cap not applied (cgroup v2 is unavailable).")
+        return False
+
+    try:
+        current_max = _read_memory_max(current)
+    except OSError:
+        current_max = None
+    if current_max is not None and current_max <= nbytes:
+        log(f"RAM cap already {current_max / 1024**3:.1f} GiB ({current}).")
+        return True
+
+    try:
+        if os.path.basename(current.rstrip("/")) == _MEM_CGROUP_NAME:
+            _write_memory_limit(current, nbytes)
+            log(f"RAM capped at {gb:g} GiB ({current}).")
+            return True
+
+        subtree_path = os.path.join(current, "cgroup.subtree_control")
+        subtree = set(open(subtree_path, encoding="utf-8").read().split())
+        if "memory" not in subtree and not _enable_memory_controller(current, log):
+            raise OSError("memory controller is not delegated to this cgroup")
+
+        child = os.path.join(current, _MEM_CGROUP_NAME)
+        os.makedirs(child, exist_ok=True)
+        _write_memory_limit(child, nbytes)
+        _move_pid(child, os.getpid())
+        hold = os.path.join(current, "ppml-mem-hold")
+        if os.path.isdir(hold):
+            try:
+                os.rmdir(hold)
+            except OSError:
+                pass
+    except OSError:
+        code = _reexec_under_systemd(gb, log)
+        if code is None:
+            log(
+                "WARNING: RAM cap not applied. Host RAM can still grow until the "
+                "OOM killer stops the run. A user systemd session can apply the "
+                f"{gb:g} GiB cap, or set PPML_MEMORY_LIMIT_GB=0 to skip it."
+            )
+            return False
+        raise SystemExit(code)
+
+    log(f"RAM capped at {gb:g} GiB ({child}).")
+    return True
