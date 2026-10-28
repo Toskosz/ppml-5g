@@ -1,5 +1,6 @@
 """Per-record FHE encrypt / inference / decrypt latency measurement."""
 
+from concrete import fhe
 from concrete.ml.deployment import FHEModelClient, FHEModelServer
 import numpy as np
 import os
@@ -47,9 +48,18 @@ def measure_fhe_roundtrip(model_dir, X, n_records=100, log_fn=None, return_predi
 
     log("Generating evaluation keys...")
     t0 = _time.time()
-    evaluation_keys = client.get_serialized_evaluation_keys()
+    serialized_evaluation_keys = client.get_serialized_evaluation_keys()
     keygen_dur = _time.time() - t0
-    log(f"Evaluation keys ready in {keygen_dur:,.3f}s ({len(evaluation_keys):,} bytes).")
+    log(
+        f"Evaluation keys ready in {keygen_dur:,.3f}s "
+        f"({len(serialized_evaluation_keys):,} bytes)."
+    )
+    # server.run deserializes a bytes payload on every call. Parsing this blob
+    # on each record sits inside the inference timer, so do it once per session.
+    t0 = _time.time()
+    evaluation_keys = fhe.EvaluationKeys.deserialize(serialized_evaluation_keys)
+    log(f"Evaluation keys deserialized once in {_time.time() - t0:,.3f}s.")
+    del serialized_evaluation_keys
 
     encrypt_times = []
     inference_times = []
