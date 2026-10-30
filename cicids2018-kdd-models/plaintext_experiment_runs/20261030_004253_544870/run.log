@@ -1,0 +1,60 @@
+[2026-10-30T00:42:53-03:00] New isolated run directory: plaintext_experiment_runs/20261030_004253_544870
+[2026-10-30T00:42:53-03:00] No existing model, report, preprocessor, or FHE artifact will be modified.
+[2026-10-30T00:42:53-03:00] Counting source rows to set an unbiased streaming sampling probability...
+[2026-10-30T00:42:57-03:00] Source rows: 16,233,002; sampling probability: 0.061603; requested target: 1,000,000.
+[2026-10-30T00:42:57-03:00] Reading source 1/10: CIC-IDS-2018/Friday-02-03-2018_TrafficForML_CICFlowMeter.csv
+[2026-10-30T00:43:01-03:00] Sample accumulated: 64,158 rows.
+[2026-10-30T00:43:01-03:00] Reading source 2/10: CIC-IDS-2018/Friday-16-02-2018_TrafficForML_CICFlowMeter.csv
+[2026-10-30T00:43:05-03:00] Sample accumulated: 128,856 rows.
+[2026-10-30T00:43:05-03:00] Reading source 3/10: CIC-IDS-2018/Friday-23-02-2018_TrafficForML_CICFlowMeter.csv
+[2026-10-30T00:43:09-03:00] Sample accumulated: 193,378 rows.
+[2026-10-30T00:43:09-03:00] Reading source 4/10: CIC-IDS-2018/Thuesday-20-02-2018_TrafficForML_CICFlowMeter.csv
+[2026-10-30T00:43:49-03:00] Sample accumulated: 683,047 rows.
+[2026-10-30T00:43:49-03:00] Reading source 5/10: CIC-IDS-2018/Thursday-01-03-2018_TrafficForML_CICFlowMeter.csv
+[2026-10-30T00:43:52-03:00] Sample accumulated: 703,256 rows.
+[2026-10-30T00:43:52-03:00] Reading source 6/10: CIC-IDS-2018/Thursday-15-02-2018_TrafficForML_CICFlowMeter.csv
+[2026-10-30T00:43:56-03:00] Sample accumulated: 767,866 rows.
+[2026-10-30T00:43:56-03:00] Reading source 7/10: CIC-IDS-2018/Thursday-22-02-2018_TrafficForML_CICFlowMeter.csv
+[2026-10-30T00:44:01-03:00] Sample accumulated: 832,181 rows.
+[2026-10-30T00:44:01-03:00] Reading source 8/10: CIC-IDS-2018/Wednesday-14-02-2018_TrafficForML_CICFlowMeter.csv
+[2026-10-30T00:44:05-03:00] Sample accumulated: 896,985 rows.
+[2026-10-30T00:44:05-03:00] Reading source 9/10: CIC-IDS-2018/Wednesday-21-02-2018_TrafficForML_CICFlowMeter.csv
+[2026-10-30T00:44:09-03:00] Sample accumulated: 961,220 rows.
+[2026-10-30T00:44:09-03:00] Reading source 10/10: CIC-IDS-2018/Wednesday-28-02-2018_TrafficForML_CICFlowMeter.csv
+[2026-10-30T00:44:13-03:00] Sample accumulated: 998,764 rows.
+[2026-10-30T00:44:15-03:00] Loaded unbiased sample with 998,764 rows.
+[2026-10-30T00:44:28-03:00] compact_flow: retained 992,845 rows; dropped 5,919 rows with missing, infinite, or invalid required values.
+[2026-10-30T00:44:30-03:00] compact_flow: transformed dimensions=57, fit/transform time=1.6s.
+[2026-10-30T00:44:30-03:00] compact_flow/lr_balanced_c1: fitting on 807,534 rows...
+[2026-10-30T00:44:49-03:00] compact_flow/lr_balanced_c1: test F1=0.1021, precision=0.0795, recall=0.1428, threshold=0.0000, fit=18.6s.
+[2026-10-30T00:44:49-03:00] compact_flow/lr_balanced_c10: fitting on 807,534 rows...
+[2026-10-30T00:45:03-03:00] compact_flow/lr_balanced_c10: test F1=0.0985, precision=0.0785, recall=0.1321, threshold=0.0000, fit=13.6s.
+[2026-10-30T00:45:03-03:00] compact_flow/xgb_d2_n4_natural: fitting on 807,534 rows...
+[2026-10-30T00:45:04-03:00] compact_flow/xgb_d2_n4_natural: test F1=0.4326, precision=0.2760, recall=1.0000, threshold=0.1397, fit=1.3s.
+[2026-10-30T00:45:04-03:00] compact_flow/mlp_8: fitting on 282,978 rows...
+[2026-10-30T00:45:10-03:00] compact_flow/mlp_8: test F1=0.4328, precision=0.2761, recall=0.9999, threshold=0.0000, fit=5.9s.
+[2026-10-30T00:45:12-03:00] compact_flow/lr_balanced_c1/q5: fitting Concrete ML quantized-clear model on 807,534 rows...
+[2026-10-30T00:45:32-03:00] compact_flow/lr_balanced_c1/q5: quantized-clear F1=0.1012, precision=0.0790, recall=0.1405, threshold=0.0000.
+[2026-10-30T00:45:32-03:00] compact_flow/lr_balanced_c1/q6: fitting Concrete ML quantized-clear model on 807,534 rows...
+[2026-10-30T00:45:51-03:00] compact_flow/lr_balanced_c1/q6: quantized-clear F1=0.3090, precision=0.2265, recall=0.4859, threshold=0.0000.
+[2026-10-30T00:45:51-03:00] compact_flow/lr_balanced_c1/q8: fitting Concrete ML quantized-clear model on 807,534 rows...
+[2026-10-30T00:46:10-03:00] compact_flow/lr_balanced_c1/q8: quantized-clear F1=0.1026, precision=0.0799, recall=0.1435, threshold=0.0000.
+[2026-10-30T00:46:10-03:00] compact_flow/lr_balanced_c10/q5: fitting Concrete ML quantized-clear model on 807,534 rows...
+[2026-10-30T00:46:24-03:00] compact_flow/lr_balanced_c10/q5: quantized-clear F1=0.3604, precision=0.2624, recall=0.5751, threshold=0.0000.
+[2026-10-30T00:46:24-03:00] compact_flow/lr_balanced_c10/q6: fitting Concrete ML quantized-clear model on 807,534 rows...
+[2026-10-30T00:46:41-03:00] compact_flow/lr_balanced_c10/q6: quantized-clear F1=0.0991, precision=0.0786, recall=0.1340, threshold=0.0000.
+[2026-10-30T00:46:41-03:00] compact_flow/lr_balanced_c10/q8: fitting Concrete ML quantized-clear model on 807,534 rows...
+[2026-10-30T00:46:56-03:00] compact_flow/lr_balanced_c10/q8: quantized-clear F1=0.0991, precision=0.0787, recall=0.1335, threshold=0.0000.
+[2026-10-30T00:46:56-03:00] compact_flow/xgb_d2_n4_natural/q5: fitting Concrete ML quantized-clear model on 807,534 rows...
+[2026-10-30T00:46:59-03:00] compact_flow/xgb_d2_n4_natural/q5: quantized-clear F1=0.4326, precision=0.2760, recall=1.0000, threshold=0.1419.
+[2026-10-30T00:46:59-03:00] compact_flow/xgb_d2_n4_natural/q6: fitting Concrete ML quantized-clear model on 807,534 rows...
+[2026-10-30T00:47:02-03:00] compact_flow/xgb_d2_n4_natural/q6: quantized-clear F1=0.4326, precision=0.2760, recall=1.0000, threshold=0.1395.
+[2026-10-30T00:47:02-03:00] compact_flow/xgb_d2_n4_natural/q8: fitting Concrete ML quantized-clear model on 807,534 rows...
+[2026-10-30T00:47:05-03:00] compact_flow/xgb_d2_n4_natural/q8: quantized-clear F1=0.4326, precision=0.2760, recall=1.0000, threshold=0.1396.
+[2026-10-30T00:47:05-03:00] compact_flow/mlp_8/q5: fitting Concrete ML quantized-clear model on 282,978 rows...
+[2026-10-30T00:49:09-03:00] compact_flow/mlp_8/q5: quantized-clear F1=0.4326, precision=0.2760, recall=1.0000, threshold=0.0162.
+[2026-10-30T00:49:09-03:00] compact_flow/mlp_8/q6: fitting Concrete ML quantized-clear model on 282,978 rows...
+[2026-10-30T00:51:13-03:00] compact_flow/mlp_8/q6: quantized-clear F1=0.4347, precision=0.2779, recall=0.9977, threshold=0.0000.
+[2026-10-30T00:51:13-03:00] compact_flow/mlp_8/q8: fitting Concrete ML quantized-clear model on 282,978 rows...
+[2026-10-30T00:53:20-03:00] compact_flow/mlp_8/q8: quantized-clear F1=0.4330, precision=0.2763, recall=0.9999, threshold=0.0000.
+[2026-10-30T00:53:20-03:00] Experiment complete. Read plaintext_experiment_runs/20261030_004253_544870/report.txt
