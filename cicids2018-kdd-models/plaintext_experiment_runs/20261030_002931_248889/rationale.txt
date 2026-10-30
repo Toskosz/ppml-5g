@@ -1,0 +1,35 @@
+CIC-IDS-2018 plaintext experiment rationale
+================================================
+
+Model families
+--------------
+Logistic regression is the strongest latency candidate because its FHE circuit is dominated by one dot product. Shallow XGBoost tests whether boosting can recover attack recall with the same small tree depths that were fast in the random-forest runs. The MLPs are intentionally limited to one 8- or 16-neuron hidden layer to bound later FHE cost.
+
+Class imbalance
+---------------
+CIC-IDS-2018 is about 83% benign in the current binary dataset. LR uses balanced class weights; XGBoost compares natural and benign/attack-ratio weights; MLP training uses a reproducible balanced subset because sklearn 1.5 MLPClassifier does not accept class weights.
+
+Decision threshold
+------------------
+The classification threshold is selected only on a validation split by maximizing binary F1, then frozen for the test split. The test split is never used to choose a threshold. F1 at the default 0.5 threshold is also recorded so threshold gains remain visible.
+
+Feature controls
+----------------
+baseline_svd15 reproduces the current seven source fields and 15-component SVD as a control. compact_flow adds identifier-free CICFlowMeter volume, packet-size, timing, flag, window, and active/idle statistics without SVD.
+
+Destination port
+----------------
+The current categorical destination-port encoding creates roughly 64,000 one-hot columns. compact_flow instead uses log-scaled port number, IANA range, and a small common-service category. This retains useful service information while keeping a future FHE input vector compact.
+
+Heavy-tailed values
+-------------------
+compact_flow applies signed log1p before MinMax scaling. Durations, byte counts, rates, and inter-arrival statistics span many orders of magnitude; compressing tails reduces quantization pressure in a later FHE model.
+
+Leakage and comparability
+-------------------------
+The default stratified random split matches the existing experiment for a fair comparison, but can overstate deployment performance because flows from the same capture day appear in train and test. IP addresses, Flow ID, and Timestamp are excluded. A later winner should also be validated with capture-day holdout.
+
+FHE limitation
+--------------
+This is a plaintext screen. Plaintext latency does not predict FHE latency. LR and XGBoost map directly to Concrete ML model families; sklearn MLP is only an architecture screen and must be retrained as a quantization-aware Concrete ML NeuralNetClassifier before an FHE claim can be made.
+
