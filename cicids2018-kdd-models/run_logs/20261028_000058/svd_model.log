@@ -1,0 +1,221 @@
+# script: svd_model.py
+# started: 2026-10-28T00:00:58.758854-03:00
+######################################################################
+[LOG 2026-10-28 00:01:02 -03-0300] (elapsed 0.0s) Starting svd_model.py — scikit-learn 1.5.0
+[LOG 2026-10-28 00:01:02 -03-0300] (elapsed 0.0s) RAM cap already 20.0 GiB (/sys/fs/cgroup/user.slice/user-1004.slice/user@1004.service/app.slice/run-r6f6315892a2045eb92905c301244efc5.scope).
+[LOG 2026-10-28 00:01:02 -03-0300] (elapsed 0.1s) GPU status — available=True, enabled(runtime)=True
+[LOG 2026-10-28 00:01:02 -03-0300] (elapsed 0.1s) FHE device: cuda (requested)
+[LOG 2026-10-28 00:01:02 -03-0300] (elapsed 0.1s) Loading existing combined file 'CIC-IDS-2018-Combined.csv'...
+[LOG 2026-10-28 00:01:08 -03-0300] (elapsed 6.1s) Loaded 16232943 rows from 'CIC-IDS-2018-Combined.csv'.
+[LOG 2026-10-28 00:01:08 -03-0300] (elapsed 6.1s) Cleaning column names and dropping NaN/Inf rows...
+[LOG 2026-10-28 00:01:18 -03-0300] (elapsed 16.0s) Dropped 0 rows with NaN/Inf. Remaining: 16232943 rows.
+[LOG 2026-10-28 00:01:23 -03-0300] (elapsed 21.5s) Label distribution — benign: 13484708, attack: 2748235
+[LOG 2026-10-28 00:01:23 -03-0300] (elapsed 21.5s) Splitting data 80/20 (stratified)...
+[LOG 2026-10-28 00:01:45 -03-0300] (elapsed 43.3s) Train: 12986354, Test: 3246589.
+Applying preprocessing (MinMaxScaler and OneHotEncoder)...
+[LOG 2026-10-28 00:01:45 -03-0300] (elapsed 43.3s) Loading existing preprocessor from 'preprocessor_cic_ids_2018.pkl'.
+[LOG 2026-10-28 00:02:04 -03-0300] (elapsed 62.2s) Preprocessing done. X_train: (12986354, 64539), X_test: (3246589, 64539) (sparse)
+[LOG 2026-10-28 00:02:05 -03-0300] (elapsed 63.6s) Released raw tables and fitted preprocessor.
+
+                        Config |                Phase |    Wall Time
+----------------------------------------------------------------------
+[LOG 2026-10-28 00:02:05 -03-0300] (elapsed 63.6s) Loading existing SVD from 'svd_cic_ids_2018_15.pkl'.
+[LOG 2026-10-28 00:02:05 -03-0300] (elapsed 63.6s) Projecting 12,986,354 x 64,539 -> 15 components in chunks of 50,000...
+[LOG 2026-10-28 00:02:05 -03-0300] (elapsed 63.6s) Projected rows 50,000 / 12,986,354
+[LOG 2026-10-28 00:02:05 -03-0300] (elapsed 63.7s) Projected rows 1,050,000 / 12,986,354
+[LOG 2026-10-28 00:02:05 -03-0300] (elapsed 63.7s) Projected rows 2,050,000 / 12,986,354
+[LOG 2026-10-28 00:02:05 -03-0300] (elapsed 63.8s) Projected rows 3,050,000 / 12,986,354
+[LOG 2026-10-28 00:02:05 -03-0300] (elapsed 63.9s) Projected rows 4,050,000 / 12,986,354
+[LOG 2026-10-28 00:02:06 -03-0300] (elapsed 63.9s) Projected rows 5,050,000 / 12,986,354
+[LOG 2026-10-28 00:02:06 -03-0300] (elapsed 64.0s) Projected rows 6,050,000 / 12,986,354
+[LOG 2026-10-28 00:02:06 -03-0300] (elapsed 64.1s) Projected rows 7,050,000 / 12,986,354
+[LOG 2026-10-28 00:02:06 -03-0300] (elapsed 64.2s) Projected rows 8,050,000 / 12,986,354
+[LOG 2026-10-28 00:02:06 -03-0300] (elapsed 64.2s) Projected rows 9,050,000 / 12,986,354
+[LOG 2026-10-28 00:02:06 -03-0300] (elapsed 64.3s) Projected rows 10,050,000 / 12,986,354
+[LOG 2026-10-28 00:02:06 -03-0300] (elapsed 64.4s) Projected rows 11,050,000 / 12,986,354
+[LOG 2026-10-28 00:02:06 -03-0300] (elapsed 64.4s) Projected rows 12,050,000 / 12,986,354
+[LOG 2026-10-28 00:02:06 -03-0300] (elapsed 64.6s) Writing (12986354, 15) float32 projection (0.78 GB) to 'X_train_svd_15.npy'...
+[LOG 2026-10-28 00:02:07 -03-0300] (elapsed 65.1s) Projecting 3,246,589 x 64,539 -> 15 components in chunks of 50,000...
+[LOG 2026-10-28 00:02:07 -03-0300] (elapsed 65.1s) Projected rows 50,000 / 3,246,589
+[LOG 2026-10-28 00:02:07 -03-0300] (elapsed 65.2s) Projected rows 1,050,000 / 3,246,589
+[LOG 2026-10-28 00:02:07 -03-0300] (elapsed 65.3s) Projected rows 2,050,000 / 3,246,589
+[LOG 2026-10-28 00:02:07 -03-0300] (elapsed 65.3s) Projected rows 3,050,000 / 3,246,589
+[LOG 2026-10-28 00:02:07 -03-0300] (elapsed 65.4s) Writing (3246589, 15) float32 projection (0.19 GB) to 'X_test_svd_15.npy'...
+[LOG 2026-10-28 00:02:07 -03-0300] (elapsed 65.6s) SVD 15 projections stored. Explained variance ratio sum: 0.8892
+[LOG 2026-10-28 00:02:07 -03-0300] (elapsed 65.7s) Moving FHE circuit './fhe_model_2_estimators_2_depth_svd_25_components' to './fhe_model_2_estimators_2_depth_svd_25_components/cpu' (device='cpu').
+[LOG 2026-10-28 00:02:07 -03-0300] (elapsed 65.7s) Loading existing SVD from 'svd_cic_ids_2018_25.pkl'.
+[LOG 2026-10-28 00:02:07 -03-0300] (elapsed 65.7s) Projecting 12,986,354 x 64,539 -> 25 components in chunks of 50,000...
+[LOG 2026-10-28 00:02:07 -03-0300] (elapsed 65.7s) Projected rows 50,000 / 12,986,354
+[LOG 2026-10-28 00:02:07 -03-0300] (elapsed 65.8s) Projected rows 1,050,000 / 12,986,354
+[LOG 2026-10-28 00:02:08 -03-0300] (elapsed 65.9s) Projected rows 2,050,000 / 12,986,354
+[LOG 2026-10-28 00:02:08 -03-0300] (elapsed 66.0s) Projected rows 3,050,000 / 12,986,354
+[LOG 2026-10-28 00:02:08 -03-0300] (elapsed 66.1s) Projected rows 4,050,000 / 12,986,354
+[LOG 2026-10-28 00:02:08 -03-0300] (elapsed 66.2s) Projected rows 5,050,000 / 12,986,354
+[LOG 2026-10-28 00:02:08 -03-0300] (elapsed 66.2s) Projected rows 6,050,000 / 12,986,354
+[LOG 2026-10-28 00:02:08 -03-0300] (elapsed 66.3s) Projected rows 7,050,000 / 12,986,354
+[LOG 2026-10-28 00:02:08 -03-0300] (elapsed 66.4s) Projected rows 8,050,000 / 12,986,354
+[LOG 2026-10-28 00:02:08 -03-0300] (elapsed 66.5s) Projected rows 9,050,000 / 12,986,354
+[LOG 2026-10-28 00:02:08 -03-0300] (elapsed 66.6s) Projected rows 10,050,000 / 12,986,354
+[LOG 2026-10-28 00:02:08 -03-0300] (elapsed 66.7s) Projected rows 11,050,000 / 12,986,354
+[LOG 2026-10-28 00:02:08 -03-0300] (elapsed 66.8s) Projected rows 12,050,000 / 12,986,354
+[LOG 2026-10-28 00:02:09 -03-0300] (elapsed 66.9s) Writing (12986354, 25) float32 projection (1.30 GB) to 'X_train_svd_25.npy'...
+[LOG 2026-10-28 00:02:09 -03-0300] (elapsed 67.7s) Projecting 3,246,589 x 64,539 -> 25 components in chunks of 50,000...
+[LOG 2026-10-28 00:02:09 -03-0300] (elapsed 67.7s) Projected rows 50,000 / 3,246,589
+[LOG 2026-10-28 00:02:09 -03-0300] (elapsed 67.8s) Projected rows 1,050,000 / 3,246,589
+[LOG 2026-10-28 00:02:10 -03-0300] (elapsed 67.9s) Projected rows 2,050,000 / 3,246,589
+[LOG 2026-10-28 00:02:10 -03-0300] (elapsed 68.0s) Projected rows 3,050,000 / 3,246,589
+[LOG 2026-10-28 00:02:10 -03-0300] (elapsed 68.1s) Writing (3246589, 25) float32 projection (0.32 GB) to 'X_test_svd_25.npy'...
+[LOG 2026-10-28 00:02:10 -03-0300] (elapsed 68.4s) SVD 25 projections stored. Explained variance ratio sum: 0.8940
+[LOG 2026-10-28 00:02:10 -03-0300] (elapsed 68.5s) Moving FHE circuit './fhe_model_2_estimators_2_depth_svd_40_components' to './fhe_model_2_estimators_2_depth_svd_40_components/cpu' (device='cpu').
+[LOG 2026-10-28 00:02:10 -03-0300] (elapsed 68.5s) Loading existing SVD from 'svd_cic_ids_2018_40.pkl'.
+[LOG 2026-10-28 00:02:10 -03-0300] (elapsed 68.7s) Projecting 12,986,354 x 64,539 -> 40 components in chunks of 50,000...
+[LOG 2026-10-28 00:02:10 -03-0300] (elapsed 68.7s) Projected rows 50,000 / 12,986,354
+[LOG 2026-10-28 00:02:10 -03-0300] (elapsed 68.8s) Projected rows 1,050,000 / 12,986,354
+[LOG 2026-10-28 00:02:11 -03-0300] (elapsed 68.9s) Projected rows 2,050,000 / 12,986,354
+[LOG 2026-10-28 00:02:11 -03-0300] (elapsed 69.0s) Projected rows 3,050,000 / 12,986,354
+[LOG 2026-10-28 00:02:11 -03-0300] (elapsed 69.1s) Projected rows 4,050,000 / 12,986,354
+[LOG 2026-10-28 00:02:11 -03-0300] (elapsed 69.2s) Projected rows 5,050,000 / 12,986,354
+[LOG 2026-10-28 00:02:11 -03-0300] (elapsed 69.3s) Projected rows 6,050,000 / 12,986,354
+[LOG 2026-10-28 00:02:11 -03-0300] (elapsed 69.5s) Projected rows 7,050,000 / 12,986,354
+[LOG 2026-10-28 00:02:11 -03-0300] (elapsed 69.6s) Projected rows 8,050,000 / 12,986,354
+[LOG 2026-10-28 00:02:11 -03-0300] (elapsed 69.7s) Projected rows 9,050,000 / 12,986,354
+[LOG 2026-10-28 00:02:11 -03-0300] (elapsed 69.8s) Projected rows 10,050,000 / 12,986,354
+[LOG 2026-10-28 00:02:12 -03-0300] (elapsed 69.9s) Projected rows 11,050,000 / 12,986,354
+[LOG 2026-10-28 00:02:12 -03-0300] (elapsed 70.0s) Projected rows 12,050,000 / 12,986,354
+[LOG 2026-10-28 00:02:12 -03-0300] (elapsed 70.2s) Writing (12986354, 40) float32 projection (2.08 GB) to 'X_train_svd_40.npy'...
+[LOG 2026-10-28 00:02:13 -03-0300] (elapsed 71.5s) Projecting 3,246,589 x 64,539 -> 40 components in chunks of 50,000...
+[LOG 2026-10-28 00:02:13 -03-0300] (elapsed 71.5s) Projected rows 50,000 / 3,246,589
+[LOG 2026-10-28 00:02:13 -03-0300] (elapsed 71.6s) Projected rows 1,050,000 / 3,246,589
+[LOG 2026-10-28 00:02:13 -03-0300] (elapsed 71.7s) Projected rows 2,050,000 / 3,246,589
+[LOG 2026-10-28 00:02:13 -03-0300] (elapsed 71.8s) Projected rows 3,050,000 / 3,246,589
+[LOG 2026-10-28 00:02:14 -03-0300] (elapsed 71.9s) Writing (3246589, 40) float32 projection (0.52 GB) to 'X_test_svd_40.npy'...
+[LOG 2026-10-28 00:02:14 -03-0300] (elapsed 72.3s) SVD 40 projections stored. Explained variance ratio sum: 0.8952
+[LOG 2026-10-28 00:02:14 -03-0300] (elapsed 72.4s) Loading existing SVD from 'svd_cic_ids_2018_100.pkl'.
+[LOG 2026-10-28 00:02:15 -03-0300] (elapsed 73.1s) Reusing SVD 100 projections ('X_train_svd_100.npy', 'X_test_svd_100.npy'). Explained variance ratio sum: 0.8962
+[LOG 2026-10-28 00:02:15 -03-0300] (elapsed 73.3s) Released one-hot matrices before training and FHE compilation.
+[LOG 2026-10-28 00:02:15 -03-0300] (elapsed 73.3s) SVD 15 plaintext models already saved. Skipping training.
+
+######################################################################
+#  PHASE 1: PLAINTEXT TRAINING & EVALUATION  (SVD 15)
+######################################################################
+
+============================================================
+  CONFIG 1/13: n_estimators=2, max_depth=2, svd=15
+============================================================
+[LOG 2026-10-28 00:02:15 -03-0300] (elapsed 73.3s) [n=2, d=2, svd=15] Reusing plaintext model 'plaintext_model_2_estimators_2_depth_svd_15.json'.
+[LOG 2026-10-28 00:02:15 -03-0300] (elapsed 73.3s) Moving FHE circuit './fhe_model_2_estimators_4_depth_svd_15_components' to './fhe_model_2_estimators_4_depth_svd_15_components/cpu' (device='cpu').
+
+============================================================
+  CONFIG 2/13: n_estimators=2, max_depth=4, svd=15
+============================================================
+[LOG 2026-10-28 00:02:15 -03-0300] (elapsed 73.3s) [n=2, d=4, svd=15] Reusing plaintext model 'plaintext_model_2_estimators_4_depth_svd_15.json'.
+[LOG 2026-10-28 00:02:15 -03-0300] (elapsed 73.4s) Moving FHE circuit './fhe_model_4_estimators_2_depth_svd_15_components' to './fhe_model_4_estimators_2_depth_svd_15_components/cpu' (device='cpu').
+
+============================================================
+  CONFIG 3/13: n_estimators=4, max_depth=2, svd=15
+============================================================
+[LOG 2026-10-28 00:02:15 -03-0300] (elapsed 73.4s) [n=4, d=2, svd=15] Reusing plaintext model 'plaintext_model_4_estimators_2_depth_svd_15.json'.
+[LOG 2026-10-28 00:02:15 -03-0300] (elapsed 73.4s) Moving FHE circuit './fhe_model_4_estimators_4_depth_svd_15_components' to './fhe_model_4_estimators_4_depth_svd_15_components/cpu' (device='cpu').
+
+============================================================
+  CONFIG 4/13: n_estimators=4, max_depth=4, svd=15
+============================================================
+[LOG 2026-10-28 00:02:15 -03-0300] (elapsed 73.4s) [n=4, d=4, svd=15] Reusing plaintext model 'plaintext_model_4_estimators_4_depth_svd_15.json'.
+
+======================================================================
+  PLAINTEXT SUMMARY  (SVD 15)
+======================================================================
+                        Config |  Train (s) |  Predict (s)
+------------------------------------------------------------
+              n=2, d=2, svd=15 |     cached |       cached
+              n=2, d=4, svd=15 |     cached |       cached
+              n=4, d=2, svd=15 |     cached |       cached
+              n=4, d=4, svd=15 |     cached |       cached
+
+[LOG 2026-10-28 00:02:15 -03-0300] (elapsed 73.4s) Phase 1 complete for SVD 15 — all plaintext variants trained and evaluated.
+
+######################################################################
+#  PHASE 2: FHE COMPILATION & SIMULATION  (SVD 15)
+######################################################################
+
+============================================================
+  FHE for CONFIG 1/13: n_estimators=2, max_depth=2, svd=15
+============================================================
+[LOG 2026-10-28 00:02:15 -03-0300] (elapsed 73.4s) [n=2, d=2, svd=15] Saved FHE circuit './fhe_model_2_estimators_2_depth_svd_15_components/cpu' (device='cpu') does not match device='cuda'. Compiling for device='cuda'.
+[LOG 2026-10-28 00:02:15 -03-0300] (elapsed 73.4s) [n=2, d=2, svd=15] Loading plaintext model from 'plaintext_model_2_estimators_2_depth_svd_15.json'...
+[LOG 2026-10-28 00:02:17 -03-0300] (elapsed 75.1s) [n=2, d=2, svd=15] Loading train projection for FHE compilation...
+[LOG 2026-10-28 00:02:17 -03-0300] (elapsed 75.4s) [n=2, d=2, svd=15] Compiling FHE circuit (this may take a long time)...
+[LOG 2026-10-28 00:02:17 -03-0300] (elapsed 75.4s) [n=2, d=2, svd=15] GPU status — available=True, enabled(runtime)=True
+[LOG 2026-10-28 00:02:17 -03-0300] (elapsed 75.4s) [n=2, d=2, svd=15] FHE device: cuda (requested)
+[LOG 2026-10-28 00:02:17 -03-0300] (elapsed 75.4s) [n=2, d=2, svd=15] Compiling FHE circuit with device='cuda'...
+[LOG 2026-10-28 02:16:37 -03-0300] (elapsed 8,135.0s) [n=2, d=2, svd=15] FHE compilation succeeded on device='cuda'.
+[LOG 2026-10-28 02:16:37 -03-0300] (elapsed 8,135.0s) [n=2, d=2, svd=15] FHE compilation completed in 8,059.7s on device='cuda'
+[LOG 2026-10-28 02:16:37 -03-0300] (elapsed 8,135.1s) [n=2, d=2, svd=15] Loading test projection for FHE simulation...
+[LOG 2026-10-28 02:16:37 -03-0300] (elapsed 8,135.2s) [n=2, d=2, svd=15] Starting FHE simulation prediction on 3246589 samples...
+[LOG 2026-10-28 05:35:22 -03-0300] (elapsed 20,060.5s) [n=2, d=2, svd=15] FHE simulation completed in 11,925.3s
+[LOG 2026-10-28 05:35:22 -03-0300] (elapsed 20,060.5s) [n=2, d=2, svd=15] FHE metrics:
+--- Model Evaluation ---
+Accuracy: 0.8710
+Precision: 0.9804
+Recall: 0.2432
+F1-Score: 0.3897
+
+--- Confusion Matrix ---
+[[2694266    2676]
+ [ 416000  133647]]
+
+--- Classification Report ---
+              precision    recall  f1-score   support
+
+           0       0.87      1.00      0.93   2696942
+           1       0.98      0.24      0.39    549647
+
+    accuracy                           0.87   3246589
+   macro avg       0.92      0.62      0.66   3246589
+weighted avg       0.89      0.87      0.84   3246589
+
+[LOG 2026-10-28 05:35:33 -03-0300] (elapsed 20,071.5s) [n=2, d=2, svd=15] Saving compiled FHE circuit to './fhe_model_2_estimators_2_depth_svd_15_components/cuda'...
+[LOG 2026-10-28 05:35:33 -03-0300] (elapsed 20,071.6s) [n=2, d=2, svd=15] FHE assets saved (device=cuda). Summary — train: cached, predict: cached, compile: 8,059.7s, fhe_sim: 11,925.3s
+[LOG 2026-10-28 05:35:33 -03-0300] (elapsed 20,071.6s) [n=2, d=2, svd=15] Measuring real FHE encrypt/inference/decrypt on 100 records...
+[LOG 2026-10-28 05:35:33 -03-0300] (elapsed 20,071.6s) [n=2, d=2, svd=15] Loading FHE client/server from './fhe_model_2_estimators_2_depth_svd_15_components/cuda' for latency measurement...
+[LOG 2026-10-28 05:35:33 -03-0300] (elapsed 20,071.6s) [n=2, d=2, svd=15] Model compiled for device='cuda' (from fhe_device.txt).
+[LOG 2026-10-28 05:35:35 -03-0300] (elapsed 20,073.0s) [n=2, d=2, svd=15] Generating evaluation keys...
+[LOG 2026-10-28 05:35:37 -03-0300] (elapsed 20,075.3s) [n=2, d=2, svd=15] Evaluation keys ready in 2.227s (59,966,360 bytes).
+[LOG 2026-10-28 05:35:37 -03-0300] (elapsed 20,075.3s) [n=2, d=2, svd=15] Measuring encrypt / inference / decrypt on 100 records...
+[LOG 2026-10-28 05:36:33 -03-0300] (elapsed 20,131.4s) [n=2, d=2, svd=15]   10/100 — avg encrypt=0.004583s, avg infer=5.606230s, avg decrypt=0.001404s
+[LOG 2026-10-28 05:36:48 -03-0300] (elapsed 20,146.7s) [n=2, d=2, svd=15]   20/100 — avg encrypt=0.004433s, avg infer=3.565736s, avg decrypt=0.001394s
+[LOG 2026-10-28 05:37:03 -03-0300] (elapsed 20,161.8s) [n=2, d=2, svd=15]   30/100 — avg encrypt=0.004379s, avg infer=2.878648s, avg decrypt=0.001386s
+[LOG 2026-10-28 05:37:19 -03-0300] (elapsed 20,177.1s) [n=2, d=2, svd=15]   40/100 — avg encrypt=0.004358s, avg infer=2.540894s, avg decrypt=0.001386s
+[LOG 2026-10-28 05:37:34 -03-0300] (elapsed 20,192.1s) [n=2, d=2, svd=15]   50/100 — avg encrypt=0.004343s, avg infer=2.331291s, avg decrypt=0.001385s
+[LOG 2026-10-28 05:37:49 -03-0300] (elapsed 20,207.1s) [n=2, d=2, svd=15]   60/100 — avg encrypt=0.004329s, avg infer=2.191283s, avg decrypt=0.001383s
+[LOG 2026-10-28 05:38:04 -03-0300] (elapsed 20,222.2s) [n=2, d=2, svd=15]   70/100 — avg encrypt=0.004331s, avg infer=2.093224s, avg decrypt=0.001385s
+[LOG 2026-10-28 05:38:19 -03-0300] (elapsed 20,237.3s) [n=2, d=2, svd=15]   80/100 — avg encrypt=0.004332s, avg infer=2.020191s, avg decrypt=0.001388s
+[LOG 2026-10-28 05:38:34 -03-0300] (elapsed 20,252.4s) [n=2, d=2, svd=15]   90/100 — avg encrypt=0.004329s, avg infer=1.962643s, avg decrypt=0.001390s
+[LOG 2026-10-28 05:38:49 -03-0300] (elapsed 20,267.7s) [n=2, d=2, svd=15]   100/100 — avg encrypt=0.004321s, avg infer=1.918208s, avg decrypt=0.001390s
+
+==================== FHE LATENCY (n=2, d=2, svd=15) ====================
+Records measured: 100
+Key generation:   2.2266 s (once)
+       Phase |    Total (s) |     Mean (s) |      Std (s)
+----------------------------------------------------------
+     encrypt |       0.4321 |     0.004321 |     0.000299
+   inference |     191.8208 |     1.918208 |     4.049799
+     decrypt |       0.1390 |     0.001390 |     0.000042
+  end-to-end |     192.3919 |     1.923919 |          n/a
+======================================================================
+
+
+============================================================
+  FHE for CONFIG 2/13: n_estimators=2, max_depth=4, svd=15
+============================================================
+[LOG 2026-10-28 05:38:49 -03-0300] (elapsed 20,267.8s) [n=2, d=4, svd=15] Saved FHE circuit './fhe_model_2_estimators_4_depth_svd_15_components/cpu' (device='cpu') does not match device='cuda'. Compiling for device='cuda'.
+[LOG 2026-10-28 05:38:49 -03-0300] (elapsed 20,267.8s) [n=2, d=4, svd=15] Loading plaintext model from 'plaintext_model_2_estimators_4_depth_svd_15.json'...
+[LOG 2026-10-28 05:38:49 -03-0300] (elapsed 20,267.9s) [n=2, d=4, svd=15] Loading train projection for FHE compilation...
+[LOG 2026-10-28 05:38:50 -03-0300] (elapsed 20,268.2s) [n=2, d=4, svd=15] Compiling FHE circuit (this may take a long time)...
+[LOG 2026-10-28 05:38:50 -03-0300] (elapsed 20,268.2s) [n=2, d=4, svd=15] GPU status — available=True, enabled(runtime)=True
+[LOG 2026-10-28 05:38:50 -03-0300] (elapsed 20,268.2s) [n=2, d=4, svd=15] FHE device: cuda (requested)
+[LOG 2026-10-28 05:38:50 -03-0300] (elapsed 20,268.2s) [n=2, d=4, svd=15] Compiling FHE circuit with device='cuda'...
+[LOG 2026-10-28 07:53:59 -03-0300] (elapsed 28,377.6s) [n=2, d=4, svd=15] FHE compilation succeeded on device='cuda'.
+[LOG 2026-10-28 07:53:59 -03-0300] (elapsed 28,377.6s) [n=2, d=4, svd=15] FHE compilation completed in 8,109.4s on device='cuda'
+[LOG 2026-10-28 07:53:59 -03-0300] (elapsed 28,377.7s) [n=2, d=4, svd=15] Loading test projection for FHE simulation...
+[LOG 2026-10-28 07:53:59 -03-0300] (elapsed 28,377.8s) [n=2, d=4, svd=15] Starting FHE simulation prediction on 3246589 samples...

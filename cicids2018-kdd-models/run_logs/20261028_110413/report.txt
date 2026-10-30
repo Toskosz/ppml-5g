@@ -1,0 +1,178 @@
+PPML-5G / CIC-IDS-2018 — Experiment Report
+Generated: 2026-10-29T18:15:51.507405-03:00
+Started:   2026-10-28T11:04:13.522469-03:00
+Host cwd:  /home/thiago.tokarski/ppml-5g/cicids2018-kdd-models
+Python:    /home/thiago.tokarski/ppml-5g/.venv/bin/python
+FHE device request: cuda
+RAM cap (GiB): 20
+Total wall time: 31h 11m 37s
+
+Note: svd_model.py trains the 5-bit models. Artifact paths use the _fast suffix.
+
+==============================================================================
+1. RUN INVENTORY
+==============================================================================
+
+Script                      | Status | Exit | Wall time   | FHE device(s) | Log file                                                                                                 
+----------------------------+--------+------+-------------+---------------+----------------------------------------------------------------------------------------------------------
+svd_model.py                | OK     | 0    | 30h 44m 33s | cuda          | /home/thiago.tokarski/ppml-5g/cicids2018-kdd-models/run_logs/20261028_110413/svd_model.log               
+best_model_single_record.py | OK     | 0    | 27m 4s      | cuda          | /home/thiago.tokarski/ppml-5g/cicids2018-kdd-models/run_logs/20261028_110413/best_model_single_record.log
+
+
+==============================================================================
+2. MODEL QUALITY METRICS (accuracy / precision / recall / F1)
+==============================================================================
+
+Script                      | Config                  | Kind      | Accuracy | Precision | Recall | F1    
+----------------------------+-------------------------+-----------+----------+-----------+--------+-------
+svd_model.py                | n=2, d=2, svd=15, fast  | plaintext | 0.8710   | 0.9804    | 0.2432 | 0.3897
+svd_model.py                | n=2, d=4, svd=15, fast  | plaintext | 0.9137   | 0.7396    | 0.7567 | 0.7481
+svd_model.py                | n=4, d=2, svd=15, fast  | plaintext | 0.9048   | 0.7249    | 0.7058 | 0.7152
+svd_model.py                | n=4, d=4, svd=15, fast  | plaintext | 0.9137   | 0.7395    | 0.7567 | 0.7480
+svd_model.py                | n=2, d=2, svd=15, fast  | fhe       | 0.8619   | 0.7501    | 0.2698 | 0.3968
+svd_model.py                | n=2, d=4, svd=15, fast  | fhe       | 0.9034   | 0.7267    | 0.6833 | 0.7044
+svd_model.py                | n=4, d=2, svd=15, fast  | fhe       | 0.8996   | 0.7267    | 0.6476 | 0.6849
+svd_model.py                | n=4, d=4, svd=15, fast  | fhe       | 0.9085   | 0.7423    | 0.7001 | 0.7206
+svd_model.py                | n=2, d=2, svd=25, fast  | plaintext | 0.8711   | 0.9810    | 0.2432 | 0.3897
+svd_model.py                | n=2, d=4, svd=25, fast  | plaintext | 0.9135   | 0.7395    | 0.7549 | 0.7471
+svd_model.py                | n=4, d=2, svd=25, fast  | plaintext | 0.9049   | 0.7250    | 0.7058 | 0.7153
+svd_model.py                | n=4, d=4, svd=25, fast  | plaintext | 0.9136   | 0.7395    | 0.7562 | 0.7477
+svd_model.py                | n=2, d=2, svd=25, fast  | fhe       | 0.8580   | 0.7206    | 0.2564 | 0.3782
+svd_model.py                | n=2, d=4, svd=25, fast  | fhe       | 0.8998   | 0.7175    | 0.6680 | 0.6919
+svd_model.py                | n=4, d=2, svd=25, fast  | fhe       | 0.8985   | 0.7255    | 0.6393 | 0.6797
+svd_model.py                | n=4, d=4, svd=25, fast  | fhe       | 0.9086   | 0.7439    | 0.6971 | 0.7197
+svd_model.py                | n=2, d=2, svd=40, fast  | plaintext | 0.8600   | 0.9990    | 0.1732 | 0.2953
+svd_model.py                | n=2, d=4, svd=40, fast  | plaintext | 0.9079   | 0.7307    | 0.7221 | 0.7264
+svd_model.py                | n=4, d=2, svd=40, fast  | plaintext | 0.8600   | 0.9990    | 0.1732 | 0.2953
+svd_model.py                | n=4, d=4, svd=40, fast  | plaintext | 0.9079   | 0.7307    | 0.7221 | 0.7264
+svd_model.py                | n=2, d=2, svd=40, fast  | fhe       | 0.8499   | 0.7115    | 0.1827 | 0.2908
+svd_model.py                | n=2, d=4, svd=40, fast  | fhe       | 0.8930   | 0.6973    | 0.6441 | 0.6697
+svd_model.py                | n=4, d=2, svd=40, fast  | fhe       | 0.8601   | 0.9196    | 0.1859 | 0.3093
+svd_model.py                | n=4, d=4, svd=40, fast  | fhe       | 0.8969   | 0.7367    | 0.6038 | 0.6637
+svd_model.py                | n=2, d=2, svd=100, fast | plaintext | 0.8512   | 0.9985    | 0.1213 | 0.2163
+svd_model.py                | n=2, d=2, svd=100, fast | fhe       | 0.8497   | 0.9217    | 0.1174 | 0.2083
+best_model_single_record.py | n=2, d=2, svd=15        | plaintext | 0.8710   | 0.9804    | 0.2432 | 0.3897
+best_model_single_record.py | n=2, d=4, svd=15        | plaintext | 0.9137   | 0.7396    | 0.7567 | 0.7481
+best_model_single_record.py | n=4, d=2, svd=15        | plaintext | 0.9048   | 0.7249    | 0.7058 | 0.7152
+best_model_single_record.py | n=4, d=4, svd=15        | plaintext | 0.9137   | 0.7395    | 0.7567 | 0.7480
+best_model_single_record.py | n=2, d=2, svd=25        | plaintext | 0.8711   | 0.9810    | 0.2432 | 0.3897
+best_model_single_record.py | n=2, d=4, svd=25        | plaintext | 0.9135   | 0.7395    | 0.7549 | 0.7471
+best_model_single_record.py | n=4, d=2, svd=25        | plaintext | 0.9049   | 0.7250    | 0.7058 | 0.7153
+best_model_single_record.py | n=4, d=4, svd=25        | plaintext | 0.9136   | 0.7395    | 0.7562 | 0.7477
+best_model_single_record.py | n=2, d=2, svd=40        | plaintext | 0.8600   | 0.9990    | 0.1732 | 0.2953
+best_model_single_record.py | n=2, d=4, svd=40        | plaintext | 0.9079   | 0.7307    | 0.7221 | 0.7264
+best_model_single_record.py | n=4, d=2, svd=40        | plaintext | 0.8600   | 0.9990    | 0.1732 | 0.2953
+best_model_single_record.py | n=4, d=4, svd=40        | plaintext | 0.9079   | 0.7307    | 0.7221 | 0.7264
+best_model_single_record.py | n=2, d=2, svd=100       | plaintext | 0.8512   | 0.9985    | 0.1213 | 0.2163
+best_model_single_record.py | n=2, d=2, svd=15        | fhe       | 0.9000   | 0.8000    | 0.3077 | 0.4444
+best_model_single_record.py | n=2, d=4, svd=15        | fhe       | 0.9300   | 0.7500    | 0.6923 | 0.7200
+best_model_single_record.py | n=4, d=2, svd=15        | fhe       | 0.9300   | 0.7500    | 0.6923 | 0.7200
+best_model_single_record.py | n=4, d=4, svd=15        | fhe       | 0.9200   | 0.6923    | 0.6923 | 0.6923
+best_model_single_record.py | n=2, d=2, svd=25        | fhe       | 0.8900   | 0.7500    | 0.2308 | 0.3529
+best_model_single_record.py | n=2, d=4, svd=25        | fhe       | 0.9000   | 0.6154    | 0.6154 | 0.6154
+best_model_single_record.py | n=4, d=2, svd=25        | fhe       | 0.9100   | 0.6667    | 0.6154 | 0.6400
+best_model_single_record.py | n=4, d=4, svd=25        | fhe       | 0.9400   | 0.7692    | 0.7692 | 0.7692
+best_model_single_record.py | n=2, d=2, svd=40        | fhe       | 0.8600   | 0.4000    | 0.1538 | 0.2222
+best_model_single_record.py | n=2, d=4, svd=40        | fhe       | 0.8800   | 0.5455    | 0.4615 | 0.5000
+best_model_single_record.py | n=4, d=2, svd=40        | fhe       | 0.8900   | 1.0000    | 0.1538 | 0.2667
+best_model_single_record.py | n=4, d=4, svd=40        | fhe       | 0.9100   | 0.6667    | 0.6154 | 0.6400
+best_model_single_record.py | n=2, d=2, svd=100       | fhe       | 0.8800   | 1.0000    | 0.0769 | 0.1429
+
+
+==============================================================================
+3. TRAINING / COMPILE / FHE-SIM WALL TIMES
+==============================================================================
+
+Script                      | Config                  | Train (s) | Predict (s) | Compile (s) | FHE sim (s)
+----------------------------+-------------------------+-----------+-------------+-------------+------------
+svd_model.py                | n=2, d=2, svd=100, fast | 61.8      | 10.0        | 8211.5      | 191.9      
+svd_model.py                | n=2, d=2, svd=15, fast  | 12.2      | 1.8         | 8151.1      | 186.0      
+svd_model.py                | n=2, d=2, svd=25, fast  | 15.9      | 2.8         | 8138.5      | 189.5      
+svd_model.py                | n=2, d=2, svd=40, fast  | 24.4      | 4.4         | 8157.4      | 200.5      
+svd_model.py                | n=2, d=4, svd=15, fast  | 16.4      | 4.9         | 8192.3      | 190.9      
+svd_model.py                | n=2, d=4, svd=25, fast  | 20.3      | 6.7         | 8170.1      | 197.5      
+svd_model.py                | n=2, d=4, svd=40, fast  | 27.3      | 8.4         | 8221.4      | 195.0      
+svd_model.py                | n=4, d=2, svd=15, fast  | 17.3      | 2.6         | 8133.1      | 209.6      
+svd_model.py                | n=4, d=2, svd=25, fast  | 21.5      | 3.8         | 8143.4      | 192.7      
+svd_model.py                | n=4, d=2, svd=40, fast  | 29.1      | 5.6         | 8148.8      | 195.1      
+svd_model.py                | n=4, d=4, svd=15, fast  | 27.1      | 8.9         | 8226.2      | 200.8      
+svd_model.py                | n=4, d=4, svd=25, fast  | 33.8      | 11.6        | 8213.7      | 208.7      
+svd_model.py                | n=4, d=4, svd=40, fast  | 41.7      | 15.0        | 8207.4      | 201.6      
+best_model_single_record.py | n=2, d=2, svd=15        | 0.0       | 0.6         | 0.0         | 0.6        
+best_model_single_record.py | n=2, d=4, svd=15        | 0.0       | 1.1         | 0.0         | 1.1        
+best_model_single_record.py | n=4, d=2, svd=15        | 0.0       | 0.7         | 0.0         | 0.7        
+best_model_single_record.py | n=4, d=4, svd=15        | 0.0       | 1.8         | 0.0         | 1.8        
+best_model_single_record.py | n=2, d=2, svd=25        | 0.0       | 0.6         | 0.0         | 0.6        
+best_model_single_record.py | n=2, d=4, svd=25        | 0.0       | 1.1         | 0.0         | 1.1        
+best_model_single_record.py | n=4, d=2, svd=25        | 0.0       | 0.6         | 0.0         | 0.6        
+best_model_single_record.py | n=4, d=4, svd=25        | 0.0       | 1.6         | 0.0         | 1.6        
+best_model_single_record.py | n=2, d=2, svd=40        | 0.0       | 0.6         | 0.0         | 0.6        
+best_model_single_record.py | n=2, d=4, svd=40        | 0.0       | 0.8         | 0.0         | 0.8        
+best_model_single_record.py | n=4, d=2, svd=40        | 0.0       | 0.6         | 0.0         | 0.6        
+best_model_single_record.py | n=4, d=4, svd=40        | 0.0       | 1.1         | 0.0         | 1.2        
+best_model_single_record.py | n=2, d=2, svd=100       | 0.0       | 0.6         | 0.0         | 0.6        
+
+
+==============================================================================
+4. FHE ENCRYPT / INFERENCE / DECRYPT LATENCY (real client/server)
+==============================================================================
+
+Script                      | Config                  | N   | Keygen (s) | Enc mean | Inf mean | Dec mean | E2E mean | Enc std  | Inf std  | Dec std 
+----------------------------+-------------------------+-----+------------+----------+----------+----------+----------+----------+----------+---------
+svd_model.py                | n=2, d=2, svd=15, fast  | 100 | 1.6189     | 0.004838 | 0.754210 | 0.001593 | 0.760640 | 0.000371 | 0.122143 | 0.000235
+svd_model.py                | n=2, d=4, svd=15, fast  | 100 | 1.7733     | 0.005045 | 1.315519 | 0.001601 | 1.322164 | 0.000731 | 0.090660 | 0.000111
+svd_model.py                | n=4, d=2, svd=15, fast  | 100 | 1.5948     | 0.005135 | 0.795746 | 0.002032 | 0.802913 | 0.000282 | 0.077300 | 0.000215
+svd_model.py                | n=4, d=4, svd=15, fast  | 100 | 1.7839     | 0.005232 | 2.151781 | 0.002009 | 2.159021 | 0.000385 | 0.114437 | 0.000306
+svd_model.py                | n=2, d=2, svd=25, fast  | 100 | 1.5989     | 0.006271 | 0.830650 | 0.001772 | 0.838693 | 0.000256 | 0.078565 | 0.000207
+svd_model.py                | n=2, d=4, svd=25, fast  | 100 | 1.8714     | 0.006611 | 1.568771 | 0.002032 | 1.577415 | 0.001307 | 0.105542 | 0.000401
+svd_model.py                | n=4, d=2, svd=25, fast  | 100 | 1.6143     | 0.006285 | 0.948437 | 0.002202 | 0.956925 | 0.000362 | 0.085211 | 0.000322
+svd_model.py                | n=4, d=4, svd=25, fast  | 100 | 1.8882     | 0.006586 | 2.658915 | 0.002370 | 2.667871 | 0.000937 | 0.187481 | 0.000506
+svd_model.py                | n=2, d=2, svd=40, fast  | 100 | 1.6552     | 0.008528 | 0.878848 | 0.001955 | 0.889330 | 0.001165 | 0.101119 | 0.000352
+svd_model.py                | n=2, d=4, svd=40, fast  | 100 | 1.5790     | 0.008232 | 1.180206 | 0.001901 | 1.190339 | 0.000691 | 0.093179 | 0.000551
+svd_model.py                | n=4, d=2, svd=40, fast  | 100 | 1.5890     | 0.008304 | 0.795076 | 0.002253 | 0.805633 | 0.000533 | 0.081923 | 0.000524
+svd_model.py                | n=4, d=4, svd=40, fast  | 100 | 1.7960     | 0.008060 | 1.448156 | 0.001985 | 1.458201 | 0.000786 | 0.119485 | 0.000335
+svd_model.py                | n=2, d=2, svd=100, fast | 100 | 1.5682     | 0.015151 | 0.668680 | 0.001849 | 0.685680 | 0.001014 | 0.069322 | 0.001509
+best_model_single_record.py | n=2, d=2, svd=15        | 100 | 1.5295     | 0.004714 | 0.642338 | 0.001494 | 0.648545 | 0.000144 | 0.126505 | 0.000103
+best_model_single_record.py | n=2, d=4, svd=15        | 100 | 1.7257     | 0.004882 | 1.140425 | 0.001574 | 1.146882 | 0.000841 | 0.088761 | 0.000077
+best_model_single_record.py | n=4, d=2, svd=15        | 100 | 1.5425     | 0.004987 | 0.690211 | 0.002163 | 0.697361 | 0.000589 | 0.069347 | 0.000978
+best_model_single_record.py | n=4, d=4, svd=15        | 100 | 1.7365     | 0.004826 | 1.755681 | 0.001733 | 1.762240 | 0.000485 | 0.108702 | 0.000104
+best_model_single_record.py | n=2, d=2, svd=25        | 100 | 1.5334     | 0.005887 | 0.626575 | 0.001586 | 0.634048 | 0.000150 | 0.075090 | 0.000413
+best_model_single_record.py | n=2, d=4, svd=25        | 100 | 1.7336     | 0.005986 | 1.072047 | 0.001649 | 1.079682 | 0.000642 | 0.087475 | 0.000438
+best_model_single_record.py | n=4, d=2, svd=25        | 100 | 1.5239     | 0.005944 | 0.639710 | 0.001712 | 0.647367 | 0.000283 | 0.072806 | 0.000118
+best_model_single_record.py | n=4, d=4, svd=25        | 100 | 1.7200     | 0.005991 | 1.611802 | 0.001716 | 1.619508 | 0.000434 | 0.106107 | 0.000134
+best_model_single_record.py | n=2, d=2, svd=40        | 100 | 1.5249     | 0.007653 | 0.579150 | 0.001535 | 0.588338 | 0.000122 | 0.085637 | 0.000093
+best_model_single_record.py | n=2, d=4, svd=40        | 100 | 1.5296     | 0.007600 | 0.807636 | 0.001525 | 0.816761 | 0.000155 | 0.080509 | 0.000089
+best_model_single_record.py | n=4, d=2, svd=40        | 100 | 1.5230     | 0.007614 | 0.566583 | 0.001658 | 0.575856 | 0.000107 | 0.075613 | 0.000099
+best_model_single_record.py | n=4, d=4, svd=40        | 100 | 1.7113     | 0.007742 | 1.148418 | 0.001672 | 1.157832 | 0.000992 | 0.100058 | 0.000085
+best_model_single_record.py | n=2, d=2, svd=100       | 100 | 1.5244     | 0.014667 | 0.583790 | 0.001526 | 0.599984 | 0.000188 | 0.070135 | 0.000072
+
+
+==============================================================================
+5. PLAINTEXT SINGLE-RECORD INFERENCE LATENCY
+==============================================================================
+
+Script                      | Config            | N   | Total (s) | Mean (s) | Std (s) 
+----------------------------+-------------------+-----+-----------+----------+---------
+best_model_single_record.py | n=2, d=2, svd=15  | 100 | 0.0353    | 0.000353 | 0.000056
+best_model_single_record.py | n=2, d=4, svd=15  | 100 | 0.0356    | 0.000356 | 0.000060
+best_model_single_record.py | n=4, d=2, svd=15  | 100 | 0.0353    | 0.000353 | 0.000062
+best_model_single_record.py | n=4, d=4, svd=15  | 100 | 0.0358    | 0.000358 | 0.000063
+best_model_single_record.py | n=2, d=2, svd=25  | 100 | 0.0417    | 0.000417 | 0.000054
+best_model_single_record.py | n=2, d=4, svd=25  | 100 | 0.0425    | 0.000425 | 0.000058
+best_model_single_record.py | n=4, d=2, svd=25  | 100 | 0.0420    | 0.000420 | 0.000063
+best_model_single_record.py | n=4, d=4, svd=25  | 100 | 0.0427    | 0.000427 | 0.000064
+best_model_single_record.py | n=2, d=2, svd=40  | 100 | 0.0530    | 0.000530 | 0.000072
+best_model_single_record.py | n=2, d=4, svd=40  | 100 | 0.0539    | 0.000539 | 0.000168
+best_model_single_record.py | n=4, d=2, svd=40  | 100 | 0.0528    | 0.000528 | 0.000058
+best_model_single_record.py | n=4, d=4, svd=40  | 100 | 0.0526    | 0.000526 | 0.000052
+best_model_single_record.py | n=2, d=2, svd=100 | 100 | 0.0938    | 0.000938 | 0.000050
+
+
+==============================================================================
+6. PER-SCRIPT LOG POINTERS
+==============================================================================
+
+- svd_model.py: /home/thiago.tokarski/ppml-5g/cicids2018-kdd-models/run_logs/20261028_110413/svd_model.log  [OK, 30h 44m 33s]
+- best_model_single_record.py: /home/thiago.tokarski/ppml-5g/cicids2018-kdd-models/run_logs/20261028_110413/best_model_single_record.log  [OK, 27m 4s]
+
+Full raw stdout/stderr for each script is preserved in the log files above. This report aggregates classification metrics and timing measurements.

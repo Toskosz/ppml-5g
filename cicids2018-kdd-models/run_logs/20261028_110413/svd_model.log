@@ -1,0 +1,1518 @@
+# script: svd_model.py
+# started: 2026-10-28T11:04:13.522564-03:00
+######################################################################
+[LOG 2026-10-28 11:04:16 -03-0300] (elapsed 0.0s) Starting svd_model.py — scikit-learn 1.5.0, n_bits=5
+[LOG 2026-10-28 11:04:16 -03-0300] (elapsed 0.0s) RAM cap already 20.0 GiB (/sys/fs/cgroup/user.slice/user-1004.slice/user@1004.service/app.slice/run-rce4acad97f14497fba031348aede58c1.scope).
+[LOG 2026-10-28 11:04:16 -03-0300] (elapsed 0.1s) GPU status — available=True, enabled(runtime)=True
+[LOG 2026-10-28 11:04:16 -03-0300] (elapsed 0.1s) FHE device: cuda (requested)
+[LOG 2026-10-28 11:04:16 -03-0300] (elapsed 0.1s) Loading existing combined file 'CIC-IDS-2018-Combined.csv'...
+[LOG 2026-10-28 11:04:22 -03-0300] (elapsed 5.8s) Loaded 16232943 rows from 'CIC-IDS-2018-Combined.csv'.
+[LOG 2026-10-28 11:04:22 -03-0300] (elapsed 5.8s) Cleaning column names and dropping NaN/Inf rows...
+[LOG 2026-10-28 11:04:31 -03-0300] (elapsed 15.1s) Dropped 0 rows with NaN/Inf. Remaining: 16232943 rows.
+[LOG 2026-10-28 11:04:37 -03-0300] (elapsed 20.6s) Label distribution — benign: 13484708, attack: 2748235
+[LOG 2026-10-28 11:04:37 -03-0300] (elapsed 20.6s) Splitting data 80/20 (stratified)...
+[LOG 2026-10-28 11:04:59 -03-0300] (elapsed 42.9s) Train: 12986354, Test: 3246589.
+Applying preprocessing (MinMaxScaler and OneHotEncoder)...
+[LOG 2026-10-28 11:04:59 -03-0300] (elapsed 42.9s) Loading existing preprocessor from 'preprocessor_cic_ids_2018.pkl'.
+[LOG 2026-10-28 11:05:18 -03-0300] (elapsed 61.5s) Preprocessing done. X_train: (12986354, 64539), X_test: (3246589, 64539) (sparse)
+[LOG 2026-10-28 11:05:19 -03-0300] (elapsed 62.8s) Released raw tables and fitted preprocessor.
+
+                        Config |                Phase |    Wall Time
+----------------------------------------------------------------------
+[LOG 2026-10-28 11:05:19 -03-0300] (elapsed 62.8s) Loading existing SVD from 'svd_cic_ids_2018_15.pkl'.
+[LOG 2026-10-28 11:05:19 -03-0300] (elapsed 62.8s) Projecting 12,986,354 x 64,539 -> 15 components in chunks of 50,000...
+[LOG 2026-10-28 11:05:19 -03-0300] (elapsed 62.9s) Projected rows 50,000 / 12,986,354
+[LOG 2026-10-28 11:05:19 -03-0300] (elapsed 62.9s) Projected rows 1,050,000 / 12,986,354
+[LOG 2026-10-28 11:05:19 -03-0300] (elapsed 63.0s) Projected rows 2,050,000 / 12,986,354
+[LOG 2026-10-28 11:05:19 -03-0300] (elapsed 63.1s) Projected rows 3,050,000 / 12,986,354
+[LOG 2026-10-28 11:05:19 -03-0300] (elapsed 63.1s) Projected rows 4,050,000 / 12,986,354
+[LOG 2026-10-28 11:05:19 -03-0300] (elapsed 63.2s) Projected rows 5,050,000 / 12,986,354
+[LOG 2026-10-28 11:05:20 -03-0300] (elapsed 63.3s) Projected rows 6,050,000 / 12,986,354
+[LOG 2026-10-28 11:05:20 -03-0300] (elapsed 63.3s) Projected rows 7,050,000 / 12,986,354
+[LOG 2026-10-28 11:05:20 -03-0300] (elapsed 63.4s) Projected rows 8,050,000 / 12,986,354
+[LOG 2026-10-28 11:05:20 -03-0300] (elapsed 63.5s) Projected rows 9,050,000 / 12,986,354
+[LOG 2026-10-28 11:05:20 -03-0300] (elapsed 63.6s) Projected rows 10,050,000 / 12,986,354
+[LOG 2026-10-28 11:05:20 -03-0300] (elapsed 63.6s) Projected rows 11,050,000 / 12,986,354
+[LOG 2026-10-28 11:05:20 -03-0300] (elapsed 63.7s) Projected rows 12,050,000 / 12,986,354
+[LOG 2026-10-28 11:05:20 -03-0300] (elapsed 63.9s) Writing (12986354, 15) float32 projection (0.78 GB) to 'X_train_svd_15.npy'...
+[LOG 2026-10-28 11:05:21 -03-0300] (elapsed 64.4s) Projecting 3,246,589 x 64,539 -> 15 components in chunks of 50,000...
+[LOG 2026-10-28 11:05:21 -03-0300] (elapsed 64.4s) Projected rows 50,000 / 3,246,589
+[LOG 2026-10-28 11:05:21 -03-0300] (elapsed 64.5s) Projected rows 1,050,000 / 3,246,589
+[LOG 2026-10-28 11:05:21 -03-0300] (elapsed 64.5s) Projected rows 2,050,000 / 3,246,589
+[LOG 2026-10-28 11:05:21 -03-0300] (elapsed 64.6s) Projected rows 3,050,000 / 3,246,589
+[LOG 2026-10-28 11:05:21 -03-0300] (elapsed 64.7s) Writing (3246589, 15) float32 projection (0.19 GB) to 'X_test_svd_15.npy'...
+[LOG 2026-10-28 11:05:21 -03-0300] (elapsed 64.9s) SVD 15 projections stored. Explained variance ratio sum: 0.8892
+[LOG 2026-10-28 11:05:21 -03-0300] (elapsed 65.0s) Loading existing SVD from 'svd_cic_ids_2018_25.pkl'.
+[LOG 2026-10-28 11:05:21 -03-0300] (elapsed 65.0s) Projecting 12,986,354 x 64,539 -> 25 components in chunks of 50,000...
+[LOG 2026-10-28 11:05:21 -03-0300] (elapsed 65.0s) Projected rows 50,000 / 12,986,354
+[LOG 2026-10-28 11:05:21 -03-0300] (elapsed 65.1s) Projected rows 1,050,000 / 12,986,354
+[LOG 2026-10-28 11:05:21 -03-0300] (elapsed 65.2s) Projected rows 2,050,000 / 12,986,354
+[LOG 2026-10-28 11:05:22 -03-0300] (elapsed 65.2s) Projected rows 3,050,000 / 12,986,354
+[LOG 2026-10-28 11:05:22 -03-0300] (elapsed 65.3s) Projected rows 4,050,000 / 12,986,354
+[LOG 2026-10-28 11:05:22 -03-0300] (elapsed 65.4s) Projected rows 5,050,000 / 12,986,354
+[LOG 2026-10-28 11:05:22 -03-0300] (elapsed 65.5s) Projected rows 6,050,000 / 12,986,354
+[LOG 2026-10-28 11:05:22 -03-0300] (elapsed 65.6s) Projected rows 7,050,000 / 12,986,354
+[LOG 2026-10-28 11:05:22 -03-0300] (elapsed 65.7s) Projected rows 8,050,000 / 12,986,354
+[LOG 2026-10-28 11:05:22 -03-0300] (elapsed 65.8s) Projected rows 9,050,000 / 12,986,354
+[LOG 2026-10-28 11:05:22 -03-0300] (elapsed 65.8s) Projected rows 10,050,000 / 12,986,354
+[LOG 2026-10-28 11:05:22 -03-0300] (elapsed 65.9s) Projected rows 11,050,000 / 12,986,354
+[LOG 2026-10-28 11:05:22 -03-0300] (elapsed 66.0s) Projected rows 12,050,000 / 12,986,354
+[LOG 2026-10-28 11:05:22 -03-0300] (elapsed 66.2s) Writing (12986354, 25) float32 projection (1.30 GB) to 'X_train_svd_25.npy'...
+[LOG 2026-10-28 11:05:23 -03-0300] (elapsed 67.0s) Projecting 3,246,589 x 64,539 -> 25 components in chunks of 50,000...
+[LOG 2026-10-28 11:05:23 -03-0300] (elapsed 67.0s) Projected rows 50,000 / 3,246,589
+[LOG 2026-10-28 11:05:23 -03-0300] (elapsed 67.1s) Projected rows 1,050,000 / 3,246,589
+[LOG 2026-10-28 11:05:23 -03-0300] (elapsed 67.2s) Projected rows 2,050,000 / 3,246,589
+[LOG 2026-10-28 11:05:24 -03-0300] (elapsed 67.2s) Projected rows 3,050,000 / 3,246,589
+[LOG 2026-10-28 11:05:24 -03-0300] (elapsed 67.4s) Writing (3246589, 25) float32 projection (0.32 GB) to 'X_test_svd_25.npy'...
+[LOG 2026-10-28 11:05:24 -03-0300] (elapsed 67.6s) SVD 25 projections stored. Explained variance ratio sum: 0.8940
+[LOG 2026-10-28 11:05:24 -03-0300] (elapsed 67.7s) Loading existing SVD from 'svd_cic_ids_2018_40.pkl'.
+[LOG 2026-10-28 11:05:24 -03-0300] (elapsed 67.7s) Projecting 12,986,354 x 64,539 -> 40 components in chunks of 50,000...
+[LOG 2026-10-28 11:05:24 -03-0300] (elapsed 67.7s) Projected rows 50,000 / 12,986,354
+[LOG 2026-10-28 11:05:24 -03-0300] (elapsed 67.8s) Projected rows 1,050,000 / 12,986,354
+[LOG 2026-10-28 11:05:24 -03-0300] (elapsed 67.9s) Projected rows 2,050,000 / 12,986,354
+[LOG 2026-10-28 11:05:24 -03-0300] (elapsed 68.1s) Projected rows 3,050,000 / 12,986,354
+[LOG 2026-10-28 11:05:24 -03-0300] (elapsed 68.2s) Projected rows 4,050,000 / 12,986,354
+[LOG 2026-10-28 11:05:25 -03-0300] (elapsed 68.3s) Projected rows 5,050,000 / 12,986,354
+[LOG 2026-10-28 11:05:25 -03-0300] (elapsed 68.4s) Projected rows 6,050,000 / 12,986,354
+[LOG 2026-10-28 11:05:25 -03-0300] (elapsed 68.5s) Projected rows 7,050,000 / 12,986,354
+[LOG 2026-10-28 11:05:25 -03-0300] (elapsed 68.7s) Projected rows 8,050,000 / 12,986,354
+[LOG 2026-10-28 11:05:25 -03-0300] (elapsed 68.8s) Projected rows 9,050,000 / 12,986,354
+[LOG 2026-10-28 11:05:25 -03-0300] (elapsed 68.9s) Projected rows 10,050,000 / 12,986,354
+[LOG 2026-10-28 11:05:25 -03-0300] (elapsed 69.0s) Projected rows 11,050,000 / 12,986,354
+[LOG 2026-10-28 11:05:25 -03-0300] (elapsed 69.1s) Projected rows 12,050,000 / 12,986,354
+[LOG 2026-10-28 11:05:26 -03-0300] (elapsed 69.3s) Writing (12986354, 40) float32 projection (2.08 GB) to 'X_train_svd_40.npy'...
+[LOG 2026-10-28 11:05:27 -03-0300] (elapsed 70.6s) Projecting 3,246,589 x 64,539 -> 40 components in chunks of 50,000...
+[LOG 2026-10-28 11:05:27 -03-0300] (elapsed 70.6s) Projected rows 50,000 / 3,246,589
+[LOG 2026-10-28 11:05:27 -03-0300] (elapsed 70.8s) Projected rows 1,050,000 / 3,246,589
+[LOG 2026-10-28 11:05:27 -03-0300] (elapsed 70.9s) Projected rows 2,050,000 / 3,246,589
+[LOG 2026-10-28 11:05:27 -03-0300] (elapsed 71.0s) Projected rows 3,050,000 / 3,246,589
+[LOG 2026-10-28 11:05:27 -03-0300] (elapsed 71.1s) Writing (3246589, 40) float32 projection (0.52 GB) to 'X_test_svd_40.npy'...
+[LOG 2026-10-28 11:05:28 -03-0300] (elapsed 71.5s) SVD 40 projections stored. Explained variance ratio sum: 0.8952
+[LOG 2026-10-28 11:05:28 -03-0300] (elapsed 71.6s) Loading existing SVD from 'svd_cic_ids_2018_100.pkl'.
+[LOG 2026-10-28 11:05:28 -03-0300] (elapsed 71.6s) Projecting 12,986,354 x 64,539 -> 100 components in chunks of 50,000...
+[LOG 2026-10-28 11:05:28 -03-0300] (elapsed 71.6s) Projected rows 50,000 / 12,986,354
+[LOG 2026-10-28 11:05:28 -03-0300] (elapsed 71.8s) Projected rows 1,050,000 / 12,986,354
+[LOG 2026-10-28 11:05:28 -03-0300] (elapsed 72.0s) Projected rows 2,050,000 / 12,986,354
+[LOG 2026-10-28 11:05:29 -03-0300] (elapsed 72.3s) Projected rows 3,050,000 / 12,986,354
+[LOG 2026-10-28 11:05:29 -03-0300] (elapsed 72.5s) Projected rows 4,050,000 / 12,986,354
+[LOG 2026-10-28 11:05:29 -03-0300] (elapsed 72.7s) Projected rows 5,050,000 / 12,986,354
+[LOG 2026-10-28 11:05:29 -03-0300] (elapsed 72.9s) Projected rows 6,050,000 / 12,986,354
+[LOG 2026-10-28 11:05:29 -03-0300] (elapsed 73.2s) Projected rows 7,050,000 / 12,986,354
+[LOG 2026-10-28 11:05:30 -03-0300] (elapsed 73.4s) Projected rows 8,050,000 / 12,986,354
+[LOG 2026-10-28 11:05:30 -03-0300] (elapsed 73.6s) Projected rows 9,050,000 / 12,986,354
+[LOG 2026-10-28 11:05:30 -03-0300] (elapsed 73.8s) Projected rows 10,050,000 / 12,986,354
+[LOG 2026-10-28 11:05:30 -03-0300] (elapsed 74.0s) Projected rows 11,050,000 / 12,986,354
+[LOG 2026-10-28 11:05:30 -03-0300] (elapsed 74.2s) Projected rows 12,050,000 / 12,986,354
+[LOG 2026-10-28 11:05:31 -03-0300] (elapsed 74.6s) Writing (12986354, 100) float32 projection (5.19 GB) to 'X_train_svd_100.npy'...
+[LOG 2026-10-28 11:05:36 -03-0300] (elapsed 79.4s) Projecting 3,246,589 x 64,539 -> 100 components in chunks of 50,000...
+[LOG 2026-10-28 11:05:36 -03-0300] (elapsed 79.4s) Projected rows 50,000 / 3,246,589
+[LOG 2026-10-28 11:05:36 -03-0300] (elapsed 79.6s) Projected rows 1,050,000 / 3,246,589
+[LOG 2026-10-28 11:05:36 -03-0300] (elapsed 79.9s) Projected rows 2,050,000 / 3,246,589
+[LOG 2026-10-28 11:05:36 -03-0300] (elapsed 80.1s) Projected rows 3,050,000 / 3,246,589
+[LOG 2026-10-28 11:05:37 -03-0300] (elapsed 80.3s) Writing (3246589, 100) float32 projection (1.30 GB) to 'X_test_svd_100.npy'...
+[LOG 2026-10-28 11:05:37 -03-0300] (elapsed 81.2s) SVD 100 projections stored. Explained variance ratio sum: 0.8962
+[LOG 2026-10-28 11:05:38 -03-0300] (elapsed 81.4s) Released one-hot matrices before training and FHE compilation.
+[LOG 2026-10-28 11:05:38 -03-0300] (elapsed 81.4s) SVD 15 plaintext models already saved. Skipping training.
+
+######################################################################
+#  PHASE 1: PLAINTEXT TRAINING & EVALUATION  (SVD 15)
+######################################################################
+
+============================================================
+  CONFIG 1/13: n_estimators=2, max_depth=2, svd=15, n_bits=5, family=fast
+============================================================
+[LOG 2026-10-28 11:05:38 -03-0300] (elapsed 81.5s) [n=2, d=2, svd=15, fast] Training completed in 12.2s
+[LOG 2026-10-28 11:05:38 -03-0300] (elapsed 81.5s) [n=2, d=2, svd=15, fast] Clear prediction completed in 1.8s
+[LOG 2026-10-28 11:05:38 -03-0300] (elapsed 81.5s) [n=2, d=2, svd=15, fast] Plaintext metrics:
+--- Model Evaluation ---
+Accuracy: 0.8710
+Precision: 0.9804
+Recall: 0.2432
+F1-Score: 0.3897
+
+--- Confusion Matrix ---
+[[2694266    2676]
+ [ 416000  133647]]
+
+--- Classification Report ---
+              precision    recall  f1-score   support
+
+           0       0.87      1.00      0.93   2696942
+           1       0.98      0.24      0.39    549647
+
+    accuracy                           0.87   3246589
+   macro avg       0.92      0.62      0.66   3246589
+weighted avg       0.89      0.87      0.84   3246589
+
+[LOG 2026-10-28 11:05:38 -03-0300] (elapsed 81.5s) [n=2, d=2, svd=15, fast] Reusing plaintext model 'plaintext_model_2_estimators_2_depth_svd_15_fast.json'.
+
+============================================================
+  CONFIG 2/13: n_estimators=2, max_depth=4, svd=15, n_bits=5, family=fast
+============================================================
+[LOG 2026-10-28 11:05:38 -03-0300] (elapsed 81.5s) [n=2, d=4, svd=15, fast] Training completed in 16.4s
+[LOG 2026-10-28 11:05:38 -03-0300] (elapsed 81.5s) [n=2, d=4, svd=15, fast] Clear prediction completed in 4.9s
+[LOG 2026-10-28 11:05:38 -03-0300] (elapsed 81.5s) [n=2, d=4, svd=15, fast] Plaintext metrics:
+--- Model Evaluation ---
+Accuracy: 0.9137
+Precision: 0.7396
+Recall: 0.7567
+F1-Score: 0.7481
+
+--- Confusion Matrix ---
+[[2550489  146453]
+ [ 133717  415930]]
+
+--- Classification Report ---
+              precision    recall  f1-score   support
+
+           0       0.95      0.95      0.95   2696942
+           1       0.74      0.76      0.75    549647
+
+    accuracy                           0.91   3246589
+   macro avg       0.84      0.85      0.85   3246589
+weighted avg       0.91      0.91      0.91   3246589
+
+[LOG 2026-10-28 11:05:38 -03-0300] (elapsed 81.5s) [n=2, d=4, svd=15, fast] Reusing plaintext model 'plaintext_model_2_estimators_4_depth_svd_15_fast.json'.
+
+============================================================
+  CONFIG 3/13: n_estimators=4, max_depth=2, svd=15, n_bits=5, family=fast
+============================================================
+[LOG 2026-10-28 11:05:38 -03-0300] (elapsed 81.5s) [n=4, d=2, svd=15, fast] Training completed in 17.3s
+[LOG 2026-10-28 11:05:38 -03-0300] (elapsed 81.5s) [n=4, d=2, svd=15, fast] Clear prediction completed in 2.6s
+[LOG 2026-10-28 11:05:38 -03-0300] (elapsed 81.5s) [n=4, d=2, svd=15, fast] Plaintext metrics:
+--- Model Evaluation ---
+Accuracy: 0.9048
+Precision: 0.7249
+Recall: 0.7058
+F1-Score: 0.7152
+
+--- Confusion Matrix ---
+[[2549735  147207]
+ [ 161709  387938]]
+
+--- Classification Report ---
+              precision    recall  f1-score   support
+
+           0       0.94      0.95      0.94   2696942
+           1       0.72      0.71      0.72    549647
+
+    accuracy                           0.90   3246589
+   macro avg       0.83      0.83      0.83   3246589
+weighted avg       0.90      0.90      0.90   3246589
+
+[LOG 2026-10-28 11:05:38 -03-0300] (elapsed 81.5s) [n=4, d=2, svd=15, fast] Reusing plaintext model 'plaintext_model_4_estimators_2_depth_svd_15_fast.json'.
+
+============================================================
+  CONFIG 4/13: n_estimators=4, max_depth=4, svd=15, n_bits=5, family=fast
+============================================================
+[LOG 2026-10-28 11:05:38 -03-0300] (elapsed 81.5s) [n=4, d=4, svd=15, fast] Training completed in 27.1s
+[LOG 2026-10-28 11:05:38 -03-0300] (elapsed 81.5s) [n=4, d=4, svd=15, fast] Clear prediction completed in 8.9s
+[LOG 2026-10-28 11:05:38 -03-0300] (elapsed 81.5s) [n=4, d=4, svd=15, fast] Plaintext metrics:
+--- Model Evaluation ---
+Accuracy: 0.9137
+Precision: 0.7395
+Recall: 0.7567
+F1-Score: 0.7480
+
+--- Confusion Matrix ---
+[[2550427  146515]
+ [ 133717  415930]]
+
+--- Classification Report ---
+              precision    recall  f1-score   support
+
+           0       0.95      0.95      0.95   2696942
+           1       0.74      0.76      0.75    549647
+
+    accuracy                           0.91   3246589
+   macro avg       0.84      0.85      0.85   3246589
+weighted avg       0.91      0.91      0.91   3246589
+
+[LOG 2026-10-28 11:05:38 -03-0300] (elapsed 81.5s) [n=4, d=4, svd=15, fast] Reusing plaintext model 'plaintext_model_4_estimators_4_depth_svd_15_fast.json'.
+
+======================================================================
+  PLAINTEXT SUMMARY  (SVD 15)
+======================================================================
+                        Config |  Train (s) |  Predict (s)
+------------------------------------------------------------
+        n=2, d=2, svd=15, fast |       12.2 |          1.8
+        n=2, d=4, svd=15, fast |       16.4 |          4.9
+        n=4, d=2, svd=15, fast |       17.3 |          2.6
+        n=4, d=4, svd=15, fast |       27.1 |          8.9
+
+[LOG 2026-10-28 11:05:38 -03-0300] (elapsed 81.5s) Phase 1 complete for SVD 15 — all plaintext variants trained and evaluated.
+
+######################################################################
+#  PHASE 2: FHE COMPILATION & SIMULATION  (SVD 15)
+######################################################################
+
+============================================================
+  FHE for CONFIG 1/13: n_estimators=2, max_depth=2, svd=15, n_bits=5, family=fast
+============================================================
+[LOG 2026-10-28 11:05:38 -03-0300] (elapsed 81.5s) [n=2, d=2, svd=15, fast] Loading plaintext model from 'plaintext_model_2_estimators_2_depth_svd_15_fast.json'...
+[LOG 2026-10-28 11:05:43 -03-0300] (elapsed 86.6s) [n=2, d=2, svd=15, fast] Loading train projection for FHE compilation...
+[LOG 2026-10-28 11:05:46 -03-0300] (elapsed 89.8s) [n=2, d=2, svd=15, fast] Compiling FHE circuit (this may take a long time)...
+[LOG 2026-10-28 11:05:46 -03-0300] (elapsed 89.8s) [n=2, d=2, svd=15, fast] GPU status — available=True, enabled(runtime)=True
+[LOG 2026-10-28 11:05:46 -03-0300] (elapsed 89.8s) [n=2, d=2, svd=15, fast] FHE device: cuda (requested)
+[LOG 2026-10-28 11:05:46 -03-0300] (elapsed 89.8s) [n=2, d=2, svd=15, fast] Compiling FHE circuit with device='cuda'...
+[LOG 2026-10-28 13:21:37 -03-0300] (elapsed 8,240.8s) [n=2, d=2, svd=15, fast] FHE compilation succeeded on device='cuda'.
+[LOG 2026-10-28 13:21:37 -03-0300] (elapsed 8,240.8s) [n=2, d=2, svd=15, fast] FHE compilation completed in 8,151.1s on device='cuda'
+[LOG 2026-10-28 13:21:37 -03-0300] (elapsed 8,241.1s) [n=2, d=2, svd=15, fast] Loading test projection for FHE simulation...
+[LOG 2026-10-28 13:21:38 -03-0300] (elapsed 8,241.8s) [n=2, d=2, svd=15, fast] Subsampled 50,000 rows for FHE simulation...
+[LOG 2026-10-28 13:21:38 -03-0300] (elapsed 8,241.8s) [n=2, d=2, svd=15, fast] Starting FHE simulation prediction on 50,000 samples...
+[LOG 2026-10-28 13:24:44 -03-0300] (elapsed 8,427.8s) [n=2, d=2, svd=15, fast] FHE simulation completed in 186.0s
+[LOG 2026-10-28 13:24:44 -03-0300] (elapsed 8,427.8s) [n=2, d=2, svd=15, fast] FHE metrics (on 50,000 sample subset):
+--- Model Evaluation ---
+Accuracy: 0.8619
+Precision: 0.7501
+Recall: 0.2698
+F1-Score: 0.3968
+
+--- Confusion Matrix ---
+[[40821   757]
+ [ 6150  2272]]
+
+--- Classification Report ---
+              precision    recall  f1-score   support
+
+           0       0.87      0.98      0.92     41578
+           1       0.75      0.27      0.40      8422
+
+    accuracy                           0.86     50000
+   macro avg       0.81      0.63      0.66     50000
+weighted avg       0.85      0.86      0.83     50000
+
+[LOG 2026-10-28 13:24:44 -03-0300] (elapsed 8,428.1s) [n=2, d=2, svd=15, fast] Saving compiled FHE circuit to './fhe_model_2_estimators_2_depth_svd_15_components_fast/cuda'...
+[LOG 2026-10-28 13:24:44 -03-0300] (elapsed 8,428.1s) [n=2, d=2, svd=15, fast] FHE assets saved (device=cuda). Summary — train: 12.2s, predict: 1.8s, compile: 8,151.1s, fhe_sim: 186.0s
+[LOG 2026-10-28 13:24:45 -03-0300] (elapsed 8,428.3s) [n=2, d=2, svd=15, fast] Measuring real FHE encrypt/inference/decrypt on 100 records...
+[LOG 2026-10-28 13:24:45 -03-0300] (elapsed 8,428.3s) [n=2, d=2, svd=15, fast] Loading FHE client/server from './fhe_model_2_estimators_2_depth_svd_15_components_fast/cuda' for latency measurement...
+[LOG 2026-10-28 13:24:45 -03-0300] (elapsed 8,428.3s) [n=2, d=2, svd=15, fast] Model compiled for device='cuda' (from fhe_device.txt).
+[LOG 2026-10-28 13:24:46 -03-0300] (elapsed 8,429.8s) [n=2, d=2, svd=15, fast] Generating evaluation keys...
+[LOG 2026-10-28 13:24:48 -03-0300] (elapsed 8,431.4s) [n=2, d=2, svd=15, fast] Evaluation keys ready in 1.619s (29,606,808 bytes).
+[LOG 2026-10-28 13:24:48 -03-0300] (elapsed 8,431.5s) [n=2, d=2, svd=15, fast] Evaluation keys deserialized once in 0.078s.
+[LOG 2026-10-28 13:24:48 -03-0300] (elapsed 8,431.5s) [n=2, d=2, svd=15, fast] Measuring encrypt / inference / decrypt on 100 records...
+[LOG 2026-10-28 13:24:56 -03-0300] (elapsed 8,440.1s) [n=2, d=2, svd=15, fast]   10/100 — avg encrypt=0.004965s, avg infer=0.852671s, avg decrypt=0.001489s
+[LOG 2026-10-28 13:25:04 -03-0300] (elapsed 8,447.5s) [n=2, d=2, svd=15, fast]   20/100 — avg encrypt=0.004886s, avg infer=0.793095s, avg decrypt=0.001515s
+[LOG 2026-10-28 13:25:11 -03-0300] (elapsed 8,455.1s) [n=2, d=2, svd=15, fast]   30/100 — avg encrypt=0.004879s, avg infer=0.778477s, avg decrypt=0.001538s
+[LOG 2026-10-28 13:25:19 -03-0300] (elapsed 8,462.7s) [n=2, d=2, svd=15, fast]   40/100 — avg encrypt=0.004875s, avg infer=0.772855s, avg decrypt=0.001574s
+[LOG 2026-10-28 13:25:26 -03-0300] (elapsed 8,470.1s) [n=2, d=2, svd=15, fast]   50/100 — avg encrypt=0.004851s, avg infer=0.764924s, avg decrypt=0.001602s
+[LOG 2026-10-28 13:25:34 -03-0300] (elapsed 8,477.7s) [n=2, d=2, svd=15, fast]   60/100 — avg encrypt=0.004859s, avg infer=0.763816s, avg decrypt=0.001581s
+[LOG 2026-10-28 13:25:41 -03-0300] (elapsed 8,485.2s) [n=2, d=2, svd=15, fast]   70/100 — avg encrypt=0.004881s, avg infer=0.760645s, avg decrypt=0.001596s
+[LOG 2026-10-28 13:25:49 -03-0300] (elapsed 8,492.8s) [n=2, d=2, svd=15, fast]   80/100 — avg encrypt=0.004861s, avg infer=0.759280s, avg decrypt=0.001587s
+[LOG 2026-10-28 13:25:56 -03-0300] (elapsed 8,500.1s) [n=2, d=2, svd=15, fast]   90/100 — avg encrypt=0.004838s, avg infer=0.756117s, avg decrypt=0.001582s
+[LOG 2026-10-28 13:26:04 -03-0300] (elapsed 8,507.6s) [n=2, d=2, svd=15, fast]   100/100 — avg encrypt=0.004838s, avg infer=0.754210s, avg decrypt=0.001593s
+
+==================== FHE LATENCY (n=2, d=2, svd=15, fast) ====================
+Records measured: 100
+Key generation:   1.6189 s (once)
+       Phase |    Total (s) |     Mean (s) |      Std (s)
+----------------------------------------------------------
+     encrypt |       0.4838 |     0.004838 |     0.000371
+   inference |      75.4210 |     0.754210 |     0.122143
+     decrypt |       0.1593 |     0.001593 |     0.000235
+  end-to-end |      76.0640 |     0.760640 |          n/a
+======================================================================
+
+
+============================================================
+  FHE for CONFIG 2/13: n_estimators=2, max_depth=4, svd=15, n_bits=5, family=fast
+============================================================
+[LOG 2026-10-28 13:26:04 -03-0300] (elapsed 8,507.8s) [n=2, d=4, svd=15, fast] Loading plaintext model from 'plaintext_model_2_estimators_4_depth_svd_15_fast.json'...
+[LOG 2026-10-28 13:26:04 -03-0300] (elapsed 8,507.8s) [n=2, d=4, svd=15, fast] Loading train projection for FHE compilation...
+[LOG 2026-10-28 13:26:05 -03-0300] (elapsed 8,508.3s) [n=2, d=4, svd=15, fast] Compiling FHE circuit (this may take a long time)...
+[LOG 2026-10-28 13:26:05 -03-0300] (elapsed 8,508.3s) [n=2, d=4, svd=15, fast] GPU status — available=True, enabled(runtime)=True
+[LOG 2026-10-28 13:26:05 -03-0300] (elapsed 8,508.3s) [n=2, d=4, svd=15, fast] FHE device: cuda (requested)
+[LOG 2026-10-28 13:26:05 -03-0300] (elapsed 8,508.3s) [n=2, d=4, svd=15, fast] Compiling FHE circuit with device='cuda'...
+[LOG 2026-10-28 15:42:37 -03-0300] (elapsed 16,700.7s) [n=2, d=4, svd=15, fast] FHE compilation succeeded on device='cuda'.
+[LOG 2026-10-28 15:42:37 -03-0300] (elapsed 16,700.7s) [n=2, d=4, svd=15, fast] FHE compilation completed in 8,192.3s on device='cuda'
+[LOG 2026-10-28 15:42:37 -03-0300] (elapsed 16,700.9s) [n=2, d=4, svd=15, fast] Loading test projection for FHE simulation...
+[LOG 2026-10-28 15:42:37 -03-0300] (elapsed 16,701.2s) [n=2, d=4, svd=15, fast] Subsampled 50,000 rows for FHE simulation...
+[LOG 2026-10-28 15:42:37 -03-0300] (elapsed 16,701.2s) [n=2, d=4, svd=15, fast] Starting FHE simulation prediction on 50,000 samples...
+[LOG 2026-10-28 15:45:48 -03-0300] (elapsed 16,892.2s) [n=2, d=4, svd=15, fast] FHE simulation completed in 190.9s
+[LOG 2026-10-28 15:45:48 -03-0300] (elapsed 16,892.2s) [n=2, d=4, svd=15, fast] FHE metrics (on 50,000 sample subset):
+--- Model Evaluation ---
+Accuracy: 0.9034
+Precision: 0.7267
+Recall: 0.6833
+F1-Score: 0.7044
+
+--- Confusion Matrix ---
+[[39414  2164]
+ [ 2667  5755]]
+
+--- Classification Report ---
+              precision    recall  f1-score   support
+
+           0       0.94      0.95      0.94     41578
+           1       0.73      0.68      0.70      8422
+
+    accuracy                           0.90     50000
+   macro avg       0.83      0.82      0.82     50000
+weighted avg       0.90      0.90      0.90     50000
+
+[LOG 2026-10-28 15:45:49 -03-0300] (elapsed 16,892.6s) [n=2, d=4, svd=15, fast] Saving compiled FHE circuit to './fhe_model_2_estimators_4_depth_svd_15_components_fast/cuda'...
+[LOG 2026-10-28 15:45:49 -03-0300] (elapsed 16,892.6s) [n=2, d=4, svd=15, fast] FHE assets saved (device=cuda). Summary — train: 16.4s, predict: 4.9s, compile: 8,192.3s, fhe_sim: 190.9s
+[LOG 2026-10-28 15:45:49 -03-0300] (elapsed 16,892.8s) [n=2, d=4, svd=15, fast] Measuring real FHE encrypt/inference/decrypt on 100 records...
+[LOG 2026-10-28 15:45:49 -03-0300] (elapsed 16,892.8s) [n=2, d=4, svd=15, fast] Loading FHE client/server from './fhe_model_2_estimators_4_depth_svd_15_components_fast/cuda' for latency measurement...
+[LOG 2026-10-28 15:45:49 -03-0300] (elapsed 16,892.8s) [n=2, d=4, svd=15, fast] Model compiled for device='cuda' (from fhe_device.txt).
+[LOG 2026-10-28 15:45:51 -03-0300] (elapsed 16,894.2s) [n=2, d=4, svd=15, fast] Generating evaluation keys...
+[LOG 2026-10-28 15:45:52 -03-0300] (elapsed 16,896.0s) [n=2, d=4, svd=15, fast] Evaluation keys ready in 1.773s (37,278,616 bytes).
+[LOG 2026-10-28 15:45:52 -03-0300] (elapsed 16,896.1s) [n=2, d=4, svd=15, fast] Evaluation keys deserialized once in 0.062s.
+[LOG 2026-10-28 15:45:52 -03-0300] (elapsed 16,896.1s) [n=2, d=4, svd=15, fast] Measuring encrypt / inference / decrypt on 100 records...
+[LOG 2026-10-28 15:46:06 -03-0300] (elapsed 16,909.9s) [n=2, d=4, svd=15, fast]   10/100 — avg encrypt=0.005034s, avg infer=1.373868s, avg decrypt=0.001653s
+[LOG 2026-10-28 15:46:19 -03-0300] (elapsed 16,923.1s) [n=2, d=4, svd=15, fast]   20/100 — avg encrypt=0.005066s, avg infer=1.344662s, avg decrypt=0.001636s
+[LOG 2026-10-28 15:46:32 -03-0300] (elapsed 16,936.1s) [n=2, d=4, svd=15, fast]   30/100 — avg encrypt=0.005016s, avg infer=1.328198s, avg decrypt=0.001624s
+[LOG 2026-10-28 15:46:46 -03-0300] (elapsed 16,949.4s) [n=2, d=4, svd=15, fast]   40/100 — avg encrypt=0.004992s, avg infer=1.325291s, avg decrypt=0.001616s
+[LOG 2026-10-28 15:46:59 -03-0300] (elapsed 16,962.7s) [n=2, d=4, svd=15, fast]   50/100 — avg encrypt=0.005075s, avg infer=1.326566s, avg decrypt=0.001605s
+[LOG 2026-10-28 15:47:12 -03-0300] (elapsed 16,975.9s) [n=2, d=4, svd=15, fast]   60/100 — avg encrypt=0.005124s, avg infer=1.322837s, avg decrypt=0.001609s
+[LOG 2026-10-28 15:47:25 -03-0300] (elapsed 16,989.0s) [n=2, d=4, svd=15, fast]   70/100 — avg encrypt=0.005095s, avg infer=1.320572s, avg decrypt=0.001622s
+[LOG 2026-10-28 15:47:38 -03-0300] (elapsed 17,001.9s) [n=2, d=4, svd=15, fast]   80/100 — avg encrypt=0.005101s, avg infer=1.315821s, avg decrypt=0.001619s
+[LOG 2026-10-28 15:47:51 -03-0300] (elapsed 17,015.0s) [n=2, d=4, svd=15, fast]   90/100 — avg encrypt=0.005077s, avg infer=1.314197s, avg decrypt=0.001608s
+[LOG 2026-10-28 15:48:05 -03-0300] (elapsed 17,028.3s) [n=2, d=4, svd=15, fast]   100/100 — avg encrypt=0.005045s, avg infer=1.315519s, avg decrypt=0.001601s
+
+==================== FHE LATENCY (n=2, d=4, svd=15, fast) ====================
+Records measured: 100
+Key generation:   1.7733 s (once)
+       Phase |    Total (s) |     Mean (s) |      Std (s)
+----------------------------------------------------------
+     encrypt |       0.5045 |     0.005045 |     0.000731
+   inference |     131.5519 |     1.315519 |     0.090660
+     decrypt |       0.1601 |     0.001601 |     0.000111
+  end-to-end |     132.2164 |     1.322164 |          n/a
+======================================================================
+
+
+============================================================
+  FHE for CONFIG 3/13: n_estimators=4, max_depth=2, svd=15, n_bits=5, family=fast
+============================================================
+[LOG 2026-10-28 15:48:05 -03-0300] (elapsed 17,028.5s) [n=4, d=2, svd=15, fast] Loading plaintext model from 'plaintext_model_4_estimators_2_depth_svd_15_fast.json'...
+[LOG 2026-10-28 15:48:05 -03-0300] (elapsed 17,028.6s) [n=4, d=2, svd=15, fast] Loading train projection for FHE compilation...
+[LOG 2026-10-28 15:48:05 -03-0300] (elapsed 17,029.1s) [n=4, d=2, svd=15, fast] Compiling FHE circuit (this may take a long time)...
+[LOG 2026-10-28 15:48:05 -03-0300] (elapsed 17,029.1s) [n=4, d=2, svd=15, fast] GPU status — available=True, enabled(runtime)=True
+[LOG 2026-10-28 15:48:05 -03-0300] (elapsed 17,029.1s) [n=4, d=2, svd=15, fast] FHE device: cuda (requested)
+[LOG 2026-10-28 15:48:05 -03-0300] (elapsed 17,029.1s) [n=4, d=2, svd=15, fast] Compiling FHE circuit with device='cuda'...
+[LOG 2026-10-28 18:03:38 -03-0300] (elapsed 25,162.2s) [n=4, d=2, svd=15, fast] FHE compilation succeeded on device='cuda'.
+[LOG 2026-10-28 18:03:38 -03-0300] (elapsed 25,162.2s) [n=4, d=2, svd=15, fast] FHE compilation completed in 8,133.1s on device='cuda'
+[LOG 2026-10-28 18:03:39 -03-0300] (elapsed 25,162.5s) [n=4, d=2, svd=15, fast] Loading test projection for FHE simulation...
+[LOG 2026-10-28 18:03:39 -03-0300] (elapsed 25,162.8s) [n=4, d=2, svd=15, fast] Subsampled 50,000 rows for FHE simulation...
+[LOG 2026-10-28 18:03:39 -03-0300] (elapsed 25,162.8s) [n=4, d=2, svd=15, fast] Starting FHE simulation prediction on 50,000 samples...
+[LOG 2026-10-28 18:07:09 -03-0300] (elapsed 25,372.5s) [n=4, d=2, svd=15, fast] FHE simulation completed in 209.6s
+[LOG 2026-10-28 18:07:09 -03-0300] (elapsed 25,372.5s) [n=4, d=2, svd=15, fast] FHE metrics (on 50,000 sample subset):
+--- Model Evaluation ---
+Accuracy: 0.8996
+Precision: 0.7267
+Recall: 0.6476
+F1-Score: 0.6849
+
+--- Confusion Matrix ---
+[[39527  2051]
+ [ 2968  5454]]
+
+--- Classification Report ---
+              precision    recall  f1-score   support
+
+           0       0.93      0.95      0.94     41578
+           1       0.73      0.65      0.68      8422
+
+    accuracy                           0.90     50000
+   macro avg       0.83      0.80      0.81     50000
+weighted avg       0.90      0.90      0.90     50000
+
+[LOG 2026-10-28 18:07:09 -03-0300] (elapsed 25,372.9s) [n=4, d=2, svd=15, fast] Saving compiled FHE circuit to './fhe_model_4_estimators_2_depth_svd_15_components_fast/cuda'...
+[LOG 2026-10-28 18:07:09 -03-0300] (elapsed 25,372.9s) [n=4, d=2, svd=15, fast] FHE assets saved (device=cuda). Summary — train: 17.3s, predict: 2.6s, compile: 8,133.1s, fhe_sim: 209.6s
+[LOG 2026-10-28 18:07:09 -03-0300] (elapsed 25,373.1s) [n=4, d=2, svd=15, fast] Measuring real FHE encrypt/inference/decrypt on 100 records...
+[LOG 2026-10-28 18:07:09 -03-0300] (elapsed 25,373.1s) [n=4, d=2, svd=15, fast] Loading FHE client/server from './fhe_model_4_estimators_2_depth_svd_15_components_fast/cuda' for latency measurement...
+[LOG 2026-10-28 18:07:09 -03-0300] (elapsed 25,373.1s) [n=4, d=2, svd=15, fast] Model compiled for device='cuda' (from fhe_device.txt).
+[LOG 2026-10-28 18:07:11 -03-0300] (elapsed 25,374.7s) [n=4, d=2, svd=15, fast] Generating evaluation keys...
+[LOG 2026-10-28 18:07:13 -03-0300] (elapsed 25,376.3s) [n=4, d=2, svd=15, fast] Evaluation keys ready in 1.595s (29,606,808 bytes).
+[LOG 2026-10-28 18:07:13 -03-0300] (elapsed 25,376.3s) [n=4, d=2, svd=15, fast] Evaluation keys deserialized once in 0.079s.
+[LOG 2026-10-28 18:07:13 -03-0300] (elapsed 25,376.3s) [n=4, d=2, svd=15, fast] Measuring encrypt / inference / decrypt on 100 records...
+[LOG 2026-10-28 18:07:22 -03-0300] (elapsed 25,385.4s) [n=4, d=2, svd=15, fast]   10/100 — avg encrypt=0.005290s, avg infer=0.894886s, avg decrypt=0.001994s
+[LOG 2026-10-28 18:07:30 -03-0300] (elapsed 25,393.5s) [n=4, d=2, svd=15, fast]   20/100 — avg encrypt=0.005276s, avg infer=0.849161s, avg decrypt=0.002020s
+[LOG 2026-10-28 18:07:38 -03-0300] (elapsed 25,401.3s) [n=4, d=2, svd=15, fast]   30/100 — avg encrypt=0.005301s, avg infer=0.823774s, avg decrypt=0.002019s
+[LOG 2026-10-28 18:07:45 -03-0300] (elapsed 25,409.1s) [n=4, d=2, svd=15, fast]   40/100 — avg encrypt=0.005253s, avg infer=0.811260s, avg decrypt=0.002004s
+[LOG 2026-10-28 18:07:53 -03-0300] (elapsed 25,417.2s) [n=4, d=2, svd=15, fast]   50/100 — avg encrypt=0.005210s, avg infer=0.810519s, avg decrypt=0.002003s
+[LOG 2026-10-28 18:08:01 -03-0300] (elapsed 25,425.2s) [n=4, d=2, svd=15, fast]   60/100 — avg encrypt=0.005221s, avg infer=0.806285s, avg decrypt=0.002047s
+[LOG 2026-10-28 18:08:09 -03-0300] (elapsed 25,433.0s) [n=4, d=2, svd=15, fast]   70/100 — avg encrypt=0.005196s, avg infer=0.802069s, avg decrypt=0.002044s
+[LOG 2026-10-28 18:08:17 -03-0300] (elapsed 25,440.9s) [n=4, d=2, svd=15, fast]   80/100 — avg encrypt=0.005183s, avg infer=0.799135s, avg decrypt=0.002044s
+[LOG 2026-10-28 18:08:25 -03-0300] (elapsed 25,448.7s) [n=4, d=2, svd=15, fast]   90/100 — avg encrypt=0.005156s, avg infer=0.796479s, avg decrypt=0.002046s
+[LOG 2026-10-28 18:08:33 -03-0300] (elapsed 25,456.6s) [n=4, d=2, svd=15, fast]   100/100 — avg encrypt=0.005135s, avg infer=0.795746s, avg decrypt=0.002032s
+
+==================== FHE LATENCY (n=4, d=2, svd=15, fast) ====================
+Records measured: 100
+Key generation:   1.5948 s (once)
+       Phase |    Total (s) |     Mean (s) |      Std (s)
+----------------------------------------------------------
+     encrypt |       0.5135 |     0.005135 |     0.000282
+   inference |      79.5746 |     0.795746 |     0.077300
+     decrypt |       0.2032 |     0.002032 |     0.000215
+  end-to-end |      80.2913 |     0.802913 |          n/a
+======================================================================
+
+
+============================================================
+  FHE for CONFIG 4/13: n_estimators=4, max_depth=4, svd=15, n_bits=5, family=fast
+============================================================
+[LOG 2026-10-28 18:08:33 -03-0300] (elapsed 25,456.9s) [n=4, d=4, svd=15, fast] Loading plaintext model from 'plaintext_model_4_estimators_4_depth_svd_15_fast.json'...
+[LOG 2026-10-28 18:08:33 -03-0300] (elapsed 25,456.9s) [n=4, d=4, svd=15, fast] Loading train projection for FHE compilation...
+[LOG 2026-10-28 18:08:34 -03-0300] (elapsed 25,457.5s) [n=4, d=4, svd=15, fast] Compiling FHE circuit (this may take a long time)...
+[LOG 2026-10-28 18:08:34 -03-0300] (elapsed 25,457.5s) [n=4, d=4, svd=15, fast] GPU status — available=True, enabled(runtime)=True
+[LOG 2026-10-28 18:08:34 -03-0300] (elapsed 25,457.5s) [n=4, d=4, svd=15, fast] FHE device: cuda (requested)
+[LOG 2026-10-28 18:08:34 -03-0300] (elapsed 25,457.5s) [n=4, d=4, svd=15, fast] Compiling FHE circuit with device='cuda'...
+[LOG 2026-10-28 20:25:40 -03-0300] (elapsed 33,683.7s) [n=4, d=4, svd=15, fast] FHE compilation succeeded on device='cuda'.
+[LOG 2026-10-28 20:25:40 -03-0300] (elapsed 33,683.7s) [n=4, d=4, svd=15, fast] FHE compilation completed in 8,226.2s on device='cuda'
+[LOG 2026-10-28 20:25:40 -03-0300] (elapsed 33,684.0s) [n=4, d=4, svd=15, fast] Loading test projection for FHE simulation...
+[LOG 2026-10-28 20:25:41 -03-0300] (elapsed 33,684.3s) [n=4, d=4, svd=15, fast] Subsampled 50,000 rows for FHE simulation...
+[LOG 2026-10-28 20:25:41 -03-0300] (elapsed 33,684.3s) [n=4, d=4, svd=15, fast] Starting FHE simulation prediction on 50,000 samples...
+[LOG 2026-10-28 20:29:01 -03-0300] (elapsed 33,885.1s) [n=4, d=4, svd=15, fast] FHE simulation completed in 200.8s
+[LOG 2026-10-28 20:29:01 -03-0300] (elapsed 33,885.1s) [n=4, d=4, svd=15, fast] FHE metrics (on 50,000 sample subset):
+--- Model Evaluation ---
+Accuracy: 0.9085
+Precision: 0.7423
+Recall: 0.7001
+F1-Score: 0.7206
+
+--- Confusion Matrix ---
+[[39531  2047]
+ [ 2526  5896]]
+
+--- Classification Report ---
+              precision    recall  f1-score   support
+
+           0       0.94      0.95      0.95     41578
+           1       0.74      0.70      0.72      8422
+
+    accuracy                           0.91     50000
+   macro avg       0.84      0.83      0.83     50000
+weighted avg       0.91      0.91      0.91     50000
+
+[LOG 2026-10-28 20:29:02 -03-0300] (elapsed 33,885.5s) [n=4, d=4, svd=15, fast] Saving compiled FHE circuit to './fhe_model_4_estimators_4_depth_svd_15_components_fast/cuda'...
+[LOG 2026-10-28 20:29:02 -03-0300] (elapsed 33,885.5s) [n=4, d=4, svd=15, fast] FHE assets saved (device=cuda). Summary — train: 27.1s, predict: 8.9s, compile: 8,226.2s, fhe_sim: 200.8s
+[LOG 2026-10-28 20:29:02 -03-0300] (elapsed 33,885.7s) [n=4, d=4, svd=15, fast] Measuring real FHE encrypt/inference/decrypt on 100 records...
+[LOG 2026-10-28 20:29:02 -03-0300] (elapsed 33,885.7s) [n=4, d=4, svd=15, fast] Loading FHE client/server from './fhe_model_4_estimators_4_depth_svd_15_components_fast/cuda' for latency measurement...
+[LOG 2026-10-28 20:29:02 -03-0300] (elapsed 33,885.7s) [n=4, d=4, svd=15, fast] Model compiled for device='cuda' (from fhe_device.txt).
+[LOG 2026-10-28 20:29:03 -03-0300] (elapsed 33,887.2s) [n=4, d=4, svd=15, fast] Generating evaluation keys...
+[LOG 2026-10-28 20:29:05 -03-0300] (elapsed 33,889.0s) [n=4, d=4, svd=15, fast] Evaluation keys ready in 1.784s (37,278,616 bytes).
+[LOG 2026-10-28 20:29:05 -03-0300] (elapsed 33,889.1s) [n=4, d=4, svd=15, fast] Evaluation keys deserialized once in 0.065s.
+[LOG 2026-10-28 20:29:05 -03-0300] (elapsed 33,889.1s) [n=4, d=4, svd=15, fast] Measuring encrypt / inference / decrypt on 100 records...
+[LOG 2026-10-28 20:29:28 -03-0300] (elapsed 33,911.6s) [n=4, d=4, svd=15, fast]   10/100 — avg encrypt=0.005551s, avg infer=2.243314s, avg decrypt=0.002171s
+[LOG 2026-10-28 20:29:49 -03-0300] (elapsed 33,932.9s) [n=4, d=4, svd=15, fast]   20/100 — avg encrypt=0.005451s, avg infer=2.181800s, avg decrypt=0.002075s
+[LOG 2026-10-28 20:30:11 -03-0300] (elapsed 33,954.8s) [n=4, d=4, svd=15, fast]   30/100 — avg encrypt=0.005384s, avg infer=2.182248s, avg decrypt=0.002055s
+[LOG 2026-10-28 20:30:33 -03-0300] (elapsed 33,976.4s) [n=4, d=4, svd=15, fast]   40/100 — avg encrypt=0.005395s, avg infer=2.175367s, avg decrypt=0.002068s
+[LOG 2026-10-28 20:30:54 -03-0300] (elapsed 33,997.4s) [n=4, d=4, svd=15, fast]   50/100 — avg encrypt=0.005359s, avg infer=2.159602s, avg decrypt=0.002064s
+[LOG 2026-10-28 20:31:15 -03-0300] (elapsed 34,018.6s) [n=4, d=4, svd=15, fast]   60/100 — avg encrypt=0.005331s, avg infer=2.150582s, avg decrypt=0.002065s
+[LOG 2026-10-28 20:31:36 -03-0300] (elapsed 34,039.9s) [n=4, d=4, svd=15, fast]   70/100 — avg encrypt=0.005278s, avg infer=2.146887s, avg decrypt=0.002044s
+[LOG 2026-10-28 20:31:57 -03-0300] (elapsed 34,061.2s) [n=4, d=4, svd=15, fast]   80/100 — avg encrypt=0.005286s, avg infer=2.143844s, avg decrypt=0.002035s
+[LOG 2026-10-28 20:32:19 -03-0300] (elapsed 34,083.2s) [n=4, d=4, svd=15, fast]   90/100 — avg encrypt=0.005256s, avg infer=2.149332s, avg decrypt=0.002025s
+[LOG 2026-10-28 20:32:41 -03-0300] (elapsed 34,105.0s) [n=4, d=4, svd=15, fast]   100/100 — avg encrypt=0.005232s, avg infer=2.151781s, avg decrypt=0.002009s
+
+==================== FHE LATENCY (n=4, d=4, svd=15, fast) ====================
+Records measured: 100
+Key generation:   1.7839 s (once)
+       Phase |    Total (s) |     Mean (s) |      Std (s)
+----------------------------------------------------------
+     encrypt |       0.5232 |     0.005232 |     0.000385
+   inference |     215.1781 |     2.151781 |     0.114437
+     decrypt |       0.2009 |     0.002009 |     0.000306
+  end-to-end |     215.9021 |     2.159021 |          n/a
+======================================================================
+
+
+======================================================================
+  FHE SUMMARY  (SVD 15)
+======================================================================
+                        Config | Device |  Train (s) |  Predict (s) |  Compile (s) |  FHE Sim (s) |    Enc (s) |    Inf (s) |    Dec (s)
+--------------------------------------------------------------------------------------------------------------------------------------------
+        n=2, d=2, svd=15, fast |   cuda |       12.2 |          1.8 |       8151.1 |        186.0 |   0.004838 |   0.754210 |   0.001593
+        n=2, d=4, svd=15, fast |   cuda |       16.4 |          4.9 |       8192.3 |        190.9 |   0.005045 |   1.315519 |   0.001601
+        n=4, d=2, svd=15, fast |   cuda |       17.3 |          2.6 |       8133.1 |        209.6 |   0.005135 |   0.795746 |   0.002032
+        n=4, d=4, svd=15, fast |   cuda |       27.1 |          8.9 |       8226.2 |        200.8 |   0.005232 |   2.151781 |   0.002009
+
+[LOG 2026-10-28 20:32:42 -03-0300] (elapsed 34,105.2s) FHE phase complete for SVD 15.
+[LOG 2026-10-28 20:32:42 -03-0300] (elapsed 34,105.3s) Deleted SVD 15 projection files.
+[LOG 2026-10-28 20:32:42 -03-0300] (elapsed 34,105.5s) SVD 25 plaintext models already saved. Skipping training.
+
+######################################################################
+#  PHASE 1: PLAINTEXT TRAINING & EVALUATION  (SVD 25)
+######################################################################
+
+============================================================
+  CONFIG 5/13: n_estimators=2, max_depth=2, svd=25, n_bits=5, family=fast
+============================================================
+[LOG 2026-10-28 20:32:42 -03-0300] (elapsed 34,105.5s) [n=2, d=2, svd=25, fast] Training completed in 15.9s
+[LOG 2026-10-28 20:32:42 -03-0300] (elapsed 34,105.5s) [n=2, d=2, svd=25, fast] Clear prediction completed in 2.8s
+[LOG 2026-10-28 20:32:42 -03-0300] (elapsed 34,105.5s) [n=2, d=2, svd=25, fast] Plaintext metrics:
+--- Model Evaluation ---
+Accuracy: 0.8711
+Precision: 0.9810
+Recall: 0.2432
+F1-Score: 0.3897
+
+--- Confusion Matrix ---
+[[2694358    2584]
+ [ 416000  133647]]
+
+--- Classification Report ---
+              precision    recall  f1-score   support
+
+           0       0.87      1.00      0.93   2696942
+           1       0.98      0.24      0.39    549647
+
+    accuracy                           0.87   3246589
+   macro avg       0.92      0.62      0.66   3246589
+weighted avg       0.89      0.87      0.84   3246589
+
+[LOG 2026-10-28 20:32:42 -03-0300] (elapsed 34,105.5s) [n=2, d=2, svd=25, fast] Reusing plaintext model 'plaintext_model_2_estimators_2_depth_svd_25_fast.json'.
+
+============================================================
+  CONFIG 6/13: n_estimators=2, max_depth=4, svd=25, n_bits=5, family=fast
+============================================================
+[LOG 2026-10-28 20:32:42 -03-0300] (elapsed 34,105.5s) [n=2, d=4, svd=25, fast] Training completed in 20.3s
+[LOG 2026-10-28 20:32:42 -03-0300] (elapsed 34,105.5s) [n=2, d=4, svd=25, fast] Clear prediction completed in 6.7s
+[LOG 2026-10-28 20:32:42 -03-0300] (elapsed 34,105.5s) [n=2, d=4, svd=25, fast] Plaintext metrics:
+--- Model Evaluation ---
+Accuracy: 0.9135
+Precision: 0.7395
+Recall: 0.7549
+F1-Score: 0.7471
+
+--- Confusion Matrix ---
+[[2550760  146182]
+ [ 134723  414924]]
+
+--- Classification Report ---
+              precision    recall  f1-score   support
+
+           0       0.95      0.95      0.95   2696942
+           1       0.74      0.75      0.75    549647
+
+    accuracy                           0.91   3246589
+   macro avg       0.84      0.85      0.85   3246589
+weighted avg       0.91      0.91      0.91   3246589
+
+[LOG 2026-10-28 20:32:42 -03-0300] (elapsed 34,105.5s) [n=2, d=4, svd=25, fast] Reusing plaintext model 'plaintext_model_2_estimators_4_depth_svd_25_fast.json'.
+
+============================================================
+  CONFIG 7/13: n_estimators=4, max_depth=2, svd=25, n_bits=5, family=fast
+============================================================
+[LOG 2026-10-28 20:32:42 -03-0300] (elapsed 34,105.5s) [n=4, d=2, svd=25, fast] Training completed in 21.5s
+[LOG 2026-10-28 20:32:42 -03-0300] (elapsed 34,105.5s) [n=4, d=2, svd=25, fast] Clear prediction completed in 3.8s
+[LOG 2026-10-28 20:32:42 -03-0300] (elapsed 34,105.5s) [n=4, d=2, svd=25, fast] Plaintext metrics:
+--- Model Evaluation ---
+Accuracy: 0.9049
+Precision: 0.7250
+Recall: 0.7058
+F1-Score: 0.7153
+
+--- Confusion Matrix ---
+[[2549814  147128]
+ [ 161708  387939]]
+
+--- Classification Report ---
+              precision    recall  f1-score   support
+
+           0       0.94      0.95      0.94   2696942
+           1       0.73      0.71      0.72    549647
+
+    accuracy                           0.90   3246589
+   macro avg       0.83      0.83      0.83   3246589
+weighted avg       0.90      0.90      0.90   3246589
+
+[LOG 2026-10-28 20:32:42 -03-0300] (elapsed 34,105.5s) [n=4, d=2, svd=25, fast] Reusing plaintext model 'plaintext_model_4_estimators_2_depth_svd_25_fast.json'.
+
+============================================================
+  CONFIG 8/13: n_estimators=4, max_depth=4, svd=25, n_bits=5, family=fast
+============================================================
+[LOG 2026-10-28 20:32:42 -03-0300] (elapsed 34,105.5s) [n=4, d=4, svd=25, fast] Training completed in 33.8s
+[LOG 2026-10-28 20:32:42 -03-0300] (elapsed 34,105.5s) [n=4, d=4, svd=25, fast] Clear prediction completed in 11.6s
+[LOG 2026-10-28 20:32:42 -03-0300] (elapsed 34,105.5s) [n=4, d=4, svd=25, fast] Plaintext metrics:
+--- Model Evaluation ---
+Accuracy: 0.9136
+Precision: 0.7395
+Recall: 0.7562
+F1-Score: 0.7477
+
+--- Confusion Matrix ---
+[[2550500  146442]
+ [ 134011  415636]]
+
+--- Classification Report ---
+              precision    recall  f1-score   support
+
+           0       0.95      0.95      0.95   2696942
+           1       0.74      0.76      0.75    549647
+
+    accuracy                           0.91   3246589
+   macro avg       0.84      0.85      0.85   3246589
+weighted avg       0.91      0.91      0.91   3246589
+
+[LOG 2026-10-28 20:32:42 -03-0300] (elapsed 34,105.5s) [n=4, d=4, svd=25, fast] Reusing plaintext model 'plaintext_model_4_estimators_4_depth_svd_25_fast.json'.
+
+======================================================================
+  PLAINTEXT SUMMARY  (SVD 25)
+======================================================================
+                        Config |  Train (s) |  Predict (s)
+------------------------------------------------------------
+        n=2, d=2, svd=25, fast |       15.9 |          2.8
+        n=2, d=4, svd=25, fast |       20.3 |          6.7
+        n=4, d=2, svd=25, fast |       21.5 |          3.8
+        n=4, d=4, svd=25, fast |       33.8 |         11.6
+
+[LOG 2026-10-28 20:32:42 -03-0300] (elapsed 34,105.5s) Phase 1 complete for SVD 25 — all plaintext variants trained and evaluated.
+
+######################################################################
+#  PHASE 2: FHE COMPILATION & SIMULATION  (SVD 25)
+######################################################################
+
+============================================================
+  FHE for CONFIG 5/13: n_estimators=2, max_depth=2, svd=25, n_bits=5, family=fast
+============================================================
+[LOG 2026-10-28 20:32:42 -03-0300] (elapsed 34,105.5s) [n=2, d=2, svd=25, fast] Loading plaintext model from 'plaintext_model_2_estimators_2_depth_svd_25_fast.json'...
+[LOG 2026-10-28 20:32:42 -03-0300] (elapsed 34,105.6s) [n=2, d=2, svd=25, fast] Loading train projection for FHE compilation...
+[LOG 2026-10-28 20:32:45 -03-0300] (elapsed 34,108.7s) [n=2, d=2, svd=25, fast] Compiling FHE circuit (this may take a long time)...
+[LOG 2026-10-28 20:32:45 -03-0300] (elapsed 34,108.7s) [n=2, d=2, svd=25, fast] GPU status — available=True, enabled(runtime)=True
+[LOG 2026-10-28 20:32:45 -03-0300] (elapsed 34,108.7s) [n=2, d=2, svd=25, fast] FHE device: cuda (requested)
+[LOG 2026-10-28 20:32:45 -03-0300] (elapsed 34,108.7s) [n=2, d=2, svd=25, fast] Compiling FHE circuit with device='cuda'...
+[LOG 2026-10-28 22:48:23 -03-0300] (elapsed 42,247.2s) [n=2, d=2, svd=25, fast] FHE compilation succeeded on device='cuda'.
+[LOG 2026-10-28 22:48:23 -03-0300] (elapsed 42,247.2s) [n=2, d=2, svd=25, fast] FHE compilation completed in 8,138.5s on device='cuda'
+[LOG 2026-10-28 22:48:24 -03-0300] (elapsed 42,247.5s) [n=2, d=2, svd=25, fast] Loading test projection for FHE simulation...
+[LOG 2026-10-28 22:48:25 -03-0300] (elapsed 42,248.6s) [n=2, d=2, svd=25, fast] Subsampled 50,000 rows for FHE simulation...
+[LOG 2026-10-28 22:48:25 -03-0300] (elapsed 42,248.6s) [n=2, d=2, svd=25, fast] Starting FHE simulation prediction on 50,000 samples...
+[LOG 2026-10-28 22:51:34 -03-0300] (elapsed 42,438.1s) [n=2, d=2, svd=25, fast] FHE simulation completed in 189.5s
+[LOG 2026-10-28 22:51:34 -03-0300] (elapsed 42,438.1s) [n=2, d=2, svd=25, fast] FHE metrics (on 50,000 sample subset):
+--- Model Evaluation ---
+Accuracy: 0.8580
+Precision: 0.7206
+Recall: 0.2564
+F1-Score: 0.3782
+
+--- Confusion Matrix ---
+[[40741   837]
+ [ 6263  2159]]
+
+--- Classification Report ---
+              precision    recall  f1-score   support
+
+           0       0.87      0.98      0.92     41578
+           1       0.72      0.26      0.38      8422
+
+    accuracy                           0.86     50000
+   macro avg       0.79      0.62      0.65     50000
+weighted avg       0.84      0.86      0.83     50000
+
+[LOG 2026-10-28 22:51:35 -03-0300] (elapsed 42,438.5s) [n=2, d=2, svd=25, fast] Saving compiled FHE circuit to './fhe_model_2_estimators_2_depth_svd_25_components_fast/cuda'...
+[LOG 2026-10-28 22:51:35 -03-0300] (elapsed 42,438.5s) [n=2, d=2, svd=25, fast] FHE assets saved (device=cuda). Summary — train: 15.9s, predict: 2.8s, compile: 8,138.5s, fhe_sim: 189.5s
+[LOG 2026-10-28 22:51:35 -03-0300] (elapsed 42,438.7s) [n=2, d=2, svd=25, fast] Measuring real FHE encrypt/inference/decrypt on 100 records...
+[LOG 2026-10-28 22:51:35 -03-0300] (elapsed 42,438.7s) [n=2, d=2, svd=25, fast] Loading FHE client/server from './fhe_model_2_estimators_2_depth_svd_25_components_fast/cuda' for latency measurement...
+[LOG 2026-10-28 22:51:35 -03-0300] (elapsed 42,438.7s) [n=2, d=2, svd=25, fast] Model compiled for device='cuda' (from fhe_device.txt).
+[LOG 2026-10-28 22:51:37 -03-0300] (elapsed 42,440.3s) [n=2, d=2, svd=25, fast] Generating evaluation keys...
+[LOG 2026-10-28 22:51:38 -03-0300] (elapsed 42,441.9s) [n=2, d=2, svd=25, fast] Evaluation keys ready in 1.599s (29,606,808 bytes).
+[LOG 2026-10-28 22:51:38 -03-0300] (elapsed 42,441.9s) [n=2, d=2, svd=25, fast] Evaluation keys deserialized once in 0.042s.
+[LOG 2026-10-28 22:51:38 -03-0300] (elapsed 42,441.9s) [n=2, d=2, svd=25, fast] Measuring encrypt / inference / decrypt on 100 records...
+[LOG 2026-10-28 22:51:47 -03-0300] (elapsed 42,450.8s) [n=2, d=2, svd=25, fast]   10/100 — avg encrypt=0.006492s, avg infer=0.882680s, avg decrypt=0.001892s
+[LOG 2026-10-28 22:51:55 -03-0300] (elapsed 42,459.1s) [n=2, d=2, svd=25, fast]   20/100 — avg encrypt=0.006400s, avg infer=0.853139s, avg decrypt=0.001847s
+[LOG 2026-10-28 22:52:04 -03-0300] (elapsed 42,467.6s) [n=2, d=2, svd=25, fast]   30/100 — avg encrypt=0.006317s, avg infer=0.847711s, avg decrypt=0.001797s
+[LOG 2026-10-28 22:52:12 -03-0300] (elapsed 42,476.0s) [n=2, d=2, svd=25, fast]   40/100 — avg encrypt=0.006269s, avg infer=0.845187s, avg decrypt=0.001770s
+[LOG 2026-10-28 22:52:21 -03-0300] (elapsed 42,484.5s) [n=2, d=2, svd=25, fast]   50/100 — avg encrypt=0.006269s, avg infer=0.843848s, avg decrypt=0.001763s
+[LOG 2026-10-28 22:52:29 -03-0300] (elapsed 42,492.4s) [n=2, d=2, svd=25, fast]   60/100 — avg encrypt=0.006251s, avg infer=0.834209s, avg decrypt=0.001764s
+[LOG 2026-10-28 22:52:37 -03-0300] (elapsed 42,500.6s) [n=2, d=2, svd=25, fast]   70/100 — avg encrypt=0.006263s, avg infer=0.831013s, avg decrypt=0.001794s
+[LOG 2026-10-28 22:52:45 -03-0300] (elapsed 42,509.1s) [n=2, d=2, svd=25, fast]   80/100 — avg encrypt=0.006270s, avg infer=0.831665s, avg decrypt=0.001782s
+[LOG 2026-10-28 22:52:54 -03-0300] (elapsed 42,517.3s) [n=2, d=2, svd=25, fast]   90/100 — avg encrypt=0.006271s, avg infer=0.830220s, avg decrypt=0.001773s
+[LOG 2026-10-28 22:53:02 -03-0300] (elapsed 42,525.8s) [n=2, d=2, svd=25, fast]   100/100 — avg encrypt=0.006271s, avg infer=0.830650s, avg decrypt=0.001772s
+
+==================== FHE LATENCY (n=2, d=2, svd=25, fast) ====================
+Records measured: 100
+Key generation:   1.5989 s (once)
+       Phase |    Total (s) |     Mean (s) |      Std (s)
+----------------------------------------------------------
+     encrypt |       0.6271 |     0.006271 |     0.000256
+   inference |      83.0650 |     0.830650 |     0.078565
+     decrypt |       0.1772 |     0.001772 |     0.000207
+  end-to-end |      83.8693 |     0.838693 |          n/a
+======================================================================
+
+
+============================================================
+  FHE for CONFIG 6/13: n_estimators=2, max_depth=4, svd=25, n_bits=5, family=fast
+============================================================
+[LOG 2026-10-28 22:53:02 -03-0300] (elapsed 42,526.0s) [n=2, d=4, svd=25, fast] Loading plaintext model from 'plaintext_model_2_estimators_4_depth_svd_25_fast.json'...
+[LOG 2026-10-28 22:53:02 -03-0300] (elapsed 42,526.1s) [n=2, d=4, svd=25, fast] Loading train projection for FHE compilation...
+[LOG 2026-10-28 22:53:03 -03-0300] (elapsed 42,527.1s) [n=2, d=4, svd=25, fast] Compiling FHE circuit (this may take a long time)...
+[LOG 2026-10-28 22:53:03 -03-0300] (elapsed 42,527.1s) [n=2, d=4, svd=25, fast] GPU status — available=True, enabled(runtime)=True
+[LOG 2026-10-28 22:53:03 -03-0300] (elapsed 42,527.1s) [n=2, d=4, svd=25, fast] FHE device: cuda (requested)
+[LOG 2026-10-28 22:53:03 -03-0300] (elapsed 42,527.1s) [n=2, d=4, svd=25, fast] Compiling FHE circuit with device='cuda'...
+[LOG 2026-10-29 01:09:13 -03-0300] (elapsed 50,697.1s) [n=2, d=4, svd=25, fast] FHE compilation succeeded on device='cuda'.
+[LOG 2026-10-29 01:09:13 -03-0300] (elapsed 50,697.1s) [n=2, d=4, svd=25, fast] FHE compilation completed in 8,170.1s on device='cuda'
+[LOG 2026-10-29 01:09:14 -03-0300] (elapsed 50,697.4s) [n=2, d=4, svd=25, fast] Loading test projection for FHE simulation...
+[LOG 2026-10-29 01:09:14 -03-0300] (elapsed 50,698.0s) [n=2, d=4, svd=25, fast] Subsampled 50,000 rows for FHE simulation...
+[LOG 2026-10-29 01:09:14 -03-0300] (elapsed 50,698.0s) [n=2, d=4, svd=25, fast] Starting FHE simulation prediction on 50,000 samples...
+[LOG 2026-10-29 01:12:32 -03-0300] (elapsed 50,895.5s) [n=2, d=4, svd=25, fast] FHE simulation completed in 197.5s
+[LOG 2026-10-29 01:12:32 -03-0300] (elapsed 50,895.5s) [n=2, d=4, svd=25, fast] FHE metrics (on 50,000 sample subset):
+--- Model Evaluation ---
+Accuracy: 0.8998
+Precision: 0.7175
+Recall: 0.6680
+F1-Score: 0.6919
+
+--- Confusion Matrix ---
+[[39363  2215]
+ [ 2796  5626]]
+
+--- Classification Report ---
+              precision    recall  f1-score   support
+
+           0       0.93      0.95      0.94     41578
+           1       0.72      0.67      0.69      8422
+
+    accuracy                           0.90     50000
+   macro avg       0.83      0.81      0.82     50000
+weighted avg       0.90      0.90      0.90     50000
+
+[LOG 2026-10-29 01:12:32 -03-0300] (elapsed 50,895.9s) [n=2, d=4, svd=25, fast] Saving compiled FHE circuit to './fhe_model_2_estimators_4_depth_svd_25_components_fast/cuda'...
+[LOG 2026-10-29 01:12:32 -03-0300] (elapsed 50,895.9s) [n=2, d=4, svd=25, fast] FHE assets saved (device=cuda). Summary — train: 20.3s, predict: 6.7s, compile: 8,170.1s, fhe_sim: 197.5s
+[LOG 2026-10-29 01:12:32 -03-0300] (elapsed 50,896.1s) [n=2, d=4, svd=25, fast] Measuring real FHE encrypt/inference/decrypt on 100 records...
+[LOG 2026-10-29 01:12:32 -03-0300] (elapsed 50,896.1s) [n=2, d=4, svd=25, fast] Loading FHE client/server from './fhe_model_2_estimators_4_depth_svd_25_components_fast/cuda' for latency measurement...
+[LOG 2026-10-29 01:12:32 -03-0300] (elapsed 50,896.1s) [n=2, d=4, svd=25, fast] Model compiled for device='cuda' (from fhe_device.txt).
+[LOG 2026-10-29 01:12:34 -03-0300] (elapsed 50,897.6s) [n=2, d=4, svd=25, fast] Generating evaluation keys...
+[LOG 2026-10-29 01:12:36 -03-0300] (elapsed 50,899.5s) [n=2, d=4, svd=25, fast] Evaluation keys ready in 1.871s (37,278,616 bytes).
+[LOG 2026-10-29 01:12:36 -03-0300] (elapsed 50,899.6s) [n=2, d=4, svd=25, fast] Evaluation keys deserialized once in 0.091s.
+[LOG 2026-10-29 01:12:36 -03-0300] (elapsed 50,899.6s) [n=2, d=4, svd=25, fast] Measuring encrypt / inference / decrypt on 100 records...
+[LOG 2026-10-29 01:12:52 -03-0300] (elapsed 50,915.5s) [n=2, d=4, svd=25, fast]   10/100 — avg encrypt=0.006411s, avg infer=1.584456s, avg decrypt=0.001911s
+[LOG 2026-10-29 01:13:07 -03-0300] (elapsed 50,930.8s) [n=2, d=4, svd=25, fast]   20/100 — avg encrypt=0.006701s, avg infer=1.552464s, avg decrypt=0.001998s
+[LOG 2026-10-29 01:13:22 -03-0300] (elapsed 50,945.9s) [n=2, d=4, svd=25, fast]   30/100 — avg encrypt=0.006845s, avg infer=1.534780s, avg decrypt=0.001962s
+[LOG 2026-10-29 01:13:38 -03-0300] (elapsed 50,961.8s) [n=2, d=4, svd=25, fast]   40/100 — avg encrypt=0.006798s, avg infer=1.546417s, avg decrypt=0.001957s
+[LOG 2026-10-29 01:13:54 -03-0300] (elapsed 50,978.0s) [n=2, d=4, svd=25, fast]   50/100 — avg encrypt=0.006754s, avg infer=1.558670s, avg decrypt=0.001976s
+[LOG 2026-10-29 01:14:11 -03-0300] (elapsed 50,994.4s) [n=2, d=4, svd=25, fast]   60/100 — avg encrypt=0.006689s, avg infer=1.570245s, avg decrypt=0.001982s
+[LOG 2026-10-29 01:14:27 -03-0300] (elapsed 51,010.4s) [n=2, d=4, svd=25, fast]   70/100 — avg encrypt=0.006746s, avg infer=1.573918s, avg decrypt=0.002047s
+[LOG 2026-10-29 01:14:42 -03-0300] (elapsed 51,026.1s) [n=2, d=4, svd=25, fast]   80/100 — avg encrypt=0.006694s, avg infer=1.572592s, avg decrypt=0.002035s
+[LOG 2026-10-29 01:14:58 -03-0300] (elapsed 51,041.8s) [n=2, d=4, svd=25, fast]   90/100 — avg encrypt=0.006650s, avg infer=1.571010s, avg decrypt=0.002041s
+[LOG 2026-10-29 01:15:14 -03-0300] (elapsed 51,057.4s) [n=2, d=4, svd=25, fast]   100/100 — avg encrypt=0.006611s, avg infer=1.568771s, avg decrypt=0.002032s
+
+==================== FHE LATENCY (n=2, d=4, svd=25, fast) ====================
+Records measured: 100
+Key generation:   1.8714 s (once)
+       Phase |    Total (s) |     Mean (s) |      Std (s)
+----------------------------------------------------------
+     encrypt |       0.6611 |     0.006611 |     0.001307
+   inference |     156.8771 |     1.568771 |     0.105542
+     decrypt |       0.2032 |     0.002032 |     0.000401
+  end-to-end |     157.7415 |     1.577415 |          n/a
+======================================================================
+
+
+============================================================
+  FHE for CONFIG 7/13: n_estimators=4, max_depth=2, svd=25, n_bits=5, family=fast
+============================================================
+[LOG 2026-10-29 01:15:14 -03-0300] (elapsed 51,057.7s) [n=4, d=2, svd=25, fast] Loading plaintext model from 'plaintext_model_4_estimators_2_depth_svd_25_fast.json'...
+[LOG 2026-10-29 01:15:14 -03-0300] (elapsed 51,057.7s) [n=4, d=2, svd=25, fast] Loading train projection for FHE compilation...
+[LOG 2026-10-29 01:15:15 -03-0300] (elapsed 51,058.7s) [n=4, d=2, svd=25, fast] Compiling FHE circuit (this may take a long time)...
+[LOG 2026-10-29 01:15:15 -03-0300] (elapsed 51,058.7s) [n=4, d=2, svd=25, fast] GPU status — available=True, enabled(runtime)=True
+[LOG 2026-10-29 01:15:15 -03-0300] (elapsed 51,058.7s) [n=4, d=2, svd=25, fast] FHE device: cuda (requested)
+[LOG 2026-10-29 01:15:15 -03-0300] (elapsed 51,058.7s) [n=4, d=2, svd=25, fast] Compiling FHE circuit with device='cuda'...
+[LOG 2026-10-29 03:30:58 -03-0300] (elapsed 59,202.2s) [n=4, d=2, svd=25, fast] FHE compilation succeeded on device='cuda'.
+[LOG 2026-10-29 03:30:58 -03-0300] (elapsed 59,202.2s) [n=4, d=2, svd=25, fast] FHE compilation completed in 8,143.4s on device='cuda'
+[LOG 2026-10-29 03:30:59 -03-0300] (elapsed 59,202.5s) [n=4, d=2, svd=25, fast] Loading test projection for FHE simulation...
+[LOG 2026-10-29 03:30:59 -03-0300] (elapsed 59,203.1s) [n=4, d=2, svd=25, fast] Subsampled 50,000 rows for FHE simulation...
+[LOG 2026-10-29 03:30:59 -03-0300] (elapsed 59,203.1s) [n=4, d=2, svd=25, fast] Starting FHE simulation prediction on 50,000 samples...
+[LOG 2026-10-29 03:34:12 -03-0300] (elapsed 59,395.8s) [n=4, d=2, svd=25, fast] FHE simulation completed in 192.7s
+[LOG 2026-10-29 03:34:12 -03-0300] (elapsed 59,395.8s) [n=4, d=2, svd=25, fast] FHE metrics (on 50,000 sample subset):
+--- Model Evaluation ---
+Accuracy: 0.8985
+Precision: 0.7255
+Recall: 0.6393
+F1-Score: 0.6797
+
+--- Confusion Matrix ---
+[[39541  2037]
+ [ 3038  5384]]
+
+--- Classification Report ---
+              precision    recall  f1-score   support
+
+           0       0.93      0.95      0.94     41578
+           1       0.73      0.64      0.68      8422
+
+    accuracy                           0.90     50000
+   macro avg       0.83      0.80      0.81     50000
+weighted avg       0.89      0.90      0.90     50000
+
+[LOG 2026-10-29 03:34:12 -03-0300] (elapsed 59,396.2s) [n=4, d=2, svd=25, fast] Saving compiled FHE circuit to './fhe_model_4_estimators_2_depth_svd_25_components_fast/cuda'...
+[LOG 2026-10-29 03:34:12 -03-0300] (elapsed 59,396.2s) [n=4, d=2, svd=25, fast] FHE assets saved (device=cuda). Summary — train: 21.5s, predict: 3.8s, compile: 8,143.4s, fhe_sim: 192.7s
+[LOG 2026-10-29 03:34:13 -03-0300] (elapsed 59,396.5s) [n=4, d=2, svd=25, fast] Measuring real FHE encrypt/inference/decrypt on 100 records...
+[LOG 2026-10-29 03:34:13 -03-0300] (elapsed 59,396.5s) [n=4, d=2, svd=25, fast] Loading FHE client/server from './fhe_model_4_estimators_2_depth_svd_25_components_fast/cuda' for latency measurement...
+[LOG 2026-10-29 03:34:13 -03-0300] (elapsed 59,396.5s) [n=4, d=2, svd=25, fast] Model compiled for device='cuda' (from fhe_device.txt).
+[LOG 2026-10-29 03:34:14 -03-0300] (elapsed 59,398.1s) [n=4, d=2, svd=25, fast] Generating evaluation keys...
+[LOG 2026-10-29 03:34:16 -03-0300] (elapsed 59,399.7s) [n=4, d=2, svd=25, fast] Evaluation keys ready in 1.614s (29,606,808 bytes).
+[LOG 2026-10-29 03:34:16 -03-0300] (elapsed 59,399.7s) [n=4, d=2, svd=25, fast] Evaluation keys deserialized once in 0.080s.
+[LOG 2026-10-29 03:34:16 -03-0300] (elapsed 59,399.7s) [n=4, d=2, svd=25, fast] Measuring encrypt / inference / decrypt on 100 records...
+[LOG 2026-10-29 03:34:26 -03-0300] (elapsed 59,409.9s) [n=4, d=2, svd=25, fast]   10/100 — avg encrypt=0.006494s, avg infer=1.002516s, avg decrypt=0.002345s
+[LOG 2026-10-29 03:34:36 -03-0300] (elapsed 59,419.6s) [n=4, d=2, svd=25, fast]   20/100 — avg encrypt=0.006379s, avg infer=0.983467s, avg decrypt=0.002256s
+[LOG 2026-10-29 03:34:45 -03-0300] (elapsed 59,429.2s) [n=4, d=2, svd=25, fast]   30/100 — avg encrypt=0.006334s, avg infer=0.974298s, avg decrypt=0.002219s
+[LOG 2026-10-29 03:34:55 -03-0300] (elapsed 59,438.8s) [n=4, d=2, svd=25, fast]   40/100 — avg encrypt=0.006366s, avg infer=0.966842s, avg decrypt=0.002291s
+[LOG 2026-10-29 03:35:04 -03-0300] (elapsed 59,447.9s) [n=4, d=2, svd=25, fast]   50/100 — avg encrypt=0.006324s, avg infer=0.954846s, avg decrypt=0.002260s
+[LOG 2026-10-29 03:35:14 -03-0300] (elapsed 59,457.5s) [n=4, d=2, svd=25, fast]   60/100 — avg encrypt=0.006300s, avg infer=0.953872s, avg decrypt=0.002238s
+[LOG 2026-10-29 03:35:24 -03-0300] (elapsed 59,467.5s) [n=4, d=2, svd=25, fast]   70/100 — avg encrypt=0.006289s, avg infer=0.959651s, avg decrypt=0.002231s
+[LOG 2026-10-29 03:35:33 -03-0300] (elapsed 59,476.6s) [n=4, d=2, svd=25, fast]   80/100 — avg encrypt=0.006278s, avg infer=0.951636s, avg decrypt=0.002216s
+[LOG 2026-10-29 03:35:42 -03-0300] (elapsed 59,486.2s) [n=4, d=2, svd=25, fast]   90/100 — avg encrypt=0.006284s, avg infer=0.951998s, avg decrypt=0.002203s
+[LOG 2026-10-29 03:35:52 -03-0300] (elapsed 59,495.5s) [n=4, d=2, svd=25, fast]   100/100 — avg encrypt=0.006285s, avg infer=0.948437s, avg decrypt=0.002202s
+
+==================== FHE LATENCY (n=4, d=2, svd=25, fast) ====================
+Records measured: 100
+Key generation:   1.6143 s (once)
+       Phase |    Total (s) |     Mean (s) |      Std (s)
+----------------------------------------------------------
+     encrypt |       0.6285 |     0.006285 |     0.000362
+   inference |      94.8437 |     0.948437 |     0.085211
+     decrypt |       0.2202 |     0.002202 |     0.000322
+  end-to-end |      95.6925 |     0.956925 |          n/a
+======================================================================
+
+
+============================================================
+  FHE for CONFIG 8/13: n_estimators=4, max_depth=4, svd=25, n_bits=5, family=fast
+============================================================
+[LOG 2026-10-29 03:35:52 -03-0300] (elapsed 59,495.7s) [n=4, d=4, svd=25, fast] Loading plaintext model from 'plaintext_model_4_estimators_4_depth_svd_25_fast.json'...
+[LOG 2026-10-29 03:35:52 -03-0300] (elapsed 59,495.8s) [n=4, d=4, svd=25, fast] Loading train projection for FHE compilation...
+[LOG 2026-10-29 03:35:53 -03-0300] (elapsed 59,496.9s) [n=4, d=4, svd=25, fast] Compiling FHE circuit (this may take a long time)...
+[LOG 2026-10-29 03:35:53 -03-0300] (elapsed 59,496.9s) [n=4, d=4, svd=25, fast] GPU status — available=True, enabled(runtime)=True
+[LOG 2026-10-29 03:35:53 -03-0300] (elapsed 59,496.9s) [n=4, d=4, svd=25, fast] FHE device: cuda (requested)
+[LOG 2026-10-29 03:35:53 -03-0300] (elapsed 59,496.9s) [n=4, d=4, svd=25, fast] Compiling FHE circuit with device='cuda'...
+[LOG 2026-10-29 05:52:47 -03-0300] (elapsed 67,710.5s) [n=4, d=4, svd=25, fast] FHE compilation succeeded on device='cuda'.
+[LOG 2026-10-29 05:52:47 -03-0300] (elapsed 67,710.5s) [n=4, d=4, svd=25, fast] FHE compilation completed in 8,213.7s on device='cuda'
+[LOG 2026-10-29 05:52:47 -03-0300] (elapsed 67,710.8s) [n=4, d=4, svd=25, fast] Loading test projection for FHE simulation...
+[LOG 2026-10-29 05:52:48 -03-0300] (elapsed 67,711.4s) [n=4, d=4, svd=25, fast] Subsampled 50,000 rows for FHE simulation...
+[LOG 2026-10-29 05:52:48 -03-0300] (elapsed 67,711.4s) [n=4, d=4, svd=25, fast] Starting FHE simulation prediction on 50,000 samples...
+[LOG 2026-10-29 05:56:16 -03-0300] (elapsed 67,920.1s) [n=4, d=4, svd=25, fast] FHE simulation completed in 208.7s
+[LOG 2026-10-29 05:56:16 -03-0300] (elapsed 67,920.1s) [n=4, d=4, svd=25, fast] FHE metrics (on 50,000 sample subset):
+--- Model Evaluation ---
+Accuracy: 0.9086
+Precision: 0.7439
+Recall: 0.6971
+F1-Score: 0.7197
+
+--- Confusion Matrix ---
+[[39557  2021]
+ [ 2551  5871]]
+
+--- Classification Report ---
+              precision    recall  f1-score   support
+
+           0       0.94      0.95      0.95     41578
+           1       0.74      0.70      0.72      8422
+
+    accuracy                           0.91     50000
+   macro avg       0.84      0.82      0.83     50000
+weighted avg       0.91      0.91      0.91     50000
+
+[LOG 2026-10-29 05:56:17 -03-0300] (elapsed 67,920.6s) [n=4, d=4, svd=25, fast] Saving compiled FHE circuit to './fhe_model_4_estimators_4_depth_svd_25_components_fast/cuda'...
+[LOG 2026-10-29 05:56:17 -03-0300] (elapsed 67,920.6s) [n=4, d=4, svd=25, fast] FHE assets saved (device=cuda). Summary — train: 33.8s, predict: 11.6s, compile: 8,213.7s, fhe_sim: 208.7s
+[LOG 2026-10-29 05:56:17 -03-0300] (elapsed 67,920.9s) [n=4, d=4, svd=25, fast] Measuring real FHE encrypt/inference/decrypt on 100 records...
+[LOG 2026-10-29 05:56:17 -03-0300] (elapsed 67,920.9s) [n=4, d=4, svd=25, fast] Loading FHE client/server from './fhe_model_4_estimators_4_depth_svd_25_components_fast/cuda' for latency measurement...
+[LOG 2026-10-29 05:56:17 -03-0300] (elapsed 67,920.9s) [n=4, d=4, svd=25, fast] Model compiled for device='cuda' (from fhe_device.txt).
+[LOG 2026-10-29 05:56:19 -03-0300] (elapsed 67,922.4s) [n=4, d=4, svd=25, fast] Generating evaluation keys...
+[LOG 2026-10-29 05:56:21 -03-0300] (elapsed 67,924.3s) [n=4, d=4, svd=25, fast] Evaluation keys ready in 1.888s (37,278,616 bytes).
+[LOG 2026-10-29 05:56:21 -03-0300] (elapsed 67,924.4s) [n=4, d=4, svd=25, fast] Evaluation keys deserialized once in 0.118s.
+[LOG 2026-10-29 05:56:21 -03-0300] (elapsed 67,924.4s) [n=4, d=4, svd=25, fast] Measuring encrypt / inference / decrypt on 100 records...
+[LOG 2026-10-29 05:56:50 -03-0300] (elapsed 67,953.5s) [n=4, d=4, svd=25, fast]   10/100 — avg encrypt=0.006598s, avg infer=2.895429s, avg decrypt=0.002389s
+[LOG 2026-10-29 05:57:18 -03-0300] (elapsed 67,981.5s) [n=4, d=4, svd=25, fast]   20/100 — avg encrypt=0.006505s, avg infer=2.848184s, avg decrypt=0.002363s
+[LOG 2026-10-29 05:57:47 -03-0300] (elapsed 68,010.3s) [n=4, d=4, svd=25, fast]   30/100 — avg encrypt=0.006506s, avg infer=2.853562s, avg decrypt=0.002373s
+[LOG 2026-10-29 05:58:14 -03-0300] (elapsed 68,037.7s) [n=4, d=4, svd=25, fast]   40/100 — avg encrypt=0.006715s, avg infer=2.824102s, avg decrypt=0.002396s
+[LOG 2026-10-29 05:58:40 -03-0300] (elapsed 68,063.7s) [n=4, d=4, svd=25, fast]   50/100 — avg encrypt=0.006666s, avg infer=2.776842s, avg decrypt=0.002404s
+[LOG 2026-10-29 05:59:06 -03-0300] (elapsed 68,089.3s) [n=4, d=4, svd=25, fast]   60/100 — avg encrypt=0.006616s, avg infer=2.739093s, avg decrypt=0.002379s
+[LOG 2026-10-29 05:59:31 -03-0300] (elapsed 68,114.9s) [n=4, d=4, svd=25, fast]   70/100 — avg encrypt=0.006633s, avg infer=2.711974s, avg decrypt=0.002403s
+[LOG 2026-10-29 05:59:57 -03-0300] (elapsed 68,140.4s) [n=4, d=4, svd=25, fast]   80/100 — avg encrypt=0.006638s, avg infer=2.691195s, avg decrypt=0.002411s
+[LOG 2026-10-29 06:00:22 -03-0300] (elapsed 68,165.4s) [n=4, d=4, svd=25, fast]   90/100 — avg encrypt=0.006595s, avg infer=2.668771s, avg decrypt=0.002382s
+[LOG 2026-10-29 06:00:47 -03-0300] (elapsed 68,191.2s) [n=4, d=4, svd=25, fast]   100/100 — avg encrypt=0.006586s, avg infer=2.658915s, avg decrypt=0.002370s
+
+==================== FHE LATENCY (n=4, d=4, svd=25, fast) ====================
+Records measured: 100
+Key generation:   1.8882 s (once)
+       Phase |    Total (s) |     Mean (s) |      Std (s)
+----------------------------------------------------------
+     encrypt |       0.6586 |     0.006586 |     0.000937
+   inference |     265.8915 |     2.658915 |     0.187481
+     decrypt |       0.2370 |     0.002370 |     0.000506
+  end-to-end |     266.7871 |     2.667871 |          n/a
+======================================================================
+
+
+======================================================================
+  FHE SUMMARY  (SVD 25)
+======================================================================
+                        Config | Device |  Train (s) |  Predict (s) |  Compile (s) |  FHE Sim (s) |    Enc (s) |    Inf (s) |    Dec (s)
+--------------------------------------------------------------------------------------------------------------------------------------------
+        n=2, d=2, svd=25, fast |   cuda |       15.9 |          2.8 |       8138.5 |        189.5 |   0.006271 |   0.830650 |   0.001772
+        n=2, d=4, svd=25, fast |   cuda |       20.3 |          6.7 |       8170.1 |        197.5 |   0.006611 |   1.568771 |   0.002032
+        n=4, d=2, svd=25, fast |   cuda |       21.5 |          3.8 |       8143.4 |        192.7 |   0.006285 |   0.948437 |   0.002202
+        n=4, d=4, svd=25, fast |   cuda |       33.8 |         11.6 |       8213.7 |        208.7 |   0.006586 |   2.658915 |   0.002370
+
+[LOG 2026-10-29 06:00:48 -03-0300] (elapsed 68,191.5s) FHE phase complete for SVD 25.
+[LOG 2026-10-29 06:00:48 -03-0300] (elapsed 68,191.7s) Deleted SVD 25 projection files.
+[LOG 2026-10-29 06:00:48 -03-0300] (elapsed 68,191.9s) SVD 40 plaintext models already saved. Skipping training.
+
+######################################################################
+#  PHASE 1: PLAINTEXT TRAINING & EVALUATION  (SVD 40)
+######################################################################
+
+============================================================
+  CONFIG 9/13: n_estimators=2, max_depth=2, svd=40, n_bits=5, family=fast
+============================================================
+[LOG 2026-10-29 06:00:48 -03-0300] (elapsed 68,191.9s) [n=2, d=2, svd=40, fast] Training completed in 24.4s
+[LOG 2026-10-29 06:00:48 -03-0300] (elapsed 68,191.9s) [n=2, d=2, svd=40, fast] Clear prediction completed in 4.4s
+[LOG 2026-10-29 06:00:48 -03-0300] (elapsed 68,191.9s) [n=2, d=2, svd=40, fast] Plaintext metrics:
+--- Model Evaluation ---
+Accuracy: 0.8600
+Precision: 0.9990
+Recall: 0.1732
+F1-Score: 0.2953
+
+--- Confusion Matrix ---
+[[2696845      97]
+ [ 454434   95213]]
+
+--- Classification Report ---
+              precision    recall  f1-score   support
+
+           0       0.86      1.00      0.92   2696942
+           1       1.00      0.17      0.30    549647
+
+    accuracy                           0.86   3246589
+   macro avg       0.93      0.59      0.61   3246589
+weighted avg       0.88      0.86      0.82   3246589
+
+[LOG 2026-10-29 06:00:48 -03-0300] (elapsed 68,191.9s) [n=2, d=2, svd=40, fast] Reusing plaintext model 'plaintext_model_2_estimators_2_depth_svd_40_fast.json'.
+
+============================================================
+  CONFIG 10/13: n_estimators=2, max_depth=4, svd=40, n_bits=5, family=fast
+============================================================
+[LOG 2026-10-29 06:00:48 -03-0300] (elapsed 68,191.9s) [n=2, d=4, svd=40, fast] Training completed in 27.3s
+[LOG 2026-10-29 06:00:48 -03-0300] (elapsed 68,191.9s) [n=2, d=4, svd=40, fast] Clear prediction completed in 8.4s
+[LOG 2026-10-29 06:00:48 -03-0300] (elapsed 68,191.9s) [n=2, d=4, svd=40, fast] Plaintext metrics:
+--- Model Evaluation ---
+Accuracy: 0.9079
+Precision: 0.7307
+Recall: 0.7221
+F1-Score: 0.7264
+
+--- Confusion Matrix ---
+[[2550687  146255]
+ [ 152753  396894]]
+
+--- Classification Report ---
+              precision    recall  f1-score   support
+
+           0       0.94      0.95      0.94   2696942
+           1       0.73      0.72      0.73    549647
+
+    accuracy                           0.91   3246589
+   macro avg       0.84      0.83      0.84   3246589
+weighted avg       0.91      0.91      0.91   3246589
+
+[LOG 2026-10-29 06:00:48 -03-0300] (elapsed 68,191.9s) [n=2, d=4, svd=40, fast] Reusing plaintext model 'plaintext_model_2_estimators_4_depth_svd_40_fast.json'.
+
+============================================================
+  CONFIG 11/13: n_estimators=4, max_depth=2, svd=40, n_bits=5, family=fast
+============================================================
+[LOG 2026-10-29 06:00:48 -03-0300] (elapsed 68,191.9s) [n=4, d=2, svd=40, fast] Training completed in 29.1s
+[LOG 2026-10-29 06:00:48 -03-0300] (elapsed 68,191.9s) [n=4, d=2, svd=40, fast] Clear prediction completed in 5.6s
+[LOG 2026-10-29 06:00:48 -03-0300] (elapsed 68,191.9s) [n=4, d=2, svd=40, fast] Plaintext metrics:
+--- Model Evaluation ---
+Accuracy: 0.8600
+Precision: 0.9990
+Recall: 0.1732
+F1-Score: 0.2953
+
+--- Confusion Matrix ---
+[[2696845      97]
+ [ 454434   95213]]
+
+--- Classification Report ---
+              precision    recall  f1-score   support
+
+           0       0.86      1.00      0.92   2696942
+           1       1.00      0.17      0.30    549647
+
+    accuracy                           0.86   3246589
+   macro avg       0.93      0.59      0.61   3246589
+weighted avg       0.88      0.86      0.82   3246589
+
+[LOG 2026-10-29 06:00:48 -03-0300] (elapsed 68,191.9s) [n=4, d=2, svd=40, fast] Reusing plaintext model 'plaintext_model_4_estimators_2_depth_svd_40_fast.json'.
+
+============================================================
+  CONFIG 12/13: n_estimators=4, max_depth=4, svd=40, n_bits=5, family=fast
+============================================================
+[LOG 2026-10-29 06:00:48 -03-0300] (elapsed 68,191.9s) [n=4, d=4, svd=40, fast] Training completed in 41.7s
+[LOG 2026-10-29 06:00:48 -03-0300] (elapsed 68,191.9s) [n=4, d=4, svd=40, fast] Clear prediction completed in 15.0s
+[LOG 2026-10-29 06:00:48 -03-0300] (elapsed 68,191.9s) [n=4, d=4, svd=40, fast] Plaintext metrics:
+--- Model Evaluation ---
+Accuracy: 0.9079
+Precision: 0.7307
+Recall: 0.7221
+F1-Score: 0.7264
+
+--- Confusion Matrix ---
+[[2550687  146255]
+ [ 152753  396894]]
+
+--- Classification Report ---
+              precision    recall  f1-score   support
+
+           0       0.94      0.95      0.94   2696942
+           1       0.73      0.72      0.73    549647
+
+    accuracy                           0.91   3246589
+   macro avg       0.84      0.83      0.84   3246589
+weighted avg       0.91      0.91      0.91   3246589
+
+[LOG 2026-10-29 06:00:48 -03-0300] (elapsed 68,191.9s) [n=4, d=4, svd=40, fast] Reusing plaintext model 'plaintext_model_4_estimators_4_depth_svd_40_fast.json'.
+
+======================================================================
+  PLAINTEXT SUMMARY  (SVD 40)
+======================================================================
+                        Config |  Train (s) |  Predict (s)
+------------------------------------------------------------
+        n=2, d=2, svd=40, fast |       24.4 |          4.4
+        n=2, d=4, svd=40, fast |       27.3 |          8.4
+        n=4, d=2, svd=40, fast |       29.1 |          5.6
+        n=4, d=4, svd=40, fast |       41.7 |         15.0
+
+[LOG 2026-10-29 06:00:48 -03-0300] (elapsed 68,191.9s) Phase 1 complete for SVD 40 — all plaintext variants trained and evaluated.
+
+######################################################################
+#  PHASE 2: FHE COMPILATION & SIMULATION  (SVD 40)
+######################################################################
+
+============================================================
+  FHE for CONFIG 9/13: n_estimators=2, max_depth=2, svd=40, n_bits=5, family=fast
+============================================================
+[LOG 2026-10-29 06:00:48 -03-0300] (elapsed 68,191.9s) [n=2, d=2, svd=40, fast] Loading plaintext model from 'plaintext_model_2_estimators_2_depth_svd_40_fast.json'...
+[LOG 2026-10-29 06:00:48 -03-0300] (elapsed 68,192.0s) [n=2, d=2, svd=40, fast] Loading train projection for FHE compilation...
+[LOG 2026-10-29 06:00:52 -03-0300] (elapsed 68,196.0s) [n=2, d=2, svd=40, fast] Compiling FHE circuit (this may take a long time)...
+[LOG 2026-10-29 06:00:52 -03-0300] (elapsed 68,196.0s) [n=2, d=2, svd=40, fast] GPU status — available=True, enabled(runtime)=True
+[LOG 2026-10-29 06:00:52 -03-0300] (elapsed 68,196.0s) [n=2, d=2, svd=40, fast] FHE device: cuda (requested)
+[LOG 2026-10-29 06:00:52 -03-0300] (elapsed 68,196.0s) [n=2, d=2, svd=40, fast] Compiling FHE circuit with device='cuda'...
+[LOG 2026-10-29 08:16:49 -03-0300] (elapsed 76,353.3s) [n=2, d=2, svd=40, fast] FHE compilation succeeded on device='cuda'.
+[LOG 2026-10-29 08:16:50 -03-0300] (elapsed 76,353.3s) [n=2, d=2, svd=40, fast] FHE compilation completed in 8,157.4s on device='cuda'
+[LOG 2026-10-29 08:16:50 -03-0300] (elapsed 76,353.7s) [n=2, d=2, svd=40, fast] Loading test projection for FHE simulation...
+[LOG 2026-10-29 08:16:51 -03-0300] (elapsed 76,354.8s) [n=2, d=2, svd=40, fast] Subsampled 50,000 rows for FHE simulation...
+[LOG 2026-10-29 08:16:51 -03-0300] (elapsed 76,354.8s) [n=2, d=2, svd=40, fast] Starting FHE simulation prediction on 50,000 samples...
+[LOG 2026-10-29 08:20:12 -03-0300] (elapsed 76,555.4s) [n=2, d=2, svd=40, fast] FHE simulation completed in 200.5s
+[LOG 2026-10-29 08:20:12 -03-0300] (elapsed 76,555.4s) [n=2, d=2, svd=40, fast] FHE metrics (on 50,000 sample subset):
+--- Model Evaluation ---
+Accuracy: 0.8499
+Precision: 0.7115
+Recall: 0.1827
+F1-Score: 0.2908
+
+--- Confusion Matrix ---
+[[40954   624]
+ [ 6883  1539]]
+
+--- Classification Report ---
+              precision    recall  f1-score   support
+
+           0       0.86      0.98      0.92     41578
+           1       0.71      0.18      0.29      8422
+
+    accuracy                           0.85     50000
+   macro avg       0.78      0.58      0.60     50000
+weighted avg       0.83      0.85      0.81     50000
+
+[LOG 2026-10-29 08:20:12 -03-0300] (elapsed 76,555.8s) [n=2, d=2, svd=40, fast] Saving compiled FHE circuit to './fhe_model_2_estimators_2_depth_svd_40_components_fast/cuda'...
+[LOG 2026-10-29 08:20:12 -03-0300] (elapsed 76,555.8s) [n=2, d=2, svd=40, fast] FHE assets saved (device=cuda). Summary — train: 24.4s, predict: 4.4s, compile: 8,157.4s, fhe_sim: 200.5s
+[LOG 2026-10-29 08:20:12 -03-0300] (elapsed 76,556.1s) [n=2, d=2, svd=40, fast] Measuring real FHE encrypt/inference/decrypt on 100 records...
+[LOG 2026-10-29 08:20:12 -03-0300] (elapsed 76,556.1s) [n=2, d=2, svd=40, fast] Loading FHE client/server from './fhe_model_2_estimators_2_depth_svd_40_components_fast/cuda' for latency measurement...
+[LOG 2026-10-29 08:20:12 -03-0300] (elapsed 76,556.1s) [n=2, d=2, svd=40, fast] Model compiled for device='cuda' (from fhe_device.txt).
+[LOG 2026-10-29 08:20:14 -03-0300] (elapsed 76,557.7s) [n=2, d=2, svd=40, fast] Generating evaluation keys...
+[LOG 2026-10-29 08:20:16 -03-0300] (elapsed 76,559.4s) [n=2, d=2, svd=40, fast] Evaluation keys ready in 1.655s (29,606,808 bytes).
+[LOG 2026-10-29 08:20:16 -03-0300] (elapsed 76,559.4s) [n=2, d=2, svd=40, fast] Evaluation keys deserialized once in 0.073s.
+[LOG 2026-10-29 08:20:16 -03-0300] (elapsed 76,559.4s) [n=2, d=2, svd=40, fast] Measuring encrypt / inference / decrypt on 100 records...
+[LOG 2026-10-29 08:20:26 -03-0300] (elapsed 76,569.3s) [n=2, d=2, svd=40, fast]   10/100 — avg encrypt=0.010028s, avg infer=0.973545s, avg decrypt=0.002246s
+[LOG 2026-10-29 08:20:34 -03-0300] (elapsed 76,577.9s) [n=2, d=2, svd=40, fast]   20/100 — avg encrypt=0.009198s, avg infer=0.913132s, avg decrypt=0.002103s
+[LOG 2026-10-29 08:20:43 -03-0300] (elapsed 76,586.7s) [n=2, d=2, svd=40, fast]   30/100 — avg encrypt=0.008973s, avg infer=0.897078s, avg decrypt=0.002027s
+[LOG 2026-10-29 08:20:52 -03-0300] (elapsed 76,596.2s) [n=2, d=2, svd=40, fast]   40/100 — avg encrypt=0.008866s, avg infer=0.908840s, avg decrypt=0.002014s
+[LOG 2026-10-29 08:21:01 -03-0300] (elapsed 76,605.0s) [n=2, d=2, svd=40, fast]   50/100 — avg encrypt=0.008737s, avg infer=0.900651s, avg decrypt=0.001990s
+[LOG 2026-10-29 08:21:10 -03-0300] (elapsed 76,613.8s) [n=2, d=2, svd=40, fast]   60/100 — avg encrypt=0.008661s, avg infer=0.894752s, avg decrypt=0.001962s
+[LOG 2026-10-29 08:21:19 -03-0300] (elapsed 76,622.5s) [n=2, d=2, svd=40, fast]   70/100 — avg encrypt=0.008632s, avg infer=0.890841s, avg decrypt=0.001969s
+[LOG 2026-10-29 08:21:27 -03-0300] (elapsed 76,631.2s) [n=2, d=2, svd=40, fast]   80/100 — avg encrypt=0.008594s, avg infer=0.886550s, avg decrypt=0.001953s
+[LOG 2026-10-29 08:21:36 -03-0300] (elapsed 76,639.8s) [n=2, d=2, svd=40, fast]   90/100 — avg encrypt=0.008568s, avg infer=0.881858s, avg decrypt=0.001950s
+[LOG 2026-10-29 08:21:45 -03-0300] (elapsed 76,648.4s) [n=2, d=2, svd=40, fast]   100/100 — avg encrypt=0.008528s, avg infer=0.878848s, avg decrypt=0.001955s
+
+==================== FHE LATENCY (n=2, d=2, svd=40, fast) ====================
+Records measured: 100
+Key generation:   1.6552 s (once)
+       Phase |    Total (s) |     Mean (s) |      Std (s)
+----------------------------------------------------------
+     encrypt |       0.8528 |     0.008528 |     0.001165
+   inference |      87.8848 |     0.878848 |     0.101119
+     decrypt |       0.1955 |     0.001955 |     0.000352
+  end-to-end |      88.9330 |     0.889330 |          n/a
+======================================================================
+
+
+============================================================
+  FHE for CONFIG 10/13: n_estimators=2, max_depth=4, svd=40, n_bits=5, family=fast
+============================================================
+[LOG 2026-10-29 08:21:45 -03-0300] (elapsed 76,648.7s) [n=2, d=4, svd=40, fast] Loading plaintext model from 'plaintext_model_2_estimators_4_depth_svd_40_fast.json'...
+[LOG 2026-10-29 08:21:45 -03-0300] (elapsed 76,648.7s) [n=2, d=4, svd=40, fast] Loading train projection for FHE compilation...
+[LOG 2026-10-29 08:21:48 -03-0300] (elapsed 76,652.2s) [n=2, d=4, svd=40, fast] Compiling FHE circuit (this may take a long time)...
+[LOG 2026-10-29 08:21:48 -03-0300] (elapsed 76,652.2s) [n=2, d=4, svd=40, fast] GPU status — available=True, enabled(runtime)=True
+[LOG 2026-10-29 08:21:48 -03-0300] (elapsed 76,652.2s) [n=2, d=4, svd=40, fast] FHE device: cuda (requested)
+[LOG 2026-10-29 08:21:48 -03-0300] (elapsed 76,652.2s) [n=2, d=4, svd=40, fast] Compiling FHE circuit with device='cuda'...
+[LOG 2026-10-29 10:38:50 -03-0300] (elapsed 84,873.6s) [n=2, d=4, svd=40, fast] FHE compilation succeeded on device='cuda'.
+[LOG 2026-10-29 10:38:50 -03-0300] (elapsed 84,873.6s) [n=2, d=4, svd=40, fast] FHE compilation completed in 8,221.4s on device='cuda'
+[LOG 2026-10-29 10:38:50 -03-0300] (elapsed 84,874.0s) [n=2, d=4, svd=40, fast] Loading test projection for FHE simulation...
+[LOG 2026-10-29 10:38:52 -03-0300] (elapsed 84,875.3s) [n=2, d=4, svd=40, fast] Subsampled 50,000 rows for FHE simulation...
+[LOG 2026-10-29 10:38:52 -03-0300] (elapsed 84,875.3s) [n=2, d=4, svd=40, fast] Starting FHE simulation prediction on 50,000 samples...
+[LOG 2026-10-29 10:42:07 -03-0300] (elapsed 85,070.3s) [n=2, d=4, svd=40, fast] FHE simulation completed in 195.0s
+[LOG 2026-10-29 10:42:07 -03-0300] (elapsed 85,070.3s) [n=2, d=4, svd=40, fast] FHE metrics (on 50,000 sample subset):
+--- Model Evaluation ---
+Accuracy: 0.8930
+Precision: 0.6973
+Recall: 0.6441
+F1-Score: 0.6697
+
+--- Confusion Matrix ---
+[[39223  2355]
+ [ 2997  5425]]
+
+--- Classification Report ---
+              precision    recall  f1-score   support
+
+           0       0.93      0.94      0.94     41578
+           1       0.70      0.64      0.67      8422
+
+    accuracy                           0.89     50000
+   macro avg       0.81      0.79      0.80     50000
+weighted avg       0.89      0.89      0.89     50000
+
+[LOG 2026-10-29 10:42:07 -03-0300] (elapsed 85,070.7s) [n=2, d=4, svd=40, fast] Saving compiled FHE circuit to './fhe_model_2_estimators_4_depth_svd_40_components_fast/cuda'...
+[LOG 2026-10-29 10:42:07 -03-0300] (elapsed 85,070.7s) [n=2, d=4, svd=40, fast] FHE assets saved (device=cuda). Summary — train: 27.3s, predict: 8.4s, compile: 8,221.4s, fhe_sim: 195.0s
+[LOG 2026-10-29 10:42:07 -03-0300] (elapsed 85,070.9s) [n=2, d=4, svd=40, fast] Measuring real FHE encrypt/inference/decrypt on 100 records...
+[LOG 2026-10-29 10:42:07 -03-0300] (elapsed 85,070.9s) [n=2, d=4, svd=40, fast] Loading FHE client/server from './fhe_model_2_estimators_4_depth_svd_40_components_fast/cuda' for latency measurement...
+[LOG 2026-10-29 10:42:07 -03-0300] (elapsed 85,070.9s) [n=2, d=4, svd=40, fast] Model compiled for device='cuda' (from fhe_device.txt).
+[LOG 2026-10-29 10:42:09 -03-0300] (elapsed 85,072.2s) [n=2, d=4, svd=40, fast] Generating evaluation keys...
+[LOG 2026-10-29 10:42:10 -03-0300] (elapsed 85,073.8s) [n=2, d=4, svd=40, fast] Evaluation keys ready in 1.579s (29,606,808 bytes).
+[LOG 2026-10-29 10:42:10 -03-0300] (elapsed 85,073.9s) [n=2, d=4, svd=40, fast] Evaluation keys deserialized once in 0.068s.
+[LOG 2026-10-29 10:42:10 -03-0300] (elapsed 85,073.9s) [n=2, d=4, svd=40, fast] Measuring encrypt / inference / decrypt on 100 records...
+[LOG 2026-10-29 10:42:22 -03-0300] (elapsed 85,086.2s) [n=2, d=4, svd=40, fast]   10/100 — avg encrypt=0.008378s, avg infer=1.215506s, avg decrypt=0.001837s
+[LOG 2026-10-29 10:42:34 -03-0300] (elapsed 85,098.0s) [n=2, d=4, svd=40, fast]   20/100 — avg encrypt=0.008198s, avg infer=1.192732s, avg decrypt=0.001816s
+[LOG 2026-10-29 10:42:46 -03-0300] (elapsed 85,110.1s) [n=2, d=4, svd=40, fast]   30/100 — avg encrypt=0.008575s, avg infer=1.195003s, avg decrypt=0.002120s
+[LOG 2026-10-29 10:42:58 -03-0300] (elapsed 85,122.2s) [n=2, d=4, svd=40, fast]   40/100 — avg encrypt=0.008494s, avg infer=1.196132s, avg decrypt=0.002042s
+[LOG 2026-10-29 10:43:10 -03-0300] (elapsed 85,134.1s) [n=2, d=4, svd=40, fast]   50/100 — avg encrypt=0.008381s, avg infer=1.192914s, avg decrypt=0.001980s
+[LOG 2026-10-29 10:43:22 -03-0300] (elapsed 85,146.1s) [n=2, d=4, svd=40, fast]   60/100 — avg encrypt=0.008329s, avg infer=1.192278s, avg decrypt=0.001965s
+[LOG 2026-10-29 10:43:34 -03-0300] (elapsed 85,157.5s) [n=2, d=4, svd=40, fast]   70/100 — avg encrypt=0.008285s, avg infer=1.183674s, avg decrypt=0.001947s
+[LOG 2026-10-29 10:43:46 -03-0300] (elapsed 85,169.4s) [n=2, d=4, svd=40, fast]   80/100 — avg encrypt=0.008251s, avg infer=1.183786s, avg decrypt=0.001926s
+[LOG 2026-10-29 10:43:58 -03-0300] (elapsed 85,181.5s) [n=2, d=4, svd=40, fast]   90/100 — avg encrypt=0.008234s, avg infer=1.185329s, avg decrypt=0.001906s
+[LOG 2026-10-29 10:44:09 -03-0300] (elapsed 85,193.0s) [n=2, d=4, svd=40, fast]   100/100 — avg encrypt=0.008232s, avg infer=1.180206s, avg decrypt=0.001901s
+
+==================== FHE LATENCY (n=2, d=4, svd=40, fast) ====================
+Records measured: 100
+Key generation:   1.5790 s (once)
+       Phase |    Total (s) |     Mean (s) |      Std (s)
+----------------------------------------------------------
+     encrypt |       0.8232 |     0.008232 |     0.000691
+   inference |     118.0206 |     1.180206 |     0.093179
+     decrypt |       0.1901 |     0.001901 |     0.000551
+  end-to-end |     119.0339 |     1.190339 |          n/a
+======================================================================
+
+
+============================================================
+  FHE for CONFIG 11/13: n_estimators=4, max_depth=2, svd=40, n_bits=5, family=fast
+============================================================
+[LOG 2026-10-29 10:44:10 -03-0300] (elapsed 85,193.3s) [n=4, d=2, svd=40, fast] Loading plaintext model from 'plaintext_model_4_estimators_2_depth_svd_40_fast.json'...
+[LOG 2026-10-29 10:44:10 -03-0300] (elapsed 85,193.4s) [n=4, d=2, svd=40, fast] Loading train projection for FHE compilation...
+[LOG 2026-10-29 10:44:11 -03-0300] (elapsed 85,195.0s) [n=4, d=2, svd=40, fast] Compiling FHE circuit (this may take a long time)...
+[LOG 2026-10-29 10:44:11 -03-0300] (elapsed 85,195.0s) [n=4, d=2, svd=40, fast] GPU status — available=True, enabled(runtime)=True
+[LOG 2026-10-29 10:44:11 -03-0300] (elapsed 85,195.0s) [n=4, d=2, svd=40, fast] FHE device: cuda (requested)
+[LOG 2026-10-29 10:44:11 -03-0300] (elapsed 85,195.0s) [n=4, d=2, svd=40, fast] Compiling FHE circuit with device='cuda'...
+[LOG 2026-10-29 13:00:00 -03-0300] (elapsed 93,343.8s) [n=4, d=2, svd=40, fast] FHE compilation succeeded on device='cuda'.
+[LOG 2026-10-29 13:00:00 -03-0300] (elapsed 93,343.8s) [n=4, d=2, svd=40, fast] FHE compilation completed in 8,148.8s on device='cuda'
+[LOG 2026-10-29 13:00:00 -03-0300] (elapsed 93,344.0s) [n=4, d=2, svd=40, fast] Loading test projection for FHE simulation...
+[LOG 2026-10-29 13:00:01 -03-0300] (elapsed 93,344.7s) [n=4, d=2, svd=40, fast] Subsampled 50,000 rows for FHE simulation...
+[LOG 2026-10-29 13:00:01 -03-0300] (elapsed 93,344.7s) [n=4, d=2, svd=40, fast] Starting FHE simulation prediction on 50,000 samples...
+[LOG 2026-10-29 13:03:16 -03-0300] (elapsed 93,539.8s) [n=4, d=2, svd=40, fast] FHE simulation completed in 195.1s
+[LOG 2026-10-29 13:03:16 -03-0300] (elapsed 93,539.8s) [n=4, d=2, svd=40, fast] FHE metrics (on 50,000 sample subset):
+--- Model Evaluation ---
+Accuracy: 0.8601
+Precision: 0.9196
+Recall: 0.1859
+F1-Score: 0.3093
+
+--- Confusion Matrix ---
+[[41441   137]
+ [ 6856  1566]]
+
+--- Classification Report ---
+              precision    recall  f1-score   support
+
+           0       0.86      1.00      0.92     41578
+           1       0.92      0.19      0.31      8422
+
+    accuracy                           0.86     50000
+   macro avg       0.89      0.59      0.62     50000
+weighted avg       0.87      0.86      0.82     50000
+
+[LOG 2026-10-29 13:03:16 -03-0300] (elapsed 93,540.2s) [n=4, d=2, svd=40, fast] Saving compiled FHE circuit to './fhe_model_4_estimators_2_depth_svd_40_components_fast/cuda'...
+[LOG 2026-10-29 13:03:17 -03-0300] (elapsed 93,540.3s) [n=4, d=2, svd=40, fast] FHE assets saved (device=cuda). Summary — train: 29.1s, predict: 5.6s, compile: 8,148.8s, fhe_sim: 195.1s
+[LOG 2026-10-29 13:03:17 -03-0300] (elapsed 93,540.5s) [n=4, d=2, svd=40, fast] Measuring real FHE encrypt/inference/decrypt on 100 records...
+[LOG 2026-10-29 13:03:17 -03-0300] (elapsed 93,540.5s) [n=4, d=2, svd=40, fast] Loading FHE client/server from './fhe_model_4_estimators_2_depth_svd_40_components_fast/cuda' for latency measurement...
+[LOG 2026-10-29 13:03:17 -03-0300] (elapsed 93,540.5s) [n=4, d=2, svd=40, fast] Model compiled for device='cuda' (from fhe_device.txt).
+[LOG 2026-10-29 13:03:18 -03-0300] (elapsed 93,542.0s) [n=4, d=2, svd=40, fast] Generating evaluation keys...
+[LOG 2026-10-29 13:03:20 -03-0300] (elapsed 93,543.6s) [n=4, d=2, svd=40, fast] Evaluation keys ready in 1.589s (29,606,808 bytes).
+[LOG 2026-10-29 13:03:20 -03-0300] (elapsed 93,543.7s) [n=4, d=2, svd=40, fast] Evaluation keys deserialized once in 0.060s.
+[LOG 2026-10-29 13:03:20 -03-0300] (elapsed 93,543.7s) [n=4, d=2, svd=40, fast] Measuring encrypt / inference / decrypt on 100 records...
+[LOG 2026-10-29 13:03:28 -03-0300] (elapsed 93,552.1s) [n=4, d=2, svd=40, fast]   10/100 — avg encrypt=0.008338s, avg infer=0.827816s, avg decrypt=0.002206s
+[LOG 2026-10-29 13:03:36 -03-0300] (elapsed 93,559.8s) [n=4, d=2, svd=40, fast]   20/100 — avg encrypt=0.008577s, avg infer=0.794739s, avg decrypt=0.002471s
+[LOG 2026-10-29 13:03:44 -03-0300] (elapsed 93,567.8s) [n=4, d=2, svd=40, fast]   30/100 — avg encrypt=0.008614s, avg infer=0.791032s, avg decrypt=0.002550s
+[LOG 2026-10-29 13:03:52 -03-0300] (elapsed 93,576.1s) [n=4, d=2, svd=40, fast]   40/100 — avg encrypt=0.008569s, avg infer=0.798846s, avg decrypt=0.002479s
+[LOG 2026-10-29 13:04:00 -03-0300] (elapsed 93,584.1s) [n=4, d=2, svd=40, fast]   50/100 — avg encrypt=0.008492s, avg infer=0.797041s, avg decrypt=0.002399s
+[LOG 2026-10-29 13:04:09 -03-0300] (elapsed 93,592.3s) [n=4, d=2, svd=40, fast]   60/100 — avg encrypt=0.008438s, avg infer=0.799324s, avg decrypt=0.002358s
+[LOG 2026-10-29 13:04:17 -03-0300] (elapsed 93,600.5s) [n=4, d=2, svd=40, fast]   70/100 — avg encrypt=0.008376s, avg infer=0.801007s, avg decrypt=0.002317s
+[LOG 2026-10-29 13:04:25 -03-0300] (elapsed 93,608.6s) [n=4, d=2, svd=40, fast]   80/100 — avg encrypt=0.008342s, avg infer=0.800496s, avg decrypt=0.002286s
+[LOG 2026-10-29 13:04:32 -03-0300] (elapsed 93,616.2s) [n=4, d=2, svd=40, fast]   90/100 — avg encrypt=0.008322s, avg infer=0.794972s, avg decrypt=0.002271s
+[LOG 2026-10-29 13:04:41 -03-0300] (elapsed 93,624.3s) [n=4, d=2, svd=40, fast]   100/100 — avg encrypt=0.008304s, avg infer=0.795076s, avg decrypt=0.002253s
+
+==================== FHE LATENCY (n=4, d=2, svd=40, fast) ====================
+Records measured: 100
+Key generation:   1.5890 s (once)
+       Phase |    Total (s) |     Mean (s) |      Std (s)
+----------------------------------------------------------
+     encrypt |       0.8304 |     0.008304 |     0.000533
+   inference |      79.5076 |     0.795076 |     0.081923
+     decrypt |       0.2253 |     0.002253 |     0.000524
+  end-to-end |      80.5633 |     0.805633 |          n/a
+======================================================================
+
+
+============================================================
+  FHE for CONFIG 12/13: n_estimators=4, max_depth=4, svd=40, n_bits=5, family=fast
+============================================================
+[LOG 2026-10-29 13:04:41 -03-0300] (elapsed 93,624.6s) [n=4, d=4, svd=40, fast] Loading plaintext model from 'plaintext_model_4_estimators_4_depth_svd_40_fast.json'...
+[LOG 2026-10-29 13:04:41 -03-0300] (elapsed 93,624.6s) [n=4, d=4, svd=40, fast] Loading train projection for FHE compilation...
+[LOG 2026-10-29 13:04:42 -03-0300] (elapsed 93,626.0s) [n=4, d=4, svd=40, fast] Compiling FHE circuit (this may take a long time)...
+[LOG 2026-10-29 13:04:42 -03-0300] (elapsed 93,626.0s) [n=4, d=4, svd=40, fast] GPU status — available=True, enabled(runtime)=True
+[LOG 2026-10-29 13:04:42 -03-0300] (elapsed 93,626.0s) [n=4, d=4, svd=40, fast] FHE device: cuda (requested)
+[LOG 2026-10-29 13:04:42 -03-0300] (elapsed 93,626.0s) [n=4, d=4, svd=40, fast] Compiling FHE circuit with device='cuda'...
+[LOG 2026-10-29 15:21:29 -03-0300] (elapsed 101,833.4s) [n=4, d=4, svd=40, fast] FHE compilation succeeded on device='cuda'.
+[LOG 2026-10-29 15:21:30 -03-0300] (elapsed 101,833.4s) [n=4, d=4, svd=40, fast] FHE compilation completed in 8,207.4s on device='cuda'
+[LOG 2026-10-29 15:21:30 -03-0300] (elapsed 101,833.7s) [n=4, d=4, svd=40, fast] Loading test projection for FHE simulation...
+[LOG 2026-10-29 15:21:30 -03-0300] (elapsed 101,834.2s) [n=4, d=4, svd=40, fast] Subsampled 50,000 rows for FHE simulation...
+[LOG 2026-10-29 15:21:30 -03-0300] (elapsed 101,834.2s) [n=4, d=4, svd=40, fast] Starting FHE simulation prediction on 50,000 samples...
+[LOG 2026-10-29 15:24:52 -03-0300] (elapsed 102,035.8s) [n=4, d=4, svd=40, fast] FHE simulation completed in 201.6s
+[LOG 2026-10-29 15:24:52 -03-0300] (elapsed 102,035.8s) [n=4, d=4, svd=40, fast] FHE metrics (on 50,000 sample subset):
+--- Model Evaluation ---
+Accuracy: 0.8969
+Precision: 0.7367
+Recall: 0.6038
+F1-Score: 0.6637
+
+--- Confusion Matrix ---
+[[39761  1817]
+ [ 3337  5085]]
+
+--- Classification Report ---
+              precision    recall  f1-score   support
+
+           0       0.92      0.96      0.94     41578
+           1       0.74      0.60      0.66      8422
+
+    accuracy                           0.90     50000
+   macro avg       0.83      0.78      0.80     50000
+weighted avg       0.89      0.90      0.89     50000
+
+[LOG 2026-10-29 15:24:53 -03-0300] (elapsed 102,036.2s) [n=4, d=4, svd=40, fast] Saving compiled FHE circuit to './fhe_model_4_estimators_4_depth_svd_40_components_fast/cuda'...
+[LOG 2026-10-29 15:24:53 -03-0300] (elapsed 102,036.3s) [n=4, d=4, svd=40, fast] FHE assets saved (device=cuda). Summary — train: 41.7s, predict: 15.0s, compile: 8,207.4s, fhe_sim: 201.6s
+[LOG 2026-10-29 15:24:53 -03-0300] (elapsed 102,036.5s) [n=4, d=4, svd=40, fast] Measuring real FHE encrypt/inference/decrypt on 100 records...
+[LOG 2026-10-29 15:24:53 -03-0300] (elapsed 102,036.5s) [n=4, d=4, svd=40, fast] Loading FHE client/server from './fhe_model_4_estimators_4_depth_svd_40_components_fast/cuda' for latency measurement...
+[LOG 2026-10-29 15:24:53 -03-0300] (elapsed 102,036.5s) [n=4, d=4, svd=40, fast] Model compiled for device='cuda' (from fhe_device.txt).
+[LOG 2026-10-29 15:24:54 -03-0300] (elapsed 102,038.0s) [n=4, d=4, svd=40, fast] Generating evaluation keys...
+[LOG 2026-10-29 15:24:56 -03-0300] (elapsed 102,039.8s) [n=4, d=4, svd=40, fast] Evaluation keys ready in 1.796s (37,278,616 bytes).
+[LOG 2026-10-29 15:24:56 -03-0300] (elapsed 102,039.9s) [n=4, d=4, svd=40, fast] Evaluation keys deserialized once in 0.086s.
+[LOG 2026-10-29 15:24:56 -03-0300] (elapsed 102,039.9s) [n=4, d=4, svd=40, fast] Measuring encrypt / inference / decrypt on 100 records...
+[LOG 2026-10-29 15:25:12 -03-0300] (elapsed 102,056.0s) [n=4, d=4, svd=40, fast]   10/100 — avg encrypt=0.008856s, avg infer=1.599313s, avg decrypt=0.002558s
+[LOG 2026-10-29 15:25:27 -03-0300] (elapsed 102,071.0s) [n=4, d=4, svd=40, fast]   20/100 — avg encrypt=0.008433s, avg infer=1.543759s, avg decrypt=0.002294s
+[LOG 2026-10-29 15:25:42 -03-0300] (elapsed 102,085.4s) [n=4, d=4, svd=40, fast]   30/100 — avg encrypt=0.008270s, avg infer=1.506729s, avg decrypt=0.002166s
+[LOG 2026-10-29 15:25:56 -03-0300] (elapsed 102,099.8s) [n=4, d=4, svd=40, fast]   40/100 — avg encrypt=0.008186s, avg infer=1.486372s, avg decrypt=0.002119s
+[LOG 2026-10-29 15:26:11 -03-0300] (elapsed 102,114.4s) [n=4, d=4, svd=40, fast]   50/100 — avg encrypt=0.008130s, avg infer=1.479938s, avg decrypt=0.002076s
+[LOG 2026-10-29 15:26:25 -03-0300] (elapsed 102,128.7s) [n=4, d=4, svd=40, fast]   60/100 — avg encrypt=0.008088s, avg infer=1.469676s, avg decrypt=0.002048s
+[LOG 2026-10-29 15:26:39 -03-0300] (elapsed 102,143.2s) [n=4, d=4, svd=40, fast]   70/100 — avg encrypt=0.008041s, avg infer=1.464840s, avg decrypt=0.002021s
+[LOG 2026-10-29 15:26:54 -03-0300] (elapsed 102,157.4s) [n=4, d=4, svd=40, fast]   80/100 — avg encrypt=0.008103s, avg infer=1.458675s, avg decrypt=0.002015s
+[LOG 2026-10-29 15:27:08 -03-0300] (elapsed 102,171.8s) [n=4, d=4, svd=40, fast]   90/100 — avg encrypt=0.008072s, avg infer=1.455637s, avg decrypt=0.002002s
+[LOG 2026-10-29 15:27:22 -03-0300] (elapsed 102,185.7s) [n=4, d=4, svd=40, fast]   100/100 — avg encrypt=0.008060s, avg infer=1.448156s, avg decrypt=0.001985s
+
+==================== FHE LATENCY (n=4, d=4, svd=40, fast) ====================
+Records measured: 100
+Key generation:   1.7960 s (once)
+       Phase |    Total (s) |     Mean (s) |      Std (s)
+----------------------------------------------------------
+     encrypt |       0.8060 |     0.008060 |     0.000786
+   inference |     144.8156 |     1.448156 |     0.119485
+     decrypt |       0.1985 |     0.001985 |     0.000335
+  end-to-end |     145.8201 |     1.458201 |          n/a
+======================================================================
+
+
+======================================================================
+  FHE SUMMARY  (SVD 40)
+======================================================================
+                        Config | Device |  Train (s) |  Predict (s) |  Compile (s) |  FHE Sim (s) |    Enc (s) |    Inf (s) |    Dec (s)
+--------------------------------------------------------------------------------------------------------------------------------------------
+        n=2, d=2, svd=40, fast |   cuda |       24.4 |          4.4 |       8157.4 |        200.5 |   0.008528 |   0.878848 |   0.001955
+        n=2, d=4, svd=40, fast |   cuda |       27.3 |          8.4 |       8221.4 |        195.0 |   0.008232 |   1.180206 |   0.001901
+        n=4, d=2, svd=40, fast |   cuda |       29.1 |          5.6 |       8148.8 |        195.1 |   0.008304 |   0.795076 |   0.002253
+        n=4, d=4, svd=40, fast |   cuda |       41.7 |         15.0 |       8207.4 |        201.6 |   0.008060 |   1.448156 |   0.001985
+
+[LOG 2026-10-29 15:27:22 -03-0300] (elapsed 102,186.0s) FHE phase complete for SVD 40.
+[LOG 2026-10-29 15:27:22 -03-0300] (elapsed 102,186.1s) Deleted SVD 40 projection files.
+[LOG 2026-10-29 15:27:23 -03-0300] (elapsed 102,186.3s) SVD 100 plaintext models already saved. Skipping training.
+
+######################################################################
+#  PHASE 1: PLAINTEXT TRAINING & EVALUATION  (SVD 100)
+######################################################################
+
+============================================================
+  CONFIG 13/13: n_estimators=2, max_depth=2, svd=100, n_bits=5, family=fast
+============================================================
+[LOG 2026-10-29 15:27:23 -03-0300] (elapsed 102,186.3s) [n=2, d=2, svd=100, fast] Training completed in 61.8s
+[LOG 2026-10-29 15:27:23 -03-0300] (elapsed 102,186.3s) [n=2, d=2, svd=100, fast] Clear prediction completed in 10.0s
+[LOG 2026-10-29 15:27:23 -03-0300] (elapsed 102,186.3s) [n=2, d=2, svd=100, fast] Plaintext metrics:
+--- Model Evaluation ---
+Accuracy: 0.8512
+Precision: 0.9985
+Recall: 0.1213
+F1-Score: 0.2163
+
+--- Confusion Matrix ---
+[[2696843      99]
+ [ 482985   66662]]
+
+--- Classification Report ---
+              precision    recall  f1-score   support
+
+           0       0.85      1.00      0.92   2696942
+           1       1.00      0.12      0.22    549647
+
+    accuracy                           0.85   3246589
+   macro avg       0.92      0.56      0.57   3246589
+weighted avg       0.87      0.85      0.80   3246589
+
+[LOG 2026-10-29 15:27:23 -03-0300] (elapsed 102,186.3s) [n=2, d=2, svd=100, fast] Reusing plaintext model 'plaintext_model_2_estimators_2_depth_svd_100_fast.json'.
+
+======================================================================
+  PLAINTEXT SUMMARY  (SVD 100)
+======================================================================
+                        Config |  Train (s) |  Predict (s)
+------------------------------------------------------------
+       n=2, d=2, svd=100, fast |       61.8 |         10.0
+
+[LOG 2026-10-29 15:27:23 -03-0300] (elapsed 102,186.3s) Phase 1 complete for SVD 100 — all plaintext variants trained and evaluated.
+
+######################################################################
+#  PHASE 2: FHE COMPILATION & SIMULATION  (SVD 100)
+######################################################################
+
+============================================================
+  FHE for CONFIG 13/13: n_estimators=2, max_depth=2, svd=100, n_bits=5, family=fast
+============================================================
+[LOG 2026-10-29 15:27:23 -03-0300] (elapsed 102,186.3s) [n=2, d=2, svd=100, fast] Loading plaintext model from 'plaintext_model_2_estimators_2_depth_svd_100_fast.json'...
+[LOG 2026-10-29 15:27:23 -03-0300] (elapsed 102,186.4s) [n=2, d=2, svd=100, fast] Loading train projection for FHE compilation...
+[LOG 2026-10-29 15:27:26 -03-0300] (elapsed 102,189.7s) [n=2, d=2, svd=100, fast] Compiling FHE circuit (this may take a long time)...
+[LOG 2026-10-29 15:27:26 -03-0300] (elapsed 102,189.7s) [n=2, d=2, svd=100, fast] GPU status — available=True, enabled(runtime)=True
+[LOG 2026-10-29 15:27:26 -03-0300] (elapsed 102,189.7s) [n=2, d=2, svd=100, fast] FHE device: cuda (requested)
+[LOG 2026-10-29 15:27:26 -03-0300] (elapsed 102,189.7s) [n=2, d=2, svd=100, fast] Compiling FHE circuit with device='cuda'...
+[LOG 2026-10-29 17:44:17 -03-0300] (elapsed 110,401.2s) [n=2, d=2, svd=100, fast] FHE compilation succeeded on device='cuda'.
+[LOG 2026-10-29 17:44:17 -03-0300] (elapsed 110,401.2s) [n=2, d=2, svd=100, fast] FHE compilation completed in 8,211.5s on device='cuda'
+[LOG 2026-10-29 17:44:18 -03-0300] (elapsed 110,401.4s) [n=2, d=2, svd=100, fast] Loading test projection for FHE simulation...
+[LOG 2026-10-29 17:44:20 -03-0300] (elapsed 110,403.7s) [n=2, d=2, svd=100, fast] Subsampled 50,000 rows for FHE simulation...
+[LOG 2026-10-29 17:44:20 -03-0300] (elapsed 110,403.7s) [n=2, d=2, svd=100, fast] Starting FHE simulation prediction on 50,000 samples...
+[LOG 2026-10-29 17:47:32 -03-0300] (elapsed 110,595.6s) [n=2, d=2, svd=100, fast] FHE simulation completed in 191.9s
+[LOG 2026-10-29 17:47:32 -03-0300] (elapsed 110,595.6s) [n=2, d=2, svd=100, fast] FHE metrics (on 50,000 sample subset):
+--- Model Evaluation ---
+Accuracy: 0.8497
+Precision: 0.9217
+Recall: 0.1174
+F1-Score: 0.2083
+
+--- Confusion Matrix ---
+[[41494    84]
+ [ 7433   989]]
+
+--- Classification Report ---
+              precision    recall  f1-score   support
+
+           0       0.85      1.00      0.92     41578
+           1       0.92      0.12      0.21      8422
+
+    accuracy                           0.85     50000
+   macro avg       0.88      0.56      0.56     50000
+weighted avg       0.86      0.85      0.80     50000
+
+[LOG 2026-10-29 17:47:32 -03-0300] (elapsed 110,596.0s) [n=2, d=2, svd=100, fast] Saving compiled FHE circuit to './fhe_model_2_estimators_2_depth_svd_100_components_fast/cuda'...
+[LOG 2026-10-29 17:47:32 -03-0300] (elapsed 110,596.0s) [n=2, d=2, svd=100, fast] FHE assets saved (device=cuda). Summary — train: 61.8s, predict: 10.0s, compile: 8,211.5s, fhe_sim: 191.9s
+[LOG 2026-10-29 17:47:32 -03-0300] (elapsed 110,596.2s) [n=2, d=2, svd=100, fast] Measuring real FHE encrypt/inference/decrypt on 100 records...
+[LOG 2026-10-29 17:47:32 -03-0300] (elapsed 110,596.2s) [n=2, d=2, svd=100, fast] Loading FHE client/server from './fhe_model_2_estimators_2_depth_svd_100_components_fast/cuda' for latency measurement...
+[LOG 2026-10-29 17:47:32 -03-0300] (elapsed 110,596.2s) [n=2, d=2, svd=100, fast] Model compiled for device='cuda' (from fhe_device.txt).
+[LOG 2026-10-29 17:47:34 -03-0300] (elapsed 110,597.7s) [n=2, d=2, svd=100, fast] Generating evaluation keys...
+[LOG 2026-10-29 17:47:36 -03-0300] (elapsed 110,599.3s) [n=2, d=2, svd=100, fast] Evaluation keys ready in 1.568s (29,606,808 bytes).
+[LOG 2026-10-29 17:47:36 -03-0300] (elapsed 110,599.3s) [n=2, d=2, svd=100, fast] Evaluation keys deserialized once in 0.067s.
+[LOG 2026-10-29 17:47:36 -03-0300] (elapsed 110,599.3s) [n=2, d=2, svd=100, fast] Measuring encrypt / inference / decrypt on 100 records...
+[LOG 2026-10-29 17:47:43 -03-0300] (elapsed 110,606.9s) [n=2, d=2, svd=100, fast]   10/100 — avg encrypt=0.015035s, avg infer=0.740103s, avg decrypt=0.001614s
+[LOG 2026-10-29 17:47:50 -03-0300] (elapsed 110,613.5s) [n=2, d=2, svd=100, fast]   20/100 — avg encrypt=0.014972s, avg infer=0.692644s, avg decrypt=0.001591s
+[LOG 2026-10-29 17:47:57 -03-0300] (elapsed 110,620.3s) [n=2, d=2, svd=100, fast]   30/100 — avg encrypt=0.014972s, avg infer=0.683602s, avg decrypt=0.001591s
+[LOG 2026-10-29 17:48:03 -03-0300] (elapsed 110,627.1s) [n=2, d=2, svd=100, fast]   40/100 — avg encrypt=0.014991s, avg infer=0.678403s, avg decrypt=0.001582s
+[LOG 2026-10-29 17:48:10 -03-0300] (elapsed 110,633.9s) [n=2, d=2, svd=100, fast]   50/100 — avg encrypt=0.014966s, avg infer=0.674584s, avg decrypt=0.001574s
+[LOG 2026-10-29 17:48:17 -03-0300] (elapsed 110,640.7s) [n=2, d=2, svd=100, fast]   60/100 — avg encrypt=0.014964s, avg infer=0.671997s, avg decrypt=0.001624s
+[LOG 2026-10-29 17:48:24 -03-0300] (elapsed 110,647.6s) [n=2, d=2, svd=100, fast]   70/100 — avg encrypt=0.014984s, avg infer=0.672794s, avg decrypt=0.001624s
+[LOG 2026-10-29 17:48:31 -03-0300] (elapsed 110,654.5s) [n=2, d=2, svd=100, fast]   80/100 — avg encrypt=0.014983s, avg infer=0.672729s, avg decrypt=0.001617s
+[LOG 2026-10-29 17:48:38 -03-0300] (elapsed 110,661.3s) [n=2, d=2, svd=100, fast]   90/100 — avg encrypt=0.015075s, avg infer=0.670955s, avg decrypt=0.001705s
+[LOG 2026-10-29 17:48:44 -03-0300] (elapsed 110,667.9s) [n=2, d=2, svd=100, fast]   100/100 — avg encrypt=0.015151s, avg infer=0.668680s, avg decrypt=0.001849s
+
+==================== FHE LATENCY (n=2, d=2, svd=100, fast) ====================
+Records measured: 100
+Key generation:   1.5682 s (once)
+       Phase |    Total (s) |     Mean (s) |      Std (s)
+----------------------------------------------------------
+     encrypt |       1.5151 |     0.015151 |     0.001014
+   inference |      66.8680 |     0.668680 |     0.069322
+     decrypt |       0.1849 |     0.001849 |     0.001509
+  end-to-end |      68.5680 |     0.685680 |          n/a
+======================================================================
+
+
+======================================================================
+  FHE SUMMARY  (SVD 100)
+======================================================================
+                        Config | Device |  Train (s) |  Predict (s) |  Compile (s) |  FHE Sim (s) |    Enc (s) |    Inf (s) |    Dec (s)
+--------------------------------------------------------------------------------------------------------------------------------------------
+       n=2, d=2, svd=100, fast |   cuda |       61.8 |         10.0 |       8211.5 |        191.9 |   0.015151 |   0.668680 |   0.001849
+
+[LOG 2026-10-29 17:48:44 -03-0300] (elapsed 110,668.1s) FHE phase complete for SVD 100.
+[LOG 2026-10-29 17:48:45 -03-0300] (elapsed 110,668.5s) Deleted SVD 100 projection files.
+
+######################################################################
+#  GLOBAL SUMMARY
+######################################################################
+                        Config | Device |  Train (s) |  Predict (s) |  Compile (s) |  FHE Sim (s) |    Enc (s) |    Inf (s) |    Dec (s) |    E2E (s)
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+        n=2, d=2, svd=15, fast |   cuda |       12.2 |          1.8 |       8151.1 |        186.0 |   0.004838 |   0.754210 |   0.001593 |   0.760640
+        n=2, d=4, svd=15, fast |   cuda |       16.4 |          4.9 |       8192.3 |        190.9 |   0.005045 |   1.315519 |   0.001601 |   1.322164
+        n=4, d=2, svd=15, fast |   cuda |       17.3 |          2.6 |       8133.1 |        209.6 |   0.005135 |   0.795746 |   0.002032 |   0.802913
+        n=4, d=4, svd=15, fast |   cuda |       27.1 |          8.9 |       8226.2 |        200.8 |   0.005232 |   2.151781 |   0.002009 |   2.159021
+        n=2, d=2, svd=25, fast |   cuda |       15.9 |          2.8 |       8138.5 |        189.5 |   0.006271 |   0.830650 |   0.001772 |   0.838693
+        n=2, d=4, svd=25, fast |   cuda |       20.3 |          6.7 |       8170.1 |        197.5 |   0.006611 |   1.568771 |   0.002032 |   1.577415
+        n=4, d=2, svd=25, fast |   cuda |       21.5 |          3.8 |       8143.4 |        192.7 |   0.006285 |   0.948437 |   0.002202 |   0.956925
+        n=4, d=4, svd=25, fast |   cuda |       33.8 |         11.6 |       8213.7 |        208.7 |   0.006586 |   2.658915 |   0.002370 |   2.667871
+        n=2, d=2, svd=40, fast |   cuda |       24.4 |          4.4 |       8157.4 |        200.5 |   0.008528 |   0.878848 |   0.001955 |   0.889330
+        n=2, d=4, svd=40, fast |   cuda |       27.3 |          8.4 |       8221.4 |        195.0 |   0.008232 |   1.180206 |   0.001901 |   1.190339
+        n=4, d=2, svd=40, fast |   cuda |       29.1 |          5.6 |       8148.8 |        195.1 |   0.008304 |   0.795076 |   0.002253 |   0.805633
+        n=4, d=4, svd=40, fast |   cuda |       41.7 |         15.0 |       8207.4 |        201.6 |   0.008060 |   1.448156 |   0.001985 |   1.458201
+       n=2, d=2, svd=100, fast |   cuda |       61.8 |         10.0 |       8211.5 |        191.9 |   0.015151 |   0.668680 |   0.001849 |   0.685680
+
+[LOG 2026-10-29 17:48:45 -03-0300] (elapsed 110,668.6s) All configurations complete.
+
+######################################################################
+# finished: 2026-10-29T17:48:46.813721-03:00
+# exit_code: 0
+# wall_time_s: 110673.291
