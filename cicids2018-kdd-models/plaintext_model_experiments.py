@@ -1,4 +1,4 @@
-"""Plaintext screening for FHE-friendly CIC-IDS-2018 classifiers.
+"""Validation and FHE gating for shortlisted CIC-IDS-2018 classifiers.
 
 This script intentionally does not compile FHE circuits or overwrite artifacts
 from ``svd_model.py``. Every invocation creates a new timestamped directory
@@ -8,8 +8,8 @@ incremental results, and final report.
 Run from this directory, as with the existing trainers:
 
     python plaintext_model_experiments.py
-    python plaintext_model_experiments.py --families lr xgb
-    python plaintext_model_experiments.py --feature-sets baseline_svd15
+    python plaintext_model_experiments.py --quantized-bits 5 6 8
+    python plaintext_model_experiments.py --no-compile-fhe  # stop after quantized clear
     python plaintext_model_experiments.py --sample-rows 0  # full dataset
 
 The default one-million-row sample is an unbiased streaming sample. It is
@@ -26,6 +26,7 @@ import glob
 import json
 import math
 import os
+import re
 import sys
 import time
 import traceback
@@ -178,40 +179,40 @@ RATIONALE = [
     ),
     (
         "Leakage and comparability",
-        "The default stratified random split matches the existing experiment for a "
-        "fair comparison, but can overstate deployment performance because flows "
-        "from the same capture day appear in train and test. IP addresses, Flow ID, "
-        "and Timestamp are excluded. A later winner should also be validated with "
-        "capture-day holdout.",
+        "The default split holds out complete capture days, preventing flows from "
+        "the same day/session from appearing in train and test. A stratified random "
+        "split remains available only for comparison with the legacy experiments. "
+        "IP addresses, Flow ID, and Timestamp are excluded.",
     ),
     (
         "FHE limitation",
-        "This is a plaintext screen. Plaintext latency does not predict FHE latency. "
-        "LR and XGBoost map directly to Concrete ML model families; sklearn MLP is "
-        "only an architecture screen and must be retrained as a quantization-aware "
-        "Concrete ML NeuralNetClassifier before an FHE claim can be made.",
+        "Float plaintext latency does not predict FHE latency. The shortlist is "
+        "therefore retrained in Concrete ML quantized-clear mode. The MLP is "
+        "retrained as a quantization-aware NeuralNetClassifier. FHE compilation is "
+        "an explicit opt-in and is restricted to the best LR model that survives "
+        "the quantized quality gate.",
+    ),
+    (
+        "Candidate shortlist",
+        "Only the four useful candidates from the first screen remain: LR C=1, "
+        "LR C=10, an 8-neuron MLP, and natural-weight XGBoost with four depth-2 "
+        "trees. Removed models were either dominated on F1 or structurally less "
+        "attractive for the <=0.7 second FHE target.",
     ),
 ]
 
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Screen FHE-friendly XGB, LR, and small-MLP models in plaintext.",
+        description="Validate shortlisted LR, XGB, and small-MLP FHE candidates.",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     parser.add_argument(
         "--feature-sets",
         nargs="+",
         choices=("baseline_svd15", "compact_flow"),
-        default=("baseline_svd15", "compact_flow"),
+        default=("compact_flow",),
         help="Feature representations to evaluate.",
-    )
-    parser.add_argument(
-        "--families",
-        nargs="+",
-        choices=("xgb", "lr", "mlp"),
-        default=("xgb", "lr", "mlp"),
-        help="Model families to evaluate.",
     )
     parser.add_argument(
         "--data-folder",
@@ -232,9 +233,37 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--chunk-rows", type=int, default=200_000)
     parser.add_argument("--test-size", type=float, default=0.15)
     parser.add_argument("--validation-size", type=float, default=0.15)
+    parser.add_argument(
+        "--split-strategy",
+        choices=("day", "random"),
+        default="day",
+        help="Hold out complete capture days by default; random is legacy comparison only.",
+    )
     parser.add_argument("--jobs", type=int, default=max(1, min(8, os.cpu_count() or 1)))
     parser.add_argument("--mlp-max-epochs", type=int, default=50)
     parser.add_argument("--target-f1", type=float, default=0.70)
+    parser.add_argument(
+        "--quantized-bits",
+        nargs="+",
+        type=int,
+        default=(5, 6, 8),
+        help="Concrete ML quantized-clear bit widths.",
+    )
+    parser.add_argument(
+        "--skip-quantized-clear",
+        action="store_true",
+        help="Skip Concrete ML quantized-clear retraining (not recommended).",
+    )
+    parser.add_argument(
+        "--compile-fhe",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="Compile and benchmark only the best quantized LR that passes the F1 gate.",
+    )
+    parser.add_argument("--device", choices=("auto", "cpu", "cuda"), default="auto")
+    parser.add_argument("--p-error", type=float, default=0.01)
+    parser.add_argument("--fhe-records", type=int, default=100)
+    parser.add_argument("--fhe-sim-rows", type=int, default=10_000)
     parser.add_argument(
         "--output-root",
         default="plaintext_experiment_runs",
@@ -347,6 +376,7 @@ def load_streaming_sample(
             low_memory=False,
         ):
             chunk = clean_col_names(chunk)
+            chunk["source_day"] = Path(path).name
             if probability < 1.0:
                 chunk = chunk.loc[rng.random(len(chunk)) < probability]
             if not chunk.empty:
@@ -372,7 +402,7 @@ def clean_for_feature_set(sample: pd.DataFrame, feature_set: str, log) -> pd.Dat
         numeric = FLOW_NUMERIC + ["dst_port"]
         required = FLOW_SOURCE_COLUMNS + ["label"]
 
-    frame = sample.loc[:, required].copy()
+    frame = sample.loc[:, required + ["source_day"]].copy()
     for column in numeric:
         frame[column] = pd.to_numeric(frame[column], errors="coerce")
     frame.replace([np.inf, -np.inf], np.nan, inplace=True)
@@ -395,13 +425,48 @@ def clean_for_feature_set(sample: pd.DataFrame, feature_set: str, log) -> pd.Dat
     return frame
 
 
+def capture_date(source_day: str) -> dt.date:
+    match = re.search(r"(\d{2}-\d{2}-\d{4})", source_day)
+    if match is None:
+        raise ValueError(f"Could not parse a capture date from '{source_day}'.")
+    return dt.datetime.strptime(match.group(1), "%d-%m-%Y").date()
+
+
 def split_frame(
     frame: pd.DataFrame,
     test_size: float,
     validation_size: float,
-) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    strategy: str,
+) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, dict[str, Any]]:
     if test_size <= 0 or validation_size <= 0 or test_size + validation_size >= 1:
         raise ValueError("--test-size and --validation-size must be positive and sum to < 1.")
+    if strategy == "day":
+        days = sorted(frame["source_day"].unique(), key=capture_date)
+        if len(days) < 3:
+            raise ValueError(
+                "Capture-day holdout requires at least three original day CSV files. "
+                "Use --split-strategy random only for legacy comparison."
+            )
+        test_day_count = max(1, round(len(days) * test_size))
+        validation_day_count = max(1, round(len(days) * validation_size))
+        if test_day_count + validation_day_count >= len(days):
+            raise ValueError("Not enough capture days for the requested validation/test fractions.")
+        test_days = days[-test_day_count:]
+        validation_days = days[-(test_day_count + validation_day_count) : -test_day_count]
+        train_days = days[: -(test_day_count + validation_day_count)]
+        train = frame.loc[frame["source_day"].isin(train_days)].copy()
+        validation = frame.loc[frame["source_day"].isin(validation_days)].copy()
+        test = frame.loc[frame["source_day"].isin(test_days)].copy()
+        for name, split in (("train", train), ("validation", validation), ("test", test)):
+            if split["binary_label"].nunique() != 2:
+                raise ValueError(f"Capture-day {name} split does not contain both binary classes.")
+        return train, validation, test, {
+            "strategy": "capture-day holdout",
+            "train_days": train_days,
+            "validation_days": validation_days,
+            "test_days": test_days,
+        }
+
     train_validation, test = train_test_split(
         frame,
         test_size=test_size,
@@ -415,7 +480,12 @@ def split_frame(
         random_state=SEED,
         stratify=train_validation["binary_label"],
     )
-    return train, validation, test
+    return train, validation, test, {
+        "strategy": "stratified random binary-label split",
+        "train_days": sorted(train["source_day"].unique()),
+        "validation_days": sorted(validation["source_day"].unique()),
+        "test_days": sorted(test["source_day"].unique()),
+    }
 
 
 def engineer_compact_flow(frame: pd.DataFrame) -> pd.DataFrame:
@@ -509,64 +579,57 @@ def fit_feature_transform(
     return x_train, x_validation, x_test, transformer
 
 
-def make_model_configs(families: list[str], jobs: int, mlp_max_epochs: int) -> list[dict]:
-    configs: list[dict] = []
-    if "lr" in families:
-        for c_value in (0.1, 1.0, 10.0):
-            configs.append(
-                {
-                    "id": f"lr_balanced_c{c_value:g}",
-                    "family": "lr",
-                    "params": {
-                        "C": c_value,
-                        "class_weight": "balanced",
-                        "max_iter": 500,
-                        "solver": "lbfgs",
-                    },
-                    "fhe_priority": "high",
-                    "fhe_note": "One linear dot product; strongest <=0.7 s candidate.",
-                }
-            )
-    if "xgb" in families:
-        for depth, estimators in ((2, 2), (2, 4), (3, 2)):
-            for weighting in ("natural", "balanced"):
-                configs.append(
-                    {
-                        "id": f"xgb_d{depth}_n{estimators}_{weighting}",
-                        "family": "xgb",
-                        "params": {
-                            "max_depth": depth,
-                            "n_estimators": estimators,
-                            "learning_rate": 0.3,
-                            "weighting": weighting,
-                        },
-                        "fhe_priority": "high" if depth == 2 else "medium",
-                        "fhe_note": (
-                            "Depth 2 and <=4 trees bracket the fastest existing forest shapes."
-                            if depth == 2
-                            else "Depth 3 may improve F1 but has up to 7 nodes per tree."
-                        ),
-                        "jobs": jobs,
-                    }
-                )
-    if "mlp" in families:
-        for width in (8, 16):
-            configs.append(
-                {
-                    "id": f"mlp_{width}",
-                    "family": "mlp",
-                    "params": {
-                        "hidden_layer_sizes": (width,),
-                        "max_iter": mlp_max_epochs,
-                        "balanced_training_subset": True,
-                    },
-                    "fhe_priority": "medium" if width == 8 else "low",
-                    "fhe_note": (
-                        "Architecture screen only; requires QAT retraining before FHE."
-                    ),
-                }
-            )
-    return configs
+def make_model_configs(jobs: int, mlp_max_epochs: int) -> list[dict]:
+    return [
+        {
+            "id": "lr_balanced_c1",
+            "family": "lr",
+            "params": {
+                "C": 1.0,
+                "class_weight": "balanced",
+                "max_iter": 500,
+                "solver": "lbfgs",
+            },
+            "fhe_priority": "high",
+            "fhe_note": "Primary candidate: one linear dot product and stronger regularization.",
+        },
+        {
+            "id": "lr_balanced_c10",
+            "family": "lr",
+            "params": {
+                "C": 10.0,
+                "class_weight": "balanced",
+                "max_iter": 500,
+                "solver": "lbfgs",
+            },
+            "fhe_priority": "high",
+            "fhe_note": "Observed float LR winner; compare quantization loss against C=1.",
+        },
+        {
+            "id": "xgb_d2_n4_natural",
+            "family": "xgb",
+            "params": {
+                "max_depth": 2,
+                "n_estimators": 4,
+                "learning_rate": 0.3,
+                "weighting": "natural",
+            },
+            "fhe_priority": "high",
+            "fhe_note": "Tree fallback: four depth-2 trees bracket the fast forest shape.",
+            "jobs": jobs,
+        },
+        {
+            "id": "mlp_8",
+            "family": "mlp",
+            "params": {
+                "hidden_layer_sizes": (8,),
+                "max_iter": mlp_max_epochs,
+                "balanced_training_subset": True,
+            },
+            "fhe_priority": "medium",
+            "fhe_note": "Quality fallback: retrain as an 8-neuron QAT network.",
+        },
+    ]
 
 
 def instantiate_model(config: dict, class_ratio: float, jobs: int):
@@ -665,6 +728,38 @@ def classification_metrics(
     }
 
 
+def per_label_detection(
+    labels: np.ndarray,
+    scores: np.ndarray,
+    threshold: float,
+    feature_set: str,
+    model_id: str,
+    mode: str,
+    n_bits: int | None = None,
+) -> list[dict[str, Any]]:
+    predictions = scores >= threshold
+    rows: list[dict[str, Any]] = []
+    for label in sorted(np.unique(labels)):
+        mask = labels == label
+        detection_rate = float(predictions[mask].mean())
+        rows.append(
+            {
+                "feature_set": feature_set,
+                "model_id": model_id,
+                "mode": mode,
+                "n_bits": n_bits,
+                "original_label": str(label),
+                "binary_class": "benign" if str(label) == "benign" else "attack",
+                "support": int(mask.sum()),
+                "predicted_attack_rate": detection_rate,
+                "metric_name": (
+                    "false_positive_rate" if str(label) == "benign" else "detection_recall"
+                ),
+            }
+        )
+    return rows
+
+
 def measure_plaintext_latency(model, x_test: np.ndarray) -> dict[str, float]:
     batch_count = min(10_000, len(x_test))
     single_count = min(100, len(x_test))
@@ -693,12 +788,13 @@ def run_one_model(
     y_validation: np.ndarray,
     x_test: np.ndarray,
     y_test: np.ndarray,
+    test_labels: np.ndarray,
     target_f1: float,
     jobs: int,
     run_dir: Path,
     save_models: bool,
     log,
-) -> dict[str, Any]:
+) -> tuple[dict[str, Any], list[dict[str, Any]]]:
     benign_count = int((y_train == 0).sum())
     attack_count = int((y_train == 1).sum())
     class_ratio = benign_count / attack_count
@@ -764,7 +860,274 @@ def run_one_model(
             },
             model_dir / f"{config['id']}.joblib",
         )
-    return result
+    breakdown = per_label_detection(
+        test_labels,
+        test_scores,
+        threshold,
+        feature_set,
+        config["id"],
+        mode="float_plaintext",
+    )
+    return result, breakdown
+
+
+def instantiate_quantized_model(config: dict, n_bits: int, input_dimensions: int, jobs: int):
+    from concrete.ml.sklearn import LogisticRegression as ConcreteLogisticRegression
+    from concrete.ml.sklearn import NeuralNetClassifier as ConcreteNeuralNetClassifier
+    from concrete.ml.sklearn import XGBClassifier as ConcreteXGBClassifier
+
+    params = config["params"]
+    if config["family"] == "lr":
+        return ConcreteLogisticRegression(
+            n_bits=n_bits,
+            C=params["C"],
+            class_weight=params["class_weight"],
+            max_iter=params["max_iter"],
+            solver=params["solver"],
+            n_jobs=jobs,
+            random_state=SEED,
+        )
+    if config["family"] == "xgb":
+        return ConcreteXGBClassifier(
+            n_bits=n_bits,
+            n_estimators=params["n_estimators"],
+            max_depth=params["max_depth"],
+            learning_rate=params["learning_rate"],
+            scale_pos_weight=1.0,
+            objective="binary:logistic",
+            eval_metric="logloss",
+            tree_method="hist",
+            n_jobs=jobs,
+            random_state=SEED,
+            use_label_encoder=False,
+            verbosity=0,
+        )
+
+    # Concrete ML expresses hidden width as an input-dimension multiplier.
+    hidden_width = params["hidden_layer_sizes"][0]
+    return ConcreteNeuralNetClassifier(
+        module__n_layers=2,
+        module__n_hidden_neurons_multiplier=hidden_width / input_dimensions,
+        module__n_w_bits=n_bits,
+        module__n_a_bits=n_bits,
+        module__n_accum_bits=max(16, n_bits * 3),
+        max_epochs=params["max_iter"],
+        batch_size=1024,
+        lr=1e-3,
+        train_split=None,
+        callbacks="disable",
+        verbose=0,
+        device="cpu",
+    )
+
+
+def run_quantized_model(
+    config: dict,
+    n_bits: int,
+    feature_set: str,
+    x_train: np.ndarray,
+    y_train: np.ndarray,
+    x_validation: np.ndarray,
+    y_validation: np.ndarray,
+    x_test: np.ndarray,
+    y_test: np.ndarray,
+    test_labels: np.ndarray,
+    target_f1: float,
+    jobs: int,
+    run_dir: Path,
+    save_models: bool,
+    log,
+) -> tuple[dict[str, Any], list[dict[str, Any]], Any]:
+    model = instantiate_quantized_model(config, n_bits, x_train.shape[1], jobs)
+    fit_x, fit_y = x_train, y_train
+    if config["family"] == "mlp":
+        indices = balanced_training_indices(y_train)
+        fit_x, fit_y = x_train[indices], y_train[indices].astype(np.int64)
+
+    log(
+        f"{feature_set}/{config['id']}/q{n_bits}: fitting Concrete ML "
+        f"quantized-clear model on {len(fit_y):,} rows..."
+    )
+    started = time.perf_counter()
+    model.fit(fit_x, fit_y)
+    fit_seconds = time.perf_counter() - started
+    validation_scores = positive_scores_quantized(model, x_validation)
+    threshold, validation_f1 = choose_f1_threshold(y_validation, validation_scores)
+    test_scores = positive_scores_quantized(model, x_test)
+    default_metrics = classification_metrics(y_test, test_scores, 0.5)
+    tuned_metrics = classification_metrics(y_test, test_scores, threshold)
+
+    result = {
+        "status": "ok",
+        "mode": "quantized_clear",
+        "n_bits": n_bits,
+        "feature_set": feature_set,
+        "model_id": config["id"],
+        "family": config["family"],
+        "input_dimensions": int(x_train.shape[1]),
+        "train_rows": int(len(fit_y)),
+        "fit_seconds": fit_seconds,
+        "selected_threshold": threshold,
+        "validation_f1": validation_f1,
+        "test_f1_default_0_5": default_metrics["f1"],
+        "test_accuracy": tuned_metrics["accuracy"],
+        "test_precision": tuned_metrics["precision"],
+        "test_recall": tuned_metrics["recall"],
+        "test_f1": tuned_metrics["f1"],
+        "test_average_precision": tuned_metrics["average_precision"],
+        "test_roc_auc": tuned_metrics["roc_auc"],
+        "quality_target_met": tuned_metrics["f1"] >= target_f1,
+        "fhe_priority": config["fhe_priority"],
+        "fhe_note": config["fhe_note"],
+    }
+    log(
+        f"{feature_set}/{config['id']}/q{n_bits}: quantized-clear F1="
+        f"{result['test_f1']:.4f}, precision={result['test_precision']:.4f}, "
+        f"recall={result['test_recall']:.4f}, threshold={threshold:.4f}."
+    )
+    if save_models:
+        model_dir = run_dir / "models" / feature_set
+        model_dir.mkdir(parents=True, exist_ok=True)
+        joblib.dump(
+            {
+                "model": model,
+                "threshold": threshold,
+                "config": config,
+                "feature_set": feature_set,
+                "n_bits": n_bits,
+            },
+            model_dir / f"{config['id']}_q{n_bits}.joblib",
+        )
+    breakdown = per_label_detection(
+        test_labels,
+        test_scores,
+        threshold,
+        feature_set,
+        config["id"],
+        mode="quantized_clear",
+        n_bits=n_bits,
+    )
+    return result, breakdown, model
+
+
+def positive_scores_quantized(model, values: np.ndarray) -> np.ndarray:
+    probabilities = np.asarray(model.predict_proba(values, fhe="disable"))
+    if probabilities.ndim != 2 or probabilities.shape[1] < 2:
+        raise ValueError("Expected binary quantized predict_proba output with two columns.")
+    return probabilities[:, 1]
+
+
+def compile_and_benchmark_lr(
+    selected_result: dict[str, Any],
+    model,
+    x_train: np.ndarray,
+    x_test: np.ndarray,
+    y_test: np.ndarray,
+    test_labels: np.ndarray,
+    args: argparse.Namespace,
+    run_dir: Path,
+    log,
+) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    from fhe_latency import measure_fhe_roundtrip
+    from gpu_utils import compile_for_device, save_fhe_model
+
+    model_id = selected_result["model_id"]
+    n_bits = int(selected_result["n_bits"])
+    log(
+        f"Compiling only surviving LR {model_id}/q{n_bits} "
+        f"for requested device={args.device}..."
+    )
+    started = time.perf_counter()
+    _, compiled_device = compile_for_device(
+        model,
+        x_train,
+        device=args.device,
+        log_fn=log,
+        p_error=args.p_error,
+    )
+    compile_seconds = time.perf_counter() - started
+
+    model_dir = run_dir / "fhe" / f"{model_id}_q{n_bits}" / compiled_device
+    save_fhe_model(
+        str(model_dir),
+        model,
+        compiled_device,
+        meta={
+            "model_id": model_id,
+            "n_bits": n_bits,
+            "selected_threshold": selected_result["selected_threshold"],
+            "capture_day_test_f1_quantized_clear": selected_result["test_f1"],
+        },
+    )
+
+    simulation_rows = min(args.fhe_sim_rows, len(x_test))
+    if simulation_rows < len(x_test):
+        _, simulation_indices = train_test_split(
+            np.arange(len(x_test)),
+            test_size=simulation_rows,
+            random_state=SEED,
+            stratify=y_test,
+        )
+    else:
+        simulation_indices = np.arange(len(x_test))
+    simulation_x = x_test[simulation_indices]
+    simulation_y = y_test[simulation_indices]
+    simulation_labels = test_labels[simulation_indices]
+    started = time.perf_counter()
+    simulated_probabilities = np.asarray(
+        model.predict_proba(simulation_x, fhe="simulate")
+    )
+    simulation_seconds = time.perf_counter() - started
+    simulation_scores = simulated_probabilities[:, 1]
+    simulation_metrics = classification_metrics(
+        simulation_y,
+        simulation_scores,
+        selected_result["selected_threshold"],
+    )
+    breakdown = per_label_detection(
+        simulation_labels,
+        simulation_scores,
+        selected_result["selected_threshold"],
+        selected_result["feature_set"],
+        model_id,
+        mode="fhe_simulation",
+        n_bits=n_bits,
+    )
+
+    latency = measure_fhe_roundtrip(
+        str(model_dir),
+        x_test,
+        n_records=args.fhe_records,
+        log_fn=log,
+    )
+    latency_summary = {
+        key: value
+        for key, value in latency.items()
+        if key not in {"encrypt_times", "inference_times", "decrypt_times", "predictions"}
+    }
+    result = {
+        "status": "ok",
+        "feature_set": selected_result["feature_set"],
+        "model_id": model_id,
+        "n_bits": n_bits,
+        "compiled_device": compiled_device,
+        "p_error": args.p_error,
+        "compile_seconds": compile_seconds,
+        "simulation_rows": simulation_rows,
+        "simulation_seconds": simulation_seconds,
+        "simulation_accuracy": simulation_metrics["accuracy"],
+        "simulation_precision": simulation_metrics["precision"],
+        "simulation_recall": simulation_metrics["recall"],
+        "simulation_f1": simulation_metrics["f1"],
+        "selected_threshold": selected_result["selected_threshold"],
+        **latency_summary,
+    }
+    log(
+        f"FHE LR complete: simulation F1={result['simulation_f1']:.4f}, "
+        f"mean inference={result['mean_inference_s']:.4f}s, "
+        f"mean E2E={result['mean_e2e_s']:.4f}s."
+    )
+    return result, breakdown
 
 
 def write_results(results: list[dict], run_dir: Path) -> None:
@@ -772,17 +1135,36 @@ def write_results(results: list[dict], run_dir: Path) -> None:
     write_json(run_dir / "results.json", results)
 
 
+def write_attack_breakdown(rows: list[dict], run_dir: Path) -> None:
+    pd.DataFrame(rows).to_csv(run_dir / "attack_breakdown.csv", index=False)
+    write_json(run_dir / "attack_breakdown.json", rows)
+
+
+def write_quantized_results(results: list[dict], run_dir: Path) -> None:
+    pd.DataFrame(results).to_csv(run_dir / "quantized_results.csv", index=False)
+    write_json(run_dir / "quantized_results.json", results)
+
+
 def write_report(
     results: list[dict],
+    quantized_results: list[dict],
+    attack_rows: list[dict],
+    fhe_results: list[dict],
     run_dir: Path,
     args: argparse.Namespace,
     dataset_summary: dict[str, Any],
 ) -> None:
     successful = pd.DataFrame([row for row in results if row.get("status") == "ok"])
     failed = [row for row in results if row.get("status") != "ok"]
+    quantized_successful = pd.DataFrame(
+        [row for row in quantized_results if row.get("status") == "ok"]
+    )
+    quantized_failed = [
+        row for row in quantized_results if row.get("status") not in {"ok", "not_requested"}
+    ]
     lines = [
-        "CIC-IDS-2018 plaintext FHE-candidate experiment",
-        "=" * 51,
+        "CIC-IDS-2018 shortlisted FHE-candidate experiment",
+        "=" * 54,
         f"Run directory: {run_dir}",
         f"Generated: {dt.datetime.now().astimezone().isoformat()}",
         f"Arguments: {json.dumps(vars(args), sort_keys=True)}",
@@ -795,10 +1177,13 @@ def write_report(
     lines.append(
         f"Quality target: test binary F1 >= {args.target_f1:.3f}. Threshold selected on validation."
     )
+    lines.append("Candidate set: LR C=1, LR C=10, MLP-8, XGB depth-2 with four trees.")
+
+    lines.extend(["", "1. Capture-day holdout", "----------------------"])
     lines.append(
-        "FHE latency target is not asserted here; fhe_priority is a structural screening label."
+        "Complete source days are isolated between train, validation, and test; "
+        "no flow from a held-out day appears in training."
     )
-    lines.extend(["", "Results (sorted by test F1)", "---------------------------"])
     if not successful.empty:
         columns = [
             "feature_set",
@@ -827,31 +1212,127 @@ def write_report(
     else:
         lines.append("No model completed successfully.")
 
-    lines.extend(["", "Recommended FHE follow-up", "-------------------------"])
-    if not successful.empty:
-        candidates = successful[
-            (successful["quality_target_met"] == True)  # noqa: E712
-            & (successful["fhe_priority"].isin(["high", "medium"]))
-        ].sort_values(["fhe_priority", "test_f1"], ascending=[True, False])
-        if candidates.empty:
-            lines.append(
-                "No configuration met both the plaintext quality gate and a high/medium "
-                "structural FHE priority. Do not spend hours compiling these results yet."
-            )
-        else:
-            for _, row in candidates.iterrows():
+    lines.extend(["", "2. Original attack-label detection", "----------------------------------"])
+    breakdown = pd.DataFrame(attack_rows)
+    selected_label = "No successful model was available for per-label reporting."
+    selected_breakdown = pd.DataFrame()
+    if not quantized_successful.empty:
+        lr_rows = quantized_successful[
+            (quantized_successful["family"] == "lr")
+            & (quantized_successful["quality_target_met"] == True)  # noqa: E712
+        ]
+        selected = (
+            lr_rows.sort_values("test_f1", ascending=False).iloc[0]
+            if not lr_rows.empty
+            else quantized_successful.sort_values("test_f1", ascending=False).iloc[0]
+        )
+        selected_label = (
+            f"{selected['feature_set']}/{selected['model_id']}/q{int(selected['n_bits'])}"
+        )
+        selected_breakdown = breakdown[
+            (breakdown["feature_set"] == selected["feature_set"])
+            & (breakdown["model_id"] == selected["model_id"])
+            & (breakdown["mode"] == "quantized_clear")
+            & (breakdown["n_bits"] == selected["n_bits"])
+        ]
+    elif not successful.empty:
+        selected = successful.sort_values("test_f1", ascending=False).iloc[0]
+        selected_label = f"{selected['feature_set']}/{selected['model_id']}"
+        selected_breakdown = breakdown[
+            (breakdown["feature_set"] == selected["feature_set"])
+            & (breakdown["model_id"] == selected["model_id"])
+            & (breakdown["mode"] == "float_plaintext")
+        ]
+    lines.append(f"Selected model for this section: {selected_label}")
+    if not selected_breakdown.empty:
+        label_table = selected_breakdown[
+            ["original_label", "binary_class", "support", "predicted_attack_rate", "metric_name"]
+        ].copy()
+        label_table["predicted_attack_rate"] = label_table["predicted_attack_rate"].map(
+            lambda value: f"{value:.4f}"
+        )
+        lines.append(label_table.to_string(index=False))
+    lines.append(
+        "The complete per-model breakdown is preserved in attack_breakdown.csv/json."
+    )
+
+    lines.extend(["", "3. Concrete ML quantized-clear results", "--------------------------------------"])
+    if args.skip_quantized_clear:
+        lines.append("Not requested (--skip-quantized-clear).")
+    elif quantized_successful.empty:
+        lines.append("No quantized-clear model completed successfully.")
+    else:
+        quantized_columns = [
+            "feature_set",
+            "model_id",
+            "n_bits",
+            "test_f1",
+            "test_precision",
+            "test_recall",
+            "selected_threshold",
+            "test_f1_default_0_5",
+            "quality_target_met",
+        ]
+        quantized_table = quantized_successful.sort_values(
+            ["test_f1", "n_bits"], ascending=[False, True]
+        )[quantized_columns].copy()
+        for column in (
+            "test_f1",
+            "test_precision",
+            "test_recall",
+            "selected_threshold",
+            "test_f1_default_0_5",
+        ):
+            quantized_table[column] = quantized_table[column].map(lambda value: f"{value:.4f}")
+        lines.append(quantized_table.to_string(index=False))
+        lines.append(
+            "Thresholds above are retuned on quantized validation probabilities, then "
+            "evaluated once on the held-out capture-day test split."
+        )
+
+    lines.extend(["", "4. Surviving LR FHE compile and latency", "---------------------------------------"])
+    if not args.compile_fhe:
+        lines.append(
+            "Not requested. Re-run with --compile-fhe to compile only the best "
+            "quantized-clear LR that remains above the F1 gate."
+        )
+    elif not fhe_results:
+        lines.append("No LR survived the quantized quality gate, so no circuit was compiled.")
+    else:
+        for fhe_result in fhe_results:
+            if fhe_result.get("status") != "ok":
                 lines.append(
-                    f"- {row['feature_set']}/{row['model_id']}: F1={row['test_f1']:.4f}, "
-                    f"priority={row['fhe_priority']}. {row['fhe_note']}"
+                    f"{fhe_result.get('model_id', 'LR')}: "
+                    f"{fhe_result.get('status')} — {fhe_result.get('error', '')}"
                 )
-            lines.append(
-                "Before compiling: retrain the selected configuration on the full dataset, "
-                "then verify its quantized clear-mode F1 in Concrete ML."
+                continue
+            lines.extend(
+                [
+                    f"Model: {fhe_result['model_id']} q{fhe_result['n_bits']}",
+                    f"Compiled device: {fhe_result['compiled_device']}",
+                    f"Compile seconds: {fhe_result['compile_seconds']:.1f}",
+                    f"FHE simulation rows: {fhe_result['simulation_rows']}",
+                    f"FHE simulation F1: {fhe_result['simulation_f1']:.4f}",
+                    f"Key generation seconds: {fhe_result['keygen_s']:.4f}",
+                    f"Mean encrypt seconds: {fhe_result['mean_encrypt_s']:.6f}",
+                    f"Mean inference seconds: {fhe_result['mean_inference_s']:.6f}",
+                    f"Mean decrypt seconds: {fhe_result['mean_decrypt_s']:.6f}",
+                    f"Mean end-to-end seconds: {fhe_result['mean_e2e_s']:.6f}",
+                    f"Latency target <=0.7 s: {fhe_result['mean_e2e_s'] <= 0.7}",
+                ]
             )
+
     if failed:
-        lines.extend(["", "Failures", "--------"])
+        lines.extend(["", "Float-model failures", "--------------------"])
         for row in failed:
             lines.append(f"- {row.get('feature_set')}/{row.get('model_id')}: {row.get('error')}")
+    if quantized_failed:
+        lines.extend(["", "Quantized-model failures", "------------------------"])
+        for row in quantized_failed:
+            lines.append(
+                f"- {row.get('feature_set')}/{row.get('model_id')}/"
+                f"q{row.get('n_bits')}: {row.get('error')}"
+            )
 
     lines.extend(["", "Recorded rationale", "------------------"])
     for title, body in RATIONALE:
@@ -873,6 +1354,9 @@ def main() -> int:
     log("No existing model, report, preprocessor, or FHE artifact will be modified.")
 
     results: list[dict] = []
+    quantized_results: list[dict] = []
+    attack_rows: list[dict] = []
+    fhe_results: list[dict] = []
     try:
         sources, needed_columns = discover_sources(args)
         sample = load_streaming_sample(
@@ -882,20 +1366,16 @@ def main() -> int:
             args.chunk_rows,
             log,
         )
-        model_configs = make_model_configs(
-            list(args.families),
-            args.jobs,
-            args.mlp_max_epochs,
-        )
+        model_configs = make_model_configs(args.jobs, args.mlp_max_epochs)
         dataset_summary: dict[str, Any] = {
             "sample_rows_before_feature_cleaning": len(sample),
             "source_files": len(sources),
             "source_rows": sum(count_csv_data_rows(path) for path in sources),
-            "split": (
+            "requested_split_fractions": (
                 f"{1 - args.test_size - args.validation_size:.0%} train / "
                 f"{args.validation_size:.0%} validation / {args.test_size:.0%} test"
             ),
-            "split_strategy": "stratified random binary-label split, seed 42",
+            "split_strategy": args.split_strategy,
         }
 
         for feature_set in args.feature_sets:
@@ -906,14 +1386,20 @@ def main() -> int:
             dataset_summary[f"{feature_set}_benign"] = benign
             dataset_summary[f"{feature_set}_attack"] = attack
 
-            train, validation, test = split_frame(
+            train, validation, test, split_metadata = split_frame(
                 frame,
                 args.test_size,
                 args.validation_size,
+                args.split_strategy,
             )
+            dataset_summary[f"{feature_set}_split"] = split_metadata
+            dataset_summary[f"{feature_set}_train_rows"] = len(train)
+            dataset_summary[f"{feature_set}_validation_rows"] = len(validation)
+            dataset_summary[f"{feature_set}_test_rows"] = len(test)
             y_train = train["binary_label"].to_numpy(dtype=np.int8, copy=True)
             y_validation = validation["binary_label"].to_numpy(dtype=np.int8, copy=True)
             y_test = test["binary_label"].to_numpy(dtype=np.int8, copy=True)
+            test_labels = test["label"].to_numpy(dtype=str, copy=True)
             x_train, x_validation, x_test, transformer = fit_feature_transform(
                 feature_set,
                 train,
@@ -926,7 +1412,7 @@ def main() -> int:
                 dataset_summary[f"{feature_set}_svd_explained_variance"] = transformer[
                     "explained_variance_ratio"
                 ]
-            if args.save_models:
+            if args.save_models or args.compile_fhe:
                 transformer_dir = run_dir / "models" / feature_set
                 transformer_dir.mkdir(parents=True, exist_ok=True)
                 joblib.dump(transformer, transformer_dir / "feature_transformer.joblib")
@@ -934,7 +1420,7 @@ def main() -> int:
             del frame, train, validation, test
             for config in model_configs:
                 try:
-                    result = run_one_model(
+                    result, breakdown = run_one_model(
                         config,
                         feature_set,
                         x_train,
@@ -943,12 +1429,14 @@ def main() -> int:
                         y_validation,
                         x_test,
                         y_test,
+                        test_labels,
                         args.target_f1,
                         args.jobs,
                         run_dir,
                         args.save_models,
                         log,
                     )
+                    attack_rows.extend(breakdown)
                 except Exception as exc:  # Preserve partial results and continue the grid.
                     log(f"{feature_set}/{config['id']} failed: {exc}")
                     result = {
@@ -962,9 +1450,102 @@ def main() -> int:
                     }
                 results.append(result)
                 write_results(results, run_dir)
-            del x_train, x_validation, x_test, y_train, y_validation, y_test
+                write_attack_breakdown(attack_rows, run_dir)
 
-        write_report(results, run_dir, args, dataset_summary)
+            quantized_lr_models: list[tuple[dict[str, Any], Any]] = []
+            if not args.skip_quantized_clear:
+                for config in model_configs:
+                    for n_bits in sorted(set(args.quantized_bits)):
+                        try:
+                            quantized_result, breakdown, quantized_model = run_quantized_model(
+                                config,
+                                n_bits,
+                                feature_set,
+                                x_train,
+                                y_train,
+                                x_validation,
+                                y_validation,
+                                x_test,
+                                y_test,
+                                test_labels,
+                                args.target_f1,
+                                args.jobs,
+                                run_dir,
+                                args.save_models,
+                                log,
+                            )
+                            attack_rows.extend(breakdown)
+                            if config["family"] == "lr":
+                                quantized_lr_models.append((quantized_result, quantized_model))
+                        except Exception as exc:
+                            log(f"{feature_set}/{config['id']}/q{n_bits} failed: {exc}")
+                            quantized_result = {
+                                "status": "failed",
+                                "mode": "quantized_clear",
+                                "n_bits": n_bits,
+                                "feature_set": feature_set,
+                                "model_id": config["id"],
+                                "family": config["family"],
+                                "error": f"{type(exc).__name__}: {exc}",
+                                "traceback": traceback.format_exc(),
+                            }
+                        quantized_results.append(quantized_result)
+                        write_quantized_results(quantized_results, run_dir)
+                        write_attack_breakdown(attack_rows, run_dir)
+
+            if args.compile_fhe and feature_set == "compact_flow":
+                surviving_lr = [
+                    pair
+                    for pair in quantized_lr_models
+                    if pair[0]["quality_target_met"]
+                ]
+                if surviving_lr:
+                    lowest_surviving_bits = min(pair[0]["n_bits"] for pair in surviving_lr)
+                    selected_result, selected_model = max(
+                        (
+                            pair
+                            for pair in surviving_lr
+                            if pair[0]["n_bits"] == lowest_surviving_bits
+                        ),
+                        key=lambda pair: pair[0]["test_f1"],
+                    )
+                    try:
+                        fhe_result, breakdown = compile_and_benchmark_lr(
+                            selected_result,
+                            selected_model,
+                            x_train,
+                            x_test,
+                            y_test,
+                            test_labels,
+                            args,
+                            run_dir,
+                            log,
+                        )
+                        attack_rows.extend(breakdown)
+                    except Exception as exc:
+                        log(f"FHE compile/benchmark failed: {exc}")
+                        fhe_result = {
+                            "status": "failed",
+                            "model_id": selected_result["model_id"],
+                            "n_bits": selected_result["n_bits"],
+                            "error": f"{type(exc).__name__}: {exc}",
+                            "traceback": traceback.format_exc(),
+                        }
+                    fhe_results.append(fhe_result)
+                    write_json(run_dir / "fhe_results.json", fhe_results)
+                    write_attack_breakdown(attack_rows, run_dir)
+
+            del x_train, x_validation, x_test, y_train, y_validation, y_test, test_labels
+
+        write_report(
+            results,
+            quantized_results,
+            attack_rows,
+            fhe_results,
+            run_dir,
+            args,
+            dataset_summary,
+        )
         write_json(
             run_dir / "status.json",
             {
@@ -972,12 +1553,22 @@ def main() -> int:
                 "finished": dt.datetime.now().astimezone().isoformat(),
                 "successful_models": sum(row.get("status") == "ok" for row in results),
                 "failed_models": sum(row.get("status") != "ok" for row in results),
+                "successful_quantized_models": sum(
+                    row.get("status") == "ok" for row in quantized_results
+                ),
+                "failed_quantized_models": sum(
+                    row.get("status") != "ok" for row in quantized_results
+                ),
+                "fhe_models_compiled": sum(row.get("status") == "ok" for row in fhe_results),
             },
         )
         log(f"Experiment complete. Read {run_dir / 'report.txt'}")
         return 0
     except Exception as exc:
         write_results(results, run_dir)
+        write_quantized_results(quantized_results, run_dir)
+        write_attack_breakdown(attack_rows, run_dir)
+        write_json(run_dir / "fhe_results.json", fhe_results)
         write_json(
             run_dir / "status.json",
             {
