@@ -1,0 +1,38 @@
+[2026-10-30T01:03:18-03:00] New isolated anomaly run: anomaly_experiment_runs/20261030_010318_212531
+[2026-10-30T01:03:18-03:00] Existing supervised reports and model artifacts will not be modified.
+[2026-10-30T01:03:18-03:00] Counting source rows to set an unbiased streaming sampling probability...
+[2026-10-30T01:03:23-03:00] Source rows: 16,233,002; sampling probability: 0.061603; requested target: 1,000,000.
+[2026-10-30T01:03:23-03:00] Reading source 1/10: CIC-IDS-2018/Friday-02-03-2018_TrafficForML_CICFlowMeter.csv
+[2026-10-30T01:03:27-03:00] Sample accumulated: 64,158 rows.
+[2026-10-30T01:03:27-03:00] Reading source 2/10: CIC-IDS-2018/Friday-16-02-2018_TrafficForML_CICFlowMeter.csv
+[2026-10-30T01:03:32-03:00] Sample accumulated: 128,856 rows.
+[2026-10-30T01:03:32-03:00] Reading source 3/10: CIC-IDS-2018/Friday-23-02-2018_TrafficForML_CICFlowMeter.csv
+[2026-10-30T01:03:37-03:00] Sample accumulated: 193,378 rows.
+[2026-10-30T01:03:37-03:00] Reading source 4/10: CIC-IDS-2018/Thuesday-20-02-2018_TrafficForML_CICFlowMeter.csv
+[2026-10-30T01:04:22-03:00] Sample accumulated: 683,047 rows.
+[2026-10-30T01:04:22-03:00] Reading source 5/10: CIC-IDS-2018/Thursday-01-03-2018_TrafficForML_CICFlowMeter.csv
+[2026-10-30T01:04:24-03:00] Sample accumulated: 703,256 rows.
+[2026-10-30T01:04:24-03:00] Reading source 6/10: CIC-IDS-2018/Thursday-15-02-2018_TrafficForML_CICFlowMeter.csv
+[2026-10-30T01:04:29-03:00] Sample accumulated: 767,866 rows.
+[2026-10-30T01:04:29-03:00] Reading source 7/10: CIC-IDS-2018/Thursday-22-02-2018_TrafficForML_CICFlowMeter.csv
+[2026-10-30T01:04:34-03:00] Sample accumulated: 832,181 rows.
+[2026-10-30T01:04:34-03:00] Reading source 8/10: CIC-IDS-2018/Wednesday-14-02-2018_TrafficForML_CICFlowMeter.csv
+[2026-10-30T01:04:38-03:00] Sample accumulated: 896,985 rows.
+[2026-10-30T01:04:38-03:00] Reading source 9/10: CIC-IDS-2018/Wednesday-21-02-2018_TrafficForML_CICFlowMeter.csv
+[2026-10-30T01:04:42-03:00] Sample accumulated: 961,220 rows.
+[2026-10-30T01:04:42-03:00] Reading source 10/10: CIC-IDS-2018/Wednesday-28-02-2018_TrafficForML_CICFlowMeter.csv
+[2026-10-30T01:04:47-03:00] Sample accumulated: 998,764 rows.
+[2026-10-30T01:04:48-03:00] Loaded unbiased sample with 998,764 rows.
+[2026-10-30T01:05:46-03:00] Clean compact-flow sample: 992,845 rows (5,919 removed for invalid features).
+[2026-10-30T01:05:50-03:00] PCA-8: best test F1=0.8380.
+[2026-10-30T01:05:53-03:00] PCA-16: best test F1=0.8173.
+[2026-10-30T01:05:56-03:00] PCA-32: best test F1=0.8538.
+[2026-10-30T01:05:56-03:00] standard_benign_distance: best test F1=0.8523.
+[2026-10-30T01:05:58-03:00] robust_benign_distance: best test F1=0.0078.
+[2026-10-30T01:05:59-03:00] KMeans-1: best test F1=0.0264.
+[2026-10-30T01:06:00-03:00] KMeans-4: best test F1=0.0352.
+[2026-10-30T01:06:39-03:00] known_lr_c1/float_plaintext: test F1=0.8999, precision=0.9906, recall=0.8244.
+[2026-10-30T01:07:15-03:00] known_lr_c1/concrete_quantized_5bit: test F1=0.9083, precision=0.9769, recall=0.8488.
+[2026-10-30T01:07:52-03:00] known_lr_c10/float_plaintext: test F1=0.8998, precision=0.9901, recall=0.8246.
+[2026-10-30T01:08:36-03:00] known_lr_c10/concrete_quantized_5bit: test F1=0.8968, precision=0.9861, recall=0.8223.
+[2026-10-30T01:08:36-03:00] Experiment complete. Read anomaly_experiment_runs/20261030_010318_212531/report.txt
