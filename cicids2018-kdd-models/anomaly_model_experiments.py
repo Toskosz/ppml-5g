@@ -11,12 +11,14 @@ model or report:
    blocks to train/validation/test.
 
 Every invocation creates a new timestamped directory under
-``anomaly_experiment_runs/``.
+``anomaly_experiment_runs/``. This script does not compile a circuit.
 
 Run from this directory:
 
-    python anomaly_model_experiments.py
-    python anomaly_model_experiments.py --sample-rows 0
+    python anomaly_model_experiments.py --sample-rows 2000000
+
+FHE compilation and the 100-record latency measurement for every qualified
+model are ``qualified_fhe_benchmark.py``.
 """
 
 from __future__ import annotations
