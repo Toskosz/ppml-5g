@@ -4,6 +4,10 @@
 
 FHE-based Random Forest classifiers for 5G/O-RAN network intrusion detection, built on [Zama Concrete ML](https://github.com/zama-ai/concrete-ml). Two model families train on public IDS datasets and compile to FHE circuits for encrypted inference.
 
+## Agent environment
+
+Training, FHE compilation, and inference run on another machine. This workspace does not have the dataset or the Concrete ML runtime. Do not install dependencies and do not run the experiment scripts. Change the script, document the command in `STATUS.md`, and leave execution to that machine.
+
 ## Setup
 
 ```bash
@@ -39,6 +43,8 @@ python cicunswnb15-models/single_record_inference.py
 ```
 
 FHE circuit compilation for large models (many estimators / deep trees) can take hours.
+
+The current CIC-IDS-2018 latency step is `cicids2018-kdd-models/qualified_fhe_benchmark.py`. Run it on the dataset machine. The command and pass rule are in `STATUS.md`.
 
 ## Datasets
 
