@@ -130,31 +130,65 @@ Decision made on 2026-10-30:
 - Any resulting claim must say **Bot detection** or list the explicitly
   supported attack families, not “general anomaly detection.”
 
-The latest committed anomaly run is commit `012aac3` and used 1,987,045 clean
-sampled flows:
+The pre-correction two-million-row run is commit `012aac3`:
 
 `anomaly_experiment_runs/20261030_234551_431460/`
 
-PCA-32 at the 1% validation benign-FPR threshold produced:
+That report has no scoped Bot-vs-benign columns. Its known-family splitter
+assigned blocks independently per label, and Infiltration remained inside the
+known-family model. Leave its known-family F1 of 0.9058 out of current claims.
 
-- Bot recall: 98.45%.
-- Future benign false-positive rate: 0.45%.
-- Approximate Bot-vs-benign precision after excluding Infiltration: 98.44%.
-- Approximate Bot-vs-benign F1 after excluding Infiltration: 98.45%.
+The corrected run is commit `7658050`:
 
-These values closely reproduce the one-million-row run, but both samples use
-the same seed and capture environment. This establishes sample-size stability,
-not independent-session replication. An independent Bot capture is still
-needed before claiming general botnet detection.
+`anomaly_experiment_runs/20261031_004057_494668/`
 
-The same run also found:
+It uses the same 1,987,045-row sample and seed as `012aac3`. Two other
+directories in that commit did not finish. `20261030_233818_174372` loaded all
+16,233,002 rows and stopped. `20261031_003425_468997` stopped after cleaning
+the two-million-row sample.
 
-- Standard benign distance: aggregate F1 0.8524 with a 0.48% future benign
-  false-positive rate. Its exact scoped Bot-vs-benign metrics were not included
-  in the report, so the corrected experiment must confirm them before FHE work.
-- Known-family Concrete ML 5-bit LR C=10: aggregate F1 0.9058 and Bot recall
-  100%. The old splitter assigned blocks independently per label, so this result
-  must be replaced by the corrected globally disjoint block split.
+Corrected unknown-anomaly results at the 1% validation benign-FPR threshold,
+with Infiltration removed from the score:
+
+- PCA-32: Bot-vs-benign F1 0.9845, Bot recall 0.9845, future benign
+  false-positive rate 0.45%. Infiltration recall on the same days is 3.85%.
+  Unscoped test F1 remains 0.8534 because that score still includes
+  Infiltration.
+- Standard benign distance: Bot-vs-benign F1 0.9840, Bot recall 0.9845,
+  future benign false-positive rate 0.48%. Infiltration recall is 3.49%.
+
+PCA-8, PCA-16, robust distance, and both k-means models miss Bot at the 1%
+budget. The 5% budget recovers Bot recall near 98.5% for PCA and standard
+distance, with future benign false-positive rates of 4.0–4.8%.
+
+Corrected known-family logistic regression, using one global 30-minute block
+assignment. `cross_split_block_overlap_count` is 0. Infiltration's 14 blocks
+are excluded:
+
+- Float C=10 F1 0.9926. Float C=1 F1 0.9918.
+- Concrete ML 5-bit clear C=1 F1 0.9761. C=10 F1 0.9747.
+
+The printed per-label table is float C=10. Of 23,983 attack test rows, 18,864
+are DDoS LOIC-HTTP (recall 99.78%). Bot support in that split is 2,001 rows,
+all detected. FTP brute force (2,493) and SSH brute force (605) are fully
+detected. Web brute force, XSS, and SQL injection have 14, 5, and 1 test rows.
+The 5-bit per-label false-positive rate was absent from that report. The
+latency benchmark records it for both compiled logistic regressions.
+
+This sample repeats the earlier two-million-row draw. It confirms the corrected
+metrics on that draw. An independent Bot capture is still required before
+claiming botnet detection beyond this dataset.
+
+Quality gates from the corrected run:
+
+1. Scoped Bot-vs-benign F1 >= 0.70: pass.
+2. Bot recall >= 0.70: pass.
+3. Future benign false-positive rate <= 1% at the 1% threshold: pass for
+   PCA-32 and standard benign distance.
+4. Known-family logistic regression F1 >= 0.70 on disjoint blocks: pass,
+   including 5-bit clear mode.
+5. Infiltration reported separately and excluded from known-family fitting:
+   pass.
 
 ## Current scripts
 
@@ -176,7 +210,9 @@ quantized-clear tests, and gated LR compilation. Every invocation creates a
 new microsecond-timestamped directory under `plaintext_experiment_runs/`; old
 reports are not overwritten.
 
-Use `--no-compile-fhe` for validation-only runs.
+Use `--no-compile-fhe` for validation-only runs. Its `--compile-fhe` path
+uses the capture-day split, whose supervised models failed. It is not the
+known-family latency run.
 
 ### `anomaly_model_experiments.py`
 
@@ -184,8 +220,9 @@ Location:
 
 `cicids2018-kdd-models/anomaly_model_experiments.py`
 
-This is the next experiment. It is separate from the existing supervised
-trainer and writes unique runs under `anomaly_experiment_runs/`.
+This is the quality experiment. It is separate from the existing supervised
+trainer and writes unique runs under `anomaly_experiment_runs/`. The corrected
+two-million-row run has already passed the quality gates above.
 
 Unknown-anomaly protocol:
 
@@ -211,54 +248,70 @@ Known-family protocol:
 - Test LR C=1 and C=10 in float and Concrete ML 5-bit clear mode.
 - Report labels excluded because they do not have enough independent blocks.
 
-This script deliberately does not compile FHE circuits. A circuit is justified
-only after a candidate passes quality and false-positive gates.
+This script deliberately does not compile FHE circuits. The latency benchmark
+for every qualified model is `qualified_fhe_benchmark.py`.
+
+### `qualified_fhe_benchmark.py`
+
+Location:
+
+`cicids2018-kdd-models/qualified_fhe_benchmark.py`
+
+Benchmarks the four models that passed
+`anomaly_experiment_runs/20261031_004057_494668`:
+
+- `standard_benign_distance` at the 1% validation benign-FPR threshold.
+- `pca_reconstruction_32` at that same threshold.
+- `known_lr_c1` and `known_lr_c10` at 5 bits.
+
+Distance and PCA are custom arithmetic circuits. The logistic regressions use
+Concrete ML. The report is rewritten after each model. `--only` repeats a
+subset. `--sample-rows 0` is refused. Each run writes a new directory under
+`qualified_fhe_runs/`.
+
+End-to-end latency is the mean of encrypt + inference + decrypt. One-time key
+generation is reported separately and is outside that mean.
+
+A distance or PCA circuit passes when all of these hold:
+
+- Quantized-clear scoped Bot F1 and Bot recall are >= 0.70.
+- Quantized-clear future benign false-positive rate is <= 1%.
+- Simulation scoped Bot F1 and Bot recall are >= 0.70.
+- Mean end-to-end latency on 100 records is <= 0.70 seconds.
+
+A logistic regression passes when clear test F1 and simulation F1 are >= 0.70
+and mean end-to-end latency is <= 0.70 seconds. On the corrected quality run
+that test mass was mostly DDoS LOIC-HTTP, plus Bot, FTP brute force, and SSH
+brute force.
+
+The default 2,000,000-row sample should reproduce float Bot F1 near 0.9840
+for distance and 0.9845 for PCA-32, and clear 5-bit test F1 near 0.9761 for
+`known_lr_c1` and 0.9747 for `known_lr_c10`. Those matches are recorded. The
+pass/fail decision uses the compiled circuit.
 
 ## Next action
 
-From the model directory:
+Run this on the machine that has the CIC-IDS-2018 CSVs and Concrete ML. Do
+not run it in the agent workspace.
 
 ```bash
 cd cicids2018-kdd-models
-python anomaly_model_experiments.py --sample-rows 2000000
+python qualified_fhe_benchmark.py --device auto
 ```
 
-Do not run `--sample-rows 0` with the current implementation under the 20 GiB
-RAM cap. It materializes all 16.2 million rows. First make full-data processing
-chunked/memory-mapped, or use a 3–5 million-row intermediate sample.
+Read `qualified_fhe_runs/<timestamp>/report.txt`. Describe a passing logistic
+regression as known-family detection. Describe a passing distance or PCA
+circuit as Bot detection against future benign traffic.
 
-The corrected rerun must confirm:
-
-- Scoped Bot-vs-benign metrics for standard benign distance.
-- `cross_split_block_overlap_count: 0` for known-family LR.
-- Infiltration is absent from known-family fitting and metrics.
-
-Decision gates:
-
-1. Bot-vs-benign F1 must remain >= 0.70 after excluding Infiltration.
-2. Bot recall must remain >= 0.70.
-3. Future benign false-positive rate must remain <= 1%.
-4. Known-family LR must reach F1 >= 0.70 on separate time blocks.
-5. Report Infiltration separately as unsupported/out of scope; never relabel it
-   as benign.
-6. Only after passing:
-   - Compile a known-family LR through Concrete ML, or
-   - Implement a custom arithmetic FHE circuit for the winning PCA/distance
-     score.
-7. Measure 100 real encrypt/inference/decrypt records and require mean
-   end-to-end latency <= 0.70 s.
-
-If both protocols fail, the next options are feature refinement, a small
-benign-only quantized autoencoder, or an additional dataset that supports
-independent sessions for the same attack families.
+Full-data loading remains unsafe under the 20 GiB RAM cap.
+`anomaly_model_experiments.py --sample-rows 0` materializes all 16.2 million
+rows.
 
 ## Repository state at handoff
 
 - Existing result directories and reports have been preserved.
-- `anomaly_model_experiments.py` now computes explicit scoped Bot-vs-benign
-  metrics, excludes Infiltration from known-family LR, and enforces globally
-  disjoint 30-minute blocks.
-- The corrected script has passed Python syntax and IDE lint checks.
-- The corrected two-million-row VM rerun is pending.
-- The external CIC-IDS-2018 CSV files are required to execute experiments and
+- The corrected two-million-row quality run is complete and passes gates 1–5.
+- `qualified_fhe_benchmark.py` times all four qualified models. It has not
+  been run.
+- Experiments are executed outside this workspace. The CIC-IDS-2018 CSV files
   are not stored in the repository.
