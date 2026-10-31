@@ -83,17 +83,21 @@ RATIONALE = [
     (
         "Known-family baseline",
         "A separate LR baseline includes only labels with at least three distinct "
-        "time blocks. Whole blocks, rather than rows, are assigned to splits. This "
-        "tests recognition of previously seen attack families without claiming "
+        "time blocks. Every complete block has one global split assignment, so "
+        "benign and attack rows from the same period cannot cross splits. This tests "
+        "recognition of previously seen supported attack families without claiming "
         "unknown-attack detection.",
     ),
     (
         "FHE gate",
-        "This script does not compile circuits. Compilation is justified only if a "
-        "candidate clears F1 >= 0.70 while respecting its benign false-positive "
-        "budget on the stricter test protocol.",
+        "This script does not compile circuits. An anomaly candidate qualifies only "
+        "with scoped Bot-vs-benign F1 and Bot recall >= 0.70 plus future benign FPR "
+        "<= 1%. Known-family metrics exclude unsupported Infiltration traffic.",
     ),
 ]
+
+SCOPED_UNKNOWN_ATTACK_LABELS = ("bot",)
+UNSUPPORTED_LABELS = {"infilteration"}
 
 
 def parse_args() -> argparse.Namespace:
@@ -294,6 +298,19 @@ def evaluate_anomaly_scores(
     for target_fpr in target_fprs:
         threshold = threshold_from_benign(score_validation, validation_y, target_fpr)
         metrics = classification_metrics(test_y, score_test, threshold)
+        scoped_mask = np.isin(
+            test_labels,
+            ("benign", *SCOPED_UNKNOWN_ATTACK_LABELS),
+        )
+        scoped_y = np.isin(
+            test_labels[scoped_mask],
+            SCOPED_UNKNOWN_ATTACK_LABELS,
+        ).astype(np.int8)
+        scoped_metrics = classification_metrics(
+            scoped_y,
+            score_test[scoped_mask],
+            threshold,
+        )
         actual_fpr = float((score_test[test_y == 0] >= threshold).mean())
         result = {
             "protocol": "unknown_anomaly_capture_day",
@@ -307,6 +324,15 @@ def evaluate_anomaly_scores(
             "test_average_precision": metrics["average_precision"],
             "test_roc_auc": metrics["roc_auc"],
             "test_benign_fpr": actual_fpr,
+            "scoped_attack_labels": ",".join(SCOPED_UNKNOWN_ATTACK_LABELS),
+            "scoped_test_rows": int(scoped_mask.sum()),
+            "bot_vs_benign_test_precision": scoped_metrics["precision"],
+            "bot_vs_benign_test_recall": scoped_metrics["recall"],
+            "bot_vs_benign_test_f1": scoped_metrics["f1"],
+            "bot_vs_benign_test_average_precision": scoped_metrics[
+                "average_precision"
+            ],
+            "bot_vs_benign_test_roc_auc": scoped_metrics["roc_auc"],
             "fit_seconds": fit_seconds,
             "fhe_note": fhe_note,
         }
@@ -462,11 +488,21 @@ def build_known_family_split(
     valid["block_id"] = (
         valid["source_day"].astype(str) + "|" + valid["time_block"].astype(str)
     )
-    assignment = pd.Series(index=valid.index, dtype="object")
+    label_block_counts = (
+        valid.groupby("label", observed=True)["block_id"].nunique().to_dict()
+    )
+    scope_excluded = {
+        label: int(label_block_counts[label])
+        for label in sorted(UNSUPPORTED_LABELS.intersection(label_block_counts))
+    }
+    valid = valid.loc[~valid["label"].isin(UNSUPPORTED_LABELS)].copy()
+
     excluded: dict[str, int] = {}
     included: dict[str, int] = {}
-
-    for label, label_frame in valid.groupby("label", observed=True):
+    included_label_blocks: dict[str, list[str]] = {}
+    attack_labels = valid.loc[valid["label"] != "benign", "label"].unique()
+    for label in sorted(attack_labels):
+        label_frame = valid.loc[valid["label"] == label]
         blocks = (
             label_frame.groupby("block_id", observed=True)["capture_timestamp"]
             .min()
@@ -476,35 +512,157 @@ def build_known_family_split(
         if len(blocks) < 3:
             excluded[str(label)] = len(blocks)
             continue
-        test_count = max(1, round(len(blocks) * 0.15))
-        validation_count = max(1, round(len(blocks) * 0.15))
-        if test_count + validation_count >= len(blocks):
-            excluded[str(label)] = len(blocks)
-            continue
-        train_blocks = blocks[: -(test_count + validation_count)]
-        validation_blocks = blocks[-(test_count + validation_count) : -test_count]
-        test_blocks = blocks[-test_count:]
-        assignment.loc[
-            label_frame.index[label_frame["block_id"].isin(train_blocks)]
-        ] = "train"
-        assignment.loc[
-            label_frame.index[label_frame["block_id"].isin(validation_blocks)]
-        ] = "validation"
-        assignment.loc[
-            label_frame.index[label_frame["block_id"].isin(test_blocks)]
-        ] = "test"
         included[str(label)] = len(blocks)
+        included_label_blocks[str(label)] = blocks
 
+    block_times = (
+        valid.groupby("block_id", observed=True)["capture_timestamp"].min().to_dict()
+    )
+    block_assignment: dict[str, str] = {}
+    required_splits = {"train", "validation", "test"}
+
+    def split_coverage(label: str, candidate: tuple[str, str] | None = None) -> set[str]:
+        coverage = {
+            block_assignment[block_id]
+            for block_id in included_label_blocks[label]
+            if block_id in block_assignment
+        }
+        if candidate is not None and candidate[0] in included_label_blocks[label]:
+            coverage.add(candidate[1])
+        return coverage
+
+    def assignment_is_feasible(block_id: str, split_name: str) -> bool:
+        for label, label_blocks in included_label_blocks.items():
+            coverage = split_coverage(label, (block_id, split_name))
+            missing_count = len(required_splits - coverage)
+            available_count = sum(
+                candidate_block not in block_assignment and candidate_block != block_id
+                for candidate_block in label_blocks
+            )
+            if available_count < missing_count:
+                return False
+        return True
+
+    def assign_covering_blocks(split_name: str, prefer_latest: bool) -> None:
+        while True:
+            uncovered = {
+                label
+                for label in included_label_blocks
+                if split_name not in split_coverage(label)
+            }
+            if not uncovered:
+                return
+            candidates = {
+                block_id
+                for label in uncovered
+                for block_id in included_label_blocks[label]
+                if block_id not in block_assignment
+                and assignment_is_feasible(block_id, split_name)
+            }
+            if not candidates:
+                raise ValueError(
+                    f"Could not create a globally disjoint '{split_name}' block "
+                    f"cover for labels: {sorted(uncovered)}"
+                )
+
+            def candidate_key(block_id: str) -> tuple[int, int, str]:
+                coverage_count = sum(
+                    block_id in included_label_blocks[label] for label in uncovered
+                )
+                timestamp_value = int(block_times[block_id].value)
+                time_rank = -timestamp_value if prefer_latest else timestamp_value
+                return (-coverage_count, time_rank, block_id)
+
+            selected = min(candidates, key=candidate_key)
+            block_assignment[selected] = split_name
+
+    assign_covering_blocks("train", prefer_latest=False)
+    assign_covering_blocks("test", prefer_latest=True)
+    assign_covering_blocks("validation", prefer_latest=True)
+
+    attack_blocks = {
+        block_id
+        for label_blocks in included_label_blocks.values()
+        for block_id in label_blocks
+    }
+    for block_id in attack_blocks:
+        block_assignment.setdefault(block_id, "train")
+
+    all_blocks = (
+        valid.groupby("block_id", observed=True)["capture_timestamp"]
+        .min()
+        .sort_values()
+        .index.tolist()
+    )
+    remaining_blocks = [
+        block_id for block_id in all_blocks if block_id not in block_assignment
+    ]
+    test_count = max(1, round(len(remaining_blocks) * 0.15))
+    validation_count = max(1, round(len(remaining_blocks) * 0.15))
+    remaining_split = {
+        "train": remaining_blocks[: -(test_count + validation_count)],
+        "validation": remaining_blocks[
+            -(test_count + validation_count) : -test_count
+        ],
+        "test": remaining_blocks[-test_count:],
+    }
+    for split_name, split_blocks in remaining_split.items():
+        block_assignment.update(dict.fromkeys(split_blocks, split_name))
+
+    included_labels = {"benign", *included}
+    valid = valid.loc[valid["label"].isin(included_labels)].copy()
+    assignment = valid["block_id"].map(block_assignment)
     train = valid.loc[assignment == "train"].copy()
     validation = valid.loc[assignment == "validation"].copy()
     test = valid.loc[assignment == "test"].copy()
+
+    block_sets = {
+        "train": set(train["block_id"]),
+        "validation": set(validation["block_id"]),
+        "test": set(test["block_id"]),
+    }
+    overlap_count = sum(
+        len(block_sets[left].intersection(block_sets[right]))
+        for left, right in (
+            ("train", "validation"),
+            ("train", "test"),
+            ("validation", "test"),
+        )
+    )
+    if overlap_count:
+        raise AssertionError("Known-family split contains cross-split block overlap.")
+
     for split_name, split in (("train", train), ("validation", validation), ("test", test)):
         if split["binary_label"].nunique() != 2:
             raise ValueError(f"Known-family {split_name} split lacks one binary class.")
+    for label in sorted(included_labels):
+        observed_splits = {
+            split_name
+            for split_name, split in (
+                ("train", train),
+                ("validation", validation),
+                ("test", test),
+            )
+            if (split["label"] == label).any()
+        }
+        if observed_splits != {"train", "validation", "test"}:
+            raise ValueError(
+                f"Known-family label '{label}' is missing from splits: "
+                f"{sorted({'train', 'validation', 'test'} - observed_splits)}"
+            )
+
+    included["benign"] = int(
+        valid.loc[valid["label"] == "benign", "block_id"].nunique()
+    )
     return train, validation, test, {
         "block_minutes": block_minutes,
         "included_label_block_counts": included,
         "excluded_label_block_counts": excluded,
+        "scope_excluded_label_block_counts": scope_excluded,
+        "global_split_block_counts": {
+            split_name: len(block_ids) for split_name, block_ids in block_sets.items()
+        },
+        "cross_split_block_overlap_count": overlap_count,
         "rows_without_parseable_timestamp": int(frame["capture_timestamp"].isna().sum()),
     }
 
@@ -654,6 +812,9 @@ def format_result_table(frame: pd.DataFrame, columns: list[str]) -> str:
         "test_f1",
         "test_precision",
         "test_recall",
+        "bot_vs_benign_test_f1",
+        "bot_vs_benign_test_precision",
+        "bot_vs_benign_test_recall",
         "threshold",
         "fit_seconds",
     ):
@@ -691,7 +852,7 @@ def write_report(
         lines.append("No unknown-anomaly candidate completed.")
     else:
         ranked = unknown.sort_values(
-            ["test_f1", "test_benign_fpr"],
+            ["bot_vs_benign_test_f1", "test_benign_fpr"],
             ascending=[False, True],
         )
         lines.append(
@@ -704,6 +865,9 @@ def write_report(
                     "test_f1",
                     "test_precision",
                     "test_recall",
+                    "bot_vs_benign_test_f1",
+                    "bot_vs_benign_test_precision",
+                    "bot_vs_benign_test_recall",
                     "fit_seconds",
                     "fhe_note",
                 ],
@@ -711,9 +875,11 @@ def write_report(
         )
         best = ranked.iloc[0]
         lines.append(
-            f"Best unknown-anomaly candidate: {best['model_id']} at validation "
+            f"Best scoped Bot-vs-benign candidate: {best['model_id']} at validation "
             f"FPR target {best['target_validation_benign_fpr']:.1%}; "
-            f"test F1={best['test_f1']:.4f}, test benign FPR={best['test_benign_fpr']:.4f}."
+            f"scoped test F1={best['bot_vs_benign_test_f1']:.4f}, "
+            f"Bot recall={best['bot_vs_benign_test_recall']:.4f}, "
+            f"test benign FPR={best['test_benign_fpr']:.4f}."
         )
 
     lines.extend(["", "2. Known-family time-block LR results", "-------------------------------------"])
@@ -741,13 +907,21 @@ def write_report(
     breakdown_frame = pd.DataFrame(breakdown)
     selections: list[tuple[str, str]] = []
     if not unknown.empty:
-        best = unknown.sort_values("test_f1", ascending=False).iloc[0]
+        best = unknown.sort_values("bot_vs_benign_test_f1", ascending=False).iloc[0]
         selections.append(
             (
                 best["model_id"],
                 f"unknown_anomaly_fpr_{best['target_validation_benign_fpr']:g}",
             )
         )
+        standard_at_one_percent = unknown.loc[
+            (unknown["model_id"] == "standard_benign_distance")
+            & (unknown["target_validation_benign_fpr"] == 0.01)
+        ]
+        if not standard_at_one_percent.empty:
+            selections.append(
+                ("standard_benign_distance", "unknown_anomaly_fpr_0.01")
+            )
     if not known.empty:
         best_known = known.sort_values("test_f1", ascending=False).iloc[0]
         selections.append((best_known["model_id"], best_known["mode"]))
@@ -773,11 +947,9 @@ def write_report(
     lines.extend(["", "4. FHE decision", "---------------"])
     passing_unknown = (
         unknown.loc[
-            (unknown["test_f1"] >= args.target_f1)
-            & (
-                unknown["test_benign_fpr"]
-                <= unknown["target_validation_benign_fpr"] * 1.5
-            )
+            (unknown["bot_vs_benign_test_f1"] >= args.target_f1)
+            & (unknown["bot_vs_benign_test_recall"] >= args.target_f1)
+            & (unknown["test_benign_fpr"] <= 0.01)
         ]
         if not unknown.empty
         else pd.DataFrame()

@@ -1,6 +1,6 @@
 # PPML-5G experiment status
 
-Updated: 2026-10-30
+Updated: 2026-10-31
 
 ## Objective
 
@@ -8,6 +8,12 @@ Find a binary CIC-IDS-2018 model that classifies **anomaly vs benign** with:
 
 - F1 score greater than 0.70.
 - Real FHE end-to-end single-record latency no greater than 0.70 seconds.
+
+Current scope decision: CIC-IDS-2018 `infilteration`/Infiltration traffic is
+out of scope. It must be excluded from scoped evaluation, not relabeled as
+benign. The primary held-out claim under evaluation is therefore Bot detection
+against future benign traffic. Results must not be described as general
+anomaly detection.
 
 Do not use row-random validation as final evidence. It mixes flows from the
 same capture days and attack sessions across train and test.
@@ -57,7 +63,7 @@ are much more informative than the original seven-field/SVD representation.
 
 ## Capture-day validation: all supervised candidates failed
 
-Latest committed results:
+Committed supervised holdout results:
 
 - Commit: `17025a2` (`more results`).
 - Run:
@@ -112,6 +118,44 @@ Two threat models must be evaluated separately:
 2. **Unknown-anomaly detection:** fitting does not use the held-out attack
    families; the model must identify deviations from benign traffic.
 
+## Scope decision: exclude Infiltration
+
+Decision made on 2026-10-30:
+
+- Infiltration is not a supported attack type for the current project scope.
+- `infilteration` rows (the source dataset spelling) must be removed from
+  scoped quality metrics.
+- They must not be counted as benign or used to make the supported model look
+  better.
+- Any resulting claim must say **Bot detection** or list the explicitly
+  supported attack families, not “general anomaly detection.”
+
+The latest committed anomaly run is commit `012aac3` and used 1,987,045 clean
+sampled flows:
+
+`anomaly_experiment_runs/20261030_234551_431460/`
+
+PCA-32 at the 1% validation benign-FPR threshold produced:
+
+- Bot recall: 98.45%.
+- Future benign false-positive rate: 0.45%.
+- Approximate Bot-vs-benign precision after excluding Infiltration: 98.44%.
+- Approximate Bot-vs-benign F1 after excluding Infiltration: 98.45%.
+
+These values closely reproduce the one-million-row run, but both samples use
+the same seed and capture environment. This establishes sample-size stability,
+not independent-session replication. An independent Bot capture is still
+needed before claiming general botnet detection.
+
+The same run also found:
+
+- Standard benign distance: aggregate F1 0.8524 with a 0.48% future benign
+  false-positive rate. Its exact scoped Bot-vs-benign metrics were not included
+  in the report, so the corrected experiment must confirm them before FHE work.
+- Known-family Concrete ML 5-bit LR C=10: aggregate F1 0.9058 and Bot recall
+  100%. The old splitter assigned blocks independently per label, so this result
+  must be replaced by the corrected globally disjoint block split.
+
 ## Current scripts
 
 ### `plaintext_model_experiments.py`
@@ -148,6 +192,8 @@ Unknown-anomaly protocol:
 - Fit preprocessing and models using benign training traffic only.
 - Select thresholds using only benign traffic from later validation days.
 - Test on complete future capture days containing Bot and Infiltration.
+  Existing reports retain both labels for scientific traceability; scoped
+  Bot metrics must exclude Infiltration explicitly.
 - Evaluate thresholds targeting 1% and 5% benign false-positive rates.
 - Models:
   - PCA reconstruction error with 8, 16, and 32 components.
@@ -158,8 +204,10 @@ Unknown-anomaly protocol:
 Known-family protocol:
 
 - Build 30-minute capture blocks.
-- Include only original labels with at least three distinct blocks.
-- Assign complete blocks chronologically to train/validation/test.
+- Exclude unsupported Infiltration traffic.
+- Include only remaining attack labels with at least three distinct blocks.
+- Give each complete block one global train/validation/test assignment, so
+  benign and attack rows from the same period cannot cross splits.
 - Test LR C=1 and C=10 in float and Concrete ML 5-bit clear mode.
 - Report labels excluded because they do not have enough independent blocks.
 
@@ -172,31 +220,32 @@ From the model directory:
 
 ```bash
 cd cicids2018-kdd-models
-python anomaly_model_experiments.py
+python anomaly_model_experiments.py --sample-rows 2000000
 ```
 
-For a final full-data rerun after a promising sampled result:
+Do not run `--sample-rows 0` with the current implementation under the 20 GiB
+RAM cap. It materializes all 16.2 million rows. First make full-data processing
+chunked/memory-mapped, or use a 3–5 million-row intermediate sample.
 
-```bash
-python anomaly_model_experiments.py --sample-rows 0
-```
+The corrected rerun must confirm:
 
-Review the newest:
-
-`anomaly_experiment_runs/<timestamp>/report.txt`
+- Scoped Bot-vs-benign metrics for standard benign distance.
+- `cross_split_block_overlap_count: 0` for known-family LR.
+- Infiltration is absent from known-family fitting and metrics.
 
 Decision gates:
 
-1. Unknown-anomaly candidate must reach F1 >= 0.70.
-2. Future benign false-positive rate must remain close to its validation
-   budget (the report allows at most 1.5 times the requested budget).
-3. Known-family LR must reach F1 >= 0.70 on separate time blocks.
-4. Inspect per-label recall; aggregate F1 alone is insufficient.
-5. Only after passing:
+1. Bot-vs-benign F1 must remain >= 0.70 after excluding Infiltration.
+2. Bot recall must remain >= 0.70.
+3. Future benign false-positive rate must remain <= 1%.
+4. Known-family LR must reach F1 >= 0.70 on separate time blocks.
+5. Report Infiltration separately as unsupported/out of scope; never relabel it
+   as benign.
+6. Only after passing:
    - Compile a known-family LR through Concrete ML, or
    - Implement a custom arithmetic FHE circuit for the winning PCA/distance
      score.
-6. Measure 100 real encrypt/inference/decrypt records and require mean
+7. Measure 100 real encrypt/inference/decrypt records and require mean
    end-to-end latency <= 0.70 s.
 
 If both protocols fail, the next options are feature refinement, a small
@@ -206,7 +255,10 @@ independent sessions for the same attack families.
 ## Repository state at handoff
 
 - Existing result directories and reports have been preserved.
-- `anomaly_model_experiments.py` is newly added and has passed Python syntax
-  and IDE lint checks.
+- `anomaly_model_experiments.py` now computes explicit scoped Bot-vs-benign
+  metrics, excludes Infiltration from known-family LR, and enforces globally
+  disjoint 30-minute blocks.
+- The corrected script has passed Python syntax and IDE lint checks.
+- The corrected two-million-row VM rerun is pending.
 - The external CIC-IDS-2018 CSV files are required to execute experiments and
   are not stored in the repository.
