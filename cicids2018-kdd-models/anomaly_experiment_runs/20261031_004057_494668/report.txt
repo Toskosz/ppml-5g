@@ -1,0 +1,87 @@
+CIC-IDS-2018 FHE-oriented anomaly experiment
+===============================================
+Run directory: anomaly_experiment_runs/20261031_004057_494668
+Generated: 2026-10-31T00:52:22.960893-03:00
+Arguments: {"benign_fpr": [0.01, 0.05], "chunk_rows": 200000, "data_folder": "CIC-IDS-2018", "jobs": 4, "output_root": "anomaly_experiment_runs", "pca_components": [8, 16, 32], "sample_rows": 2000000, "save_models": false, "target_f1": 0.7, "time_block_minutes": 30}
+
+Dataset and splits
+------------------
+sample_rows_before_cleaning: 1998881
+clean_rows: 1987045
+benign_rows: 1647946
+attack_rows: 339099
+unknown_anomaly_day_split: {'train_days': ['Wednesday-14-02-2018_TrafficForML_CICFlowMeter.csv', 'Thursday-15-02-2018_TrafficForML_CICFlowMeter.csv', 'Friday-16-02-2018_TrafficForML_CICFlowMeter.csv', 'Thuesday-20-02-2018_TrafficForML_CICFlowMeter.csv', 'Wednesday-21-02-2018_TrafficForML_CICFlowMeter.csv', 'Thursday-22-02-2018_TrafficForML_CICFlowMeter.csv'], 'validation_days': ['Friday-23-02-2018_TrafficForML_CICFlowMeter.csv', 'Wednesday-28-02-2018_TrafficForML_CICFlowMeter.csv'], 'test_days': ['Thursday-01-03-2018_TrafficForML_CICFlowMeter.csv', 'Friday-02-03-2018_TrafficForML_CICFlowMeter.csv']}
+unknown_anomaly: {'input_dimensions': 60, 'benign_train_rows': 1331103, 'validation_rows': 202980, 'test_rows': 168909}
+known_family_time_blocks: {'block_minutes': 30, 'included_label_block_counts': {'bot': 12, 'brute force -web': 6, 'brute force -xss': 5, 'ddos attacks-loic-http': 4, 'ftp-bruteforce': 4, 'sql injection': 4, 'ssh-bruteforce': 4, 'benign': 187}, 'excluded_label_block_counts': {'ddos attack-hoic': 2, 'ddos attack-loic-udp': 2, 'dos attacks-goldeneye': 2, 'dos attacks-hulk': 1, 'dos attacks-slowhttptest': 2, 'dos attacks-slowloris': 2}, 'scope_excluded_label_block_counts': {'infilteration': 14}, 'global_split_block_counts': {'train': 130, 'validation': 29, 'test': 28}, 'cross_split_block_overlap_count': 0, 'rows_without_parseable_timestamp': 0, 'train_rows': 1438231, 'validation_rows': 203749, 'test_rows': 159917, 'input_dimensions': 64}
+
+1. Unknown-anomaly capture-day results
+--------------------------------------
+                model_id target_validation_benign_fpr test_benign_fpr test_f1 test_precision test_recall bot_vs_benign_test_f1 bot_vs_benign_test_precision bot_vs_benign_test_recall fit_seconds                                                                 fhe_note
+   pca_reconstruction_32                       0.0100          0.0045  0.8534         0.9848      0.7529                0.9845                       0.9846                    0.9845     23.6357                     Linear projection/reconstruction plus squared error.
+standard_benign_distance                       0.0100          0.0048  0.8524         0.9836      0.7520                0.9840                       0.9834                    0.9845      1.4001 Subtract, scale, square, and sum; smallest candidate arithmetic circuit.
+    pca_reconstruction_8                       0.0500          0.0397  0.8452         0.8861      0.8080                0.9280                       0.8775                    0.9847      9.1218                     Linear projection/reconstruction plus squared error.
+   pca_reconstruction_32                       0.0500          0.0409  0.8323         0.8805      0.7891                0.9262                       0.8742                    0.9848     23.6357                     Linear projection/reconstruction plus squared error.
+   pca_reconstruction_16                       0.0500          0.0452  0.8174         0.8672      0.7730                0.9196                       0.8627                    0.9845     13.2260                     Linear projection/reconstruction plus squared error.
+standard_benign_distance                       0.0500          0.0480  0.8094         0.8590      0.7652                0.9159                       0.8556                    0.9853      1.4001 Subtract, scale, square, and sum; smallest candidate arithmetic circuit.
+    pca_reconstruction_8                       0.0100          0.0064  0.0187         0.3656      0.0096                0.0047                       0.0973                    0.0024      9.1218                     Linear projection/reconstruction plus squared error.
+   pca_reconstruction_16                       0.0100          0.0055  0.0180         0.3908      0.0092                0.0046                       0.1099                    0.0024     13.2260                     Linear projection/reconstruction plus squared error.
+         benign_kmeans_4                       0.0500          0.0550  0.0309         0.1108      0.0179                0.0031                       0.0096                    0.0018      1.1586               Four squared distances plus encrypted minimum comparisons.
+         benign_kmeans_4                       0.0100          0.0112  0.0167         0.2284      0.0087                0.0015                       0.0201                    0.0008      1.1586               Four squared distances plus encrypted minimum comparisons.
+         benign_kmeans_1                       0.0500          0.0519  0.0263         0.1001      0.0151                0.0012                       0.0038                    0.0007      0.7387                                           One squared centroid distance.
+  robust_benign_distance                       0.0100          0.0112  0.0053         0.0852      0.0027                0.0000                       0.0000                    0.0000     16.8384 Subtract, scale, square, and sum; smallest candidate arithmetic circuit.
+         benign_kmeans_1                       0.0100          0.0122  0.0080         0.1152      0.0042                0.0000                       0.0000                    0.0000      0.7387                                           One squared centroid distance.
+  robust_benign_distance                       0.0500          0.0434  0.0074         0.0349      0.0041                0.0000                       0.0000                    0.0000     16.8384 Subtract, scale, square, and sum; smallest candidate arithmetic circuit.
+Best scoped Bot-vs-benign candidate: pca_reconstruction_32 at validation FPR target 1.0%; scoped test F1=0.9845, Bot recall=0.9845, test benign FPR=0.0045.
+
+2. Known-family time-block LR results
+-------------------------------------
+    model_id                    mode  n_bits test_f1 test_precision test_recall threshold fit_seconds
+known_lr_c10         float_plaintext     NaN  0.9926         0.9875      0.9978    0.7355     46.6579
+ known_lr_c1         float_plaintext     NaN  0.9918         0.9865      0.9972    0.6261     44.8096
+ known_lr_c1 concrete_quantized_5bit     5.0  0.9761         0.9564      0.9967    0.6673     51.2596
+known_lr_c10 concrete_quantized_5bit     5.0  0.9747         0.9524      0.9980    0.8212     51.8181
+
+3. Per-label detection for best candidates
+------------------------------------------
+             model_id                     mode original_label  support predicted_attack_rate         metric_name
+pca_reconstruction_32 unknown_anomaly_fpr_0.01         benign   122218                0.0045 false_positive_rate
+pca_reconstruction_32 unknown_anomaly_fpr_0.01            bot    35259                0.9845    detection_recall
+pca_reconstruction_32 unknown_anomaly_fpr_0.01  infilteration    11432                0.0385    detection_recall
+                model_id                     mode original_label  support predicted_attack_rate         metric_name
+standard_benign_distance unknown_anomaly_fpr_0.01         benign   122218                0.0048 false_positive_rate
+standard_benign_distance unknown_anomaly_fpr_0.01            bot    35259                0.9845    detection_recall
+standard_benign_distance unknown_anomaly_fpr_0.01  infilteration    11432                0.0349    detection_recall
+    model_id            mode         original_label  support predicted_attack_rate         metric_name
+known_lr_c10 float_plaintext                 benign   135934                0.0022 false_positive_rate
+known_lr_c10 float_plaintext                    bot     2001                1.0000    detection_recall
+known_lr_c10 float_plaintext       brute force -web       14                0.5714    detection_recall
+known_lr_c10 float_plaintext       brute force -xss        5                0.4000    detection_recall
+known_lr_c10 float_plaintext ddos attacks-loic-http    18864                0.9978    detection_recall
+known_lr_c10 float_plaintext         ftp-bruteforce     2493                1.0000    detection_recall
+known_lr_c10 float_plaintext          sql injection        1                0.0000    detection_recall
+known_lr_c10 float_plaintext         ssh-bruteforce      605                1.0000    detection_recall
+
+4. FHE decision
+---------------
+Unknown-anomaly candidates eligible for a custom FHE prototype: pca_reconstruction_32, standard_benign_distance
+Known-family LR candidates eligible for Concrete ML FHE benchmarking: known_lr_c1, known_lr_c10
+
+Recorded rationale
+------------------
+Unknown-anomaly protocol:
+Models are fitted using benign traffic only. Thresholds are selected from benign traffic on later validation days at explicit false-positive-rate budgets. Attack rows do not influence fitting or threshold selection.
+
+Capture-day test:
+The latest two capture days remain completely held out. This tests future benign traffic and attack families absent from model fitting.
+
+PCA reconstruction:
+Distance from a low-dimensional benign subspace can detect flows that do not follow normal correlations. PCA uses linear transforms plus squared reconstruction error, making a future custom FHE circuit plausible.
+
+Benign distance:
+Standardized and robust squared distances are very small arithmetic circuits. K-means distance allows several benign modes, but selecting the nearest centroid adds encrypted comparisons and may cost more in FHE.
+
+Known-family baseline:
+A separate LR baseline includes only labels with at least three distinct time blocks. Every complete block has one global split assignment, so benign and attack rows from the same period cannot cross splits. This tests recognition of previously seen supported attack families without claiming unknown-attack detection.
+
+FHE gate:
+This script does not compile circuits. An anomaly candidate qualifies only with scoped Bot-vs-benign F1 and Bot recall >= 0.70 plus future benign FPR <= 1%. Known-family metrics exclude unsupported Infiltration traffic.

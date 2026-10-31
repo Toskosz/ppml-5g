@@ -1,0 +1,25 @@
+[2026-10-30T23:38:18-03:00] New isolated anomaly run: anomaly_experiment_runs/20261030_233818_174372
+[2026-10-30T23:38:18-03:00] Existing supervised reports and model artifacts will not be modified.
+[2026-10-30T23:38:18-03:00] Counting source rows to set an unbiased streaming sampling probability...
+[2026-10-30T23:38:27-03:00] Source rows: 16,233,002; sampling probability: 1.000000; requested target: all.
+[2026-10-30T23:38:27-03:00] Reading source 1/10: CIC-IDS-2018/Friday-02-03-2018_TrafficForML_CICFlowMeter.csv
+[2026-10-30T23:38:40-03:00] Sample accumulated: 1,048,575 rows.
+[2026-10-30T23:38:40-03:00] Reading source 2/10: CIC-IDS-2018/Friday-16-02-2018_TrafficForML_CICFlowMeter.csv
+[2026-10-30T23:38:56-03:00] Sample accumulated: 2,097,150 rows.
+[2026-10-30T23:38:56-03:00] Reading source 3/10: CIC-IDS-2018/Friday-23-02-2018_TrafficForML_CICFlowMeter.csv
+[2026-10-30T23:39:09-03:00] Sample accumulated: 3,145,725 rows.
+[2026-10-30T23:39:09-03:00] Reading source 4/10: CIC-IDS-2018/Thuesday-20-02-2018_TrafficForML_CICFlowMeter.csv
+[2026-10-30T23:41:04-03:00] Sample accumulated: 11,094,473 rows.
+[2026-10-30T23:41:04-03:00] Reading source 5/10: CIC-IDS-2018/Thursday-01-03-2018_TrafficForML_CICFlowMeter.csv
+[2026-10-30T23:41:12-03:00] Sample accumulated: 11,425,598 rows.
+[2026-10-30T23:41:12-03:00] Reading source 6/10: CIC-IDS-2018/Thursday-15-02-2018_TrafficForML_CICFlowMeter.csv
+[2026-10-30T23:41:26-03:00] Sample accumulated: 12,474,173 rows.
+[2026-10-30T23:41:26-03:00] Reading source 7/10: CIC-IDS-2018/Thursday-22-02-2018_TrafficForML_CICFlowMeter.csv
+[2026-10-30T23:41:39-03:00] Sample accumulated: 13,522,748 rows.
+[2026-10-30T23:41:39-03:00] Reading source 8/10: CIC-IDS-2018/Wednesday-14-02-2018_TrafficForML_CICFlowMeter.csv
+[2026-10-30T23:41:53-03:00] Sample accumulated: 14,571,323 rows.
+[2026-10-30T23:41:53-03:00] Reading source 9/10: CIC-IDS-2018/Wednesday-21-02-2018_TrafficForML_CICFlowMeter.csv
+[2026-10-30T23:42:05-03:00] Sample accumulated: 15,619,898 rows.
+[2026-10-30T23:42:05-03:00] Reading source 10/10: CIC-IDS-2018/Wednesday-28-02-2018_TrafficForML_CICFlowMeter.csv
+[2026-10-30T23:42:16-03:00] Sample accumulated: 16,233,002 rows.
+[2026-10-30T23:42:58-03:00] Loaded unbiased sample with 16,233,002 rows.

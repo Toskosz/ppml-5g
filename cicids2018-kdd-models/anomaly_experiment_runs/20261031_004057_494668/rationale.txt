@@ -1,0 +1,26 @@
+CIC-IDS-2018 anomaly experiment rationale
+==========================================
+
+Unknown-anomaly protocol
+------------------------
+Models are fitted using benign traffic only. Thresholds are selected from benign traffic on later validation days at explicit false-positive-rate budgets. Attack rows do not influence fitting or threshold selection.
+
+Capture-day test
+----------------
+The latest two capture days remain completely held out. This tests future benign traffic and attack families absent from model fitting.
+
+PCA reconstruction
+------------------
+Distance from a low-dimensional benign subspace can detect flows that do not follow normal correlations. PCA uses linear transforms plus squared reconstruction error, making a future custom FHE circuit plausible.
+
+Benign distance
+---------------
+Standardized and robust squared distances are very small arithmetic circuits. K-means distance allows several benign modes, but selecting the nearest centroid adds encrypted comparisons and may cost more in FHE.
+
+Known-family baseline
+---------------------
+A separate LR baseline includes only labels with at least three distinct time blocks. Every complete block has one global split assignment, so benign and attack rows from the same period cannot cross splits. This tests recognition of previously seen supported attack families without claiming unknown-attack detection.
+
+FHE gate
+--------
+This script does not compile circuits. An anomaly candidate qualifies only with scoped Bot-vs-benign F1 and Bot recall >= 0.70 plus future benign FPR <= 1%. Known-family metrics exclude unsupported Infiltration traffic.
