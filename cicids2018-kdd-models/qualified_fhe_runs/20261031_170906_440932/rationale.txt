@@ -1,0 +1,21 @@
+Qualified-model FHE benchmark
+============================
+
+Models come from anomaly_experiment_runs/20261031_004057_494668.
+standard_benign_distance and pca_reconstruction_32 qualified at the
+1% validation benign false-positive operating point, with Infiltration
+removed from the Bot-vs-benign score. known_lr_c1 and known_lr_c10
+qualified in Concrete ML 5-bit clear mode on globally disjoint
+30-minute blocks.
+
+The custom circuits output a score. The decision threshold is applied
+after decryption. For distance and PCA, that threshold is chosen from
+quantized-clear validation benign scores at the 1% false-positive
+budget. Logistic regression keeps the validation F1 threshold used by
+the quality experiment.
+
+End-to-end latency is the mean of encrypt + inference + decrypt.
+One-time key generation is reported separately and is outside that mean.
+
+A logistic-regression pass is known-family detection. A distance or
+PCA pass is Bot detection against future benign traffic.

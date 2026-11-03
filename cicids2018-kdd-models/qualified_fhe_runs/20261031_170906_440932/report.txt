@@ -1,0 +1,250 @@
+CIC-IDS-2018 qualified-model FHE benchmark
+==============================================
+Run directory: qualified_fhe_runs/20261031_170906_440932
+Generated: 2026-10-31T17:57:05.338022-03:00
+Arguments: {'data_folder': 'CIC-IDS-2018', 'sample_rows': 2000000, 'chunk_rows': 200000, 'time_block_minutes': 30, 'n_bits': 5, 'benign_fpr': 0.01, 'target_f1': 0.7, 'max_e2e_s': 0.7, 'device': 'cuda', 'p_error': 0.01, 'fhe_records': 100, 'fhe_sim_rows': 10000, 'calibration_rows': 10000, 'rounding_threshold_bits': 8, 'jobs': 4, 'only': None, 'output_root': 'qualified_fhe_runs'}
+
+Qualified models from anomaly_experiment_runs/20261031_004057_494668:
+standard_benign_distance, pca_reconstruction_32, known_lr_c1, known_lr_c10
+
+Dataset and splits
+------------------
+sample_rows_requested: 2000000
+clean_rows: 1987045
+unknown_anomaly: {'train_days': ['Wednesday-14-02-2018_TrafficForML_CICFlowMeter.csv', 'Thursday-15-02-2018_TrafficForML_CICFlowMeter.csv', 'Friday-16-02-2018_TrafficForML_CICFlowMeter.csv', 'Thuesday-20-02-2018_TrafficForML_CICFlowMeter.csv', 'Wednesday-21-02-2018_TrafficForML_CICFlowMeter.csv', 'Thursday-22-02-2018_TrafficForML_CICFlowMeter.csv'], 'validation_days': ['Friday-23-02-2018_TrafficForML_CICFlowMeter.csv', 'Wednesday-28-02-2018_TrafficForML_CICFlowMeter.csv'], 'test_days': ['Thursday-01-03-2018_TrafficForML_CICFlowMeter.csv', 'Friday-02-03-2018_TrafficForML_CICFlowMeter.csv'], 'benign_train_rows': 1331103, 'validation_rows': 202980, 'test_rows': 168909, 'input_dimensions': 60}
+known_family_time_blocks: {'block_minutes': 30, 'included_label_block_counts': {'bot': 12, 'brute force -web': 6, 'brute force -xss': 5, 'ddos attacks-loic-http': 4, 'ftp-bruteforce': 4, 'sql injection': 4, 'ssh-bruteforce': 4, 'benign': 187}, 'excluded_label_block_counts': {'ddos attack-hoic': 2, 'ddos attack-loic-udp': 2, 'dos attacks-goldeneye': 2, 'dos attacks-hulk': 1, 'dos attacks-slowhttptest': 2, 'dos attacks-slowloris': 2}, 'scope_excluded_label_block_counts': {'infilteration': 14}, 'global_split_block_counts': {'train': 130, 'validation': 29, 'test': 28}, 'cross_split_block_overlap_count': 0, 'rows_without_parseable_timestamp': 0, 'train_rows': 1438231, 'validation_rows': 203749, 'test_rows': 159917, 'input_dimensions': 64}
+
+Summary
+-------
+quality_f1 is scoped Bot-vs-benign F1 for distance and PCA, and
+known-family test F1 for logistic regression. For distance and PCA,
+quality_benign_fpr is the full-test quantized-clear false-positive rate
+and is a pass requirement. Simulation benign FPR is in the model section.
+Logistic regression passes on clear F1, simulation F1, and latency.
+Mean end-to-end latency excludes one-time key generation.
+
+                model_id                    protocol quality_f1 quality_recall quality_benign_fpr simulation_f1 mean_e2e_s gate
+standard_benign_distance unknown_anomaly_capture_day     0.3659         1.0000             1.0000        0.3658   0.843887 FAIL
+   pca_reconstruction_32 unknown_anomaly_capture_day     0.9840         0.9845             0.0048        0.7603   9.833995 FAIL
+             known_lr_c1     known_family_time_block     0.9761         0.9967             0.0080        0.9746   0.015626 PASS
+            known_lr_c10     known_family_time_block     0.9747         0.9980             0.0088        0.9737   0.015667 PASS
+
+standard_benign_distance
+------------------------
+Protocol: unknown_anomaly_capture_day
+Status: ok
+Gate: FAIL
+fit_seconds: 0.585972
+float_bot_f1: 0.983970
+float_bot_recall: 0.984515
+float_benign_fpr: 0.004787
+float_threshold: 17.754023
+quantized_bot_f1: 0.365879
+quantized_bot_precision: 0.223899
+quantized_bot_recall: 1.000000
+quantized_benign_fpr: 1.000000
+quantized_test_f1: 0.433126
+threshold: 0.000000
+compiled_device: cuda
+compile_seconds: 8.738907
+n_bits: 5
+p_error: 0.010000
+rounding_threshold_bits: 8
+simulation_rows: 10000
+simulation_seconds: 77.329999
+simulation_f1: 0.365819
+simulation_bot_f1: 0.365819
+simulation_bot_recall: 1.000000
+simulation_benign_fpr: 1.000000
+n_records: 100
+keygen_s: 4.700024
+mean_encrypt_s: 0.011632
+mean_inference_s: 0.830692
+mean_decrypt_s: 0.001563
+mean_e2e_s: 0.843887
+std_encrypt_s: 0.000553
+std_inference_s: 0.146121
+std_decrypt_s: 0.000156
+reference_deltas: {'bot_f1_delta': -2.959309494454665e-05, 'bot_recall_delta': 1.4592019058956573e-05, 'benign_fpr_delta': -1.3471010816736538e-05}
+model_dir: qualified_fhe_runs/20261031_170906_440932/fhe/standard_benign_distance_q5/cuda
+
+Quantized-clear per-label detection:
+original_label  support predicted_attack_rate         metric_name
+        benign   122218                1.0000 false_positive_rate
+           bot    35259                1.0000    detection_recall
+ infilteration    11432                1.0000    detection_recall
+
+Simulation per-label detection:
+original_label  support predicted_attack_rate         metric_name
+        benign     7236                1.0000 false_positive_rate
+           bot     2087                1.0000    detection_recall
+ infilteration      677                1.0000    detection_recall
+
+pca_reconstruction_32
+---------------------
+Protocol: unknown_anomaly_capture_day
+Status: ok
+Gate: FAIL
+fit_seconds: 9.457290
+float_bot_f1: 0.984543
+float_bot_recall: 0.984515
+float_benign_fpr: 0.004451
+float_threshold: 0.005465
+quantized_bot_f1: 0.983970
+quantized_bot_precision: 0.983427
+quantized_bot_recall: 0.984515
+quantized_benign_fpr: 0.004787
+quantized_test_f1: 0.853470
+threshold: 0.011974
+compiled_device: cuda
+compile_seconds: 29.122521
+n_bits: 5
+p_error: 0.010000
+rounding_threshold_bits: 8
+simulation_rows: 10000
+simulation_seconds: 502.185089
+simulation_f1: 0.760297
+simulation_bot_f1: 0.760297
+simulation_bot_recall: 0.981792
+simulation_benign_fpr: 0.173300
+n_records: 100
+keygen_s: 28.361174
+mean_encrypt_s: 0.013188
+mean_inference_s: 9.818852
+mean_decrypt_s: 0.001955
+mean_e2e_s: 9.833995
+std_encrypt_s: 0.001077
+std_inference_s: 0.578280
+std_decrypt_s: 0.000501
+reference_deltas: {'bot_f1_delta': 4.251517386122394e-05, 'bot_recall_delta': 1.4592019058956573e-05, 'benign_fpr_delta': -4.893714510137599e-05}
+model_dir: qualified_fhe_runs/20261031_170906_440932/fhe/pca_reconstruction_32_q5/cuda
+
+Quantized-clear per-label detection:
+original_label  support predicted_attack_rate         metric_name
+        benign   122218                0.0048 false_positive_rate
+           bot    35259                0.9845    detection_recall
+ infilteration    11432                0.0419    detection_recall
+
+Simulation per-label detection:
+original_label  support predicted_attack_rate         metric_name
+        benign     7236                0.1733 false_positive_rate
+           bot     2087                0.9818    detection_recall
+ infilteration      677                0.2201    detection_recall
+
+known_lr_c1
+-----------
+Protocol: known_family_time_block
+Status: ok
+Gate: PASS
+fit_seconds: 25.384203
+clear_f1: 0.976132
+clear_precision: 0.956390
+clear_recall: 0.996706
+clear_benign_fpr: 0.008019
+validation_f1: 0.984649
+threshold: 0.667279
+compiled_device: cuda
+compile_seconds: 373.072304
+n_bits: 5
+p_error: 0.010000
+simulation_rows: 10000
+simulation_seconds: 24.270295
+simulation_f1: 0.974593
+simulation_precision: 0.952866
+simulation_recall: 0.997333
+simulation_benign_fpr: 0.008706
+n_records: 100
+keygen_s: 0.000242
+mean_encrypt_s: 0.005960
+mean_inference_s: 0.008585
+mean_decrypt_s: 0.001081
+mean_e2e_s: 0.015626
+std_encrypt_s: 0.000091
+std_inference_s: 0.000268
+std_decrypt_s: 0.000060
+reference_deltas: {'test_f1_delta': 3.165363333812454e-05}
+model_dir: qualified_fhe_runs/20261031_170906_440932/fhe/known_lr_c1_q5/cuda
+
+Quantized-clear per-label detection:
+        original_label  support predicted_attack_rate         metric_name
+                benign   135934                0.0080 false_positive_rate
+                   bot     2001                1.0000    detection_recall
+      brute force -web       14                0.5714    detection_recall
+      brute force -xss        5                0.4000    detection_recall
+ddos attacks-loic-http    18864                0.9963    detection_recall
+        ftp-bruteforce     2493                1.0000    detection_recall
+         sql injection        1                0.0000    detection_recall
+        ssh-bruteforce      605                1.0000    detection_recall
+
+Simulation per-label detection:
+        original_label  support predicted_attack_rate         metric_name
+                benign     8500                0.0087 false_positive_rate
+                   bot      120                1.0000    detection_recall
+      brute force -web        2                0.5000    detection_recall
+ddos attacks-loic-http     1178                0.9975    detection_recall
+        ftp-bruteforce      168                1.0000    detection_recall
+        ssh-bruteforce       32                1.0000    detection_recall
+
+known_lr_c10
+------------
+Protocol: known_family_time_block
+Status: ok
+Gate: PASS
+fit_seconds: 27.741786
+clear_f1: 0.974651
+clear_precision: 0.952371
+clear_recall: 0.997999
+clear_benign_fpr: 0.008806
+validation_f1: 0.984469
+threshold: 0.821242
+compiled_device: cuda
+compile_seconds: 366.622621
+n_bits: 5
+p_error: 0.010000
+simulation_rows: 10000
+simulation_seconds: 24.038119
+simulation_f1: 0.973676
+simulation_precision: 0.949905
+simulation_recall: 0.998667
+simulation_benign_fpr: 0.009294
+n_records: 100
+keygen_s: 0.000228
+mean_encrypt_s: 0.005980
+mean_inference_s: 0.008611
+mean_decrypt_s: 0.001076
+mean_e2e_s: 0.015667
+std_encrypt_s: 0.000151
+std_inference_s: 0.000342
+std_decrypt_s: 0.000072
+reference_deltas: {'test_f1_delta': -4.8671485289641936e-05}
+model_dir: qualified_fhe_runs/20261031_170906_440932/fhe/known_lr_c10_q5/cuda
+
+Quantized-clear per-label detection:
+        original_label  support predicted_attack_rate         metric_name
+                benign   135934                0.0088 false_positive_rate
+                   bot     2001                1.0000    detection_recall
+      brute force -web       14                0.5714    detection_recall
+      brute force -xss        5                0.6000    detection_recall
+ddos attacks-loic-http    18864                0.9979    detection_recall
+        ftp-bruteforce     2493                1.0000    detection_recall
+         sql injection        1                0.0000    detection_recall
+        ssh-bruteforce      605                1.0000    detection_recall
+
+Simulation per-label detection:
+        original_label  support predicted_attack_rate         metric_name
+                benign     8500                0.0093 false_positive_rate
+                   bot      120                1.0000    detection_recall
+      brute force -web        2                0.5000    detection_recall
+ddos attacks-loic-http     1178                0.9992    detection_recall
+        ftp-bruteforce      168                1.0000    detection_recall
+        ssh-bruteforce       32                1.0000    detection_recall
+
+Passing models
+---------------
+known_lr_c1, known_lr_c10
+
+Claim
+-----
+Describe a passing logistic regression as known-family detection.
+Describe a passing distance or PCA circuit as Bot detection against
+future benign traffic. Infiltration stays out of that scoped score.
