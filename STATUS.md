@@ -1,6 +1,6 @@
 # PPML-5G experiment status
 
-Updated: 2026-10-31
+Updated: 2026-11-03
 
 ## Objective
 
@@ -289,29 +289,80 @@ for distance and 0.9845 for PCA-32, and clear 5-bit test F1 near 0.9761 for
 `known_lr_c1` and 0.9747 for `known_lr_c10`. Those matches are recorded. The
 pass/fail decision uses the compiled circuit.
 
+## Qualified FHE result
+
+Completed CUDA run:
+
+`cicids2018-kdd-models/qualified_fhe_runs/20261031_170906_440932/`
+
+Same 1,987,045-row sample as `20261031_004057_494668`. Float and 5-bit clear
+scores match that report to about 1e-5. Wall clock 17:09–17:57 (−03).
+
+Passing models: `known_lr_c1` and `known_lr_c10`. Describe them as
+known-family detection on disjoint 30-minute blocks.
+
+- `known_lr_c1`: clear F1 0.9761, simulation F1 0.9746, benign false-positive
+  rate 0.80%, mean end-to-end 0.0156 s. Frozen threshold 0.667279.
+- `known_lr_c10`: clear F1 0.9747, simulation F1 0.9737, benign false-positive
+  rate 0.88%, mean end-to-end 0.0157 s. Frozen threshold 0.821242.
+
+`known_lr_c1` is the stronger model. Of 23,983 attack test rows, 18,864
+(78.7%) are DDoS LOIC-HTTP. The sampler kept each of the 16,233,002 source
+rows with probability 0.123206, so the share follows the dataset's flow
+counts. The
+published dataset has 576,191 LOIC-HTTP flows from about 65 minutes on
+2018-02-20 (10:12–11:17). The split puts one block of each included family in
+test, preferring the latest block. That LOIC-HTTP block is about 153,000 raw
+flows. HOIC, 686,012 flows and the largest attack class, stays out because it
+has only two blocks.
+
+Clear recall for `known_lr_c1`: Bot 2,001/2,001, FTP brute force 2,493/2,493,
+SSH brute force 605/605, LOIC-HTTP 99.63%, web brute force 8/14, XSS 2/5,
+SQL injection 0/1. The Bot rows are a later block of the Friday 2018-03-02
+capture. An independent Bot recording is still required before calling this
+botnet detection beyond CIC-IDS-2018.
+
+The Bot circuits fail. Both still match the float quality run.
+
+- `standard_benign_distance`: quantized threshold 0, so every non-negative
+  score is an attack. Quantized and simulation Bot F1 are 0.3659. Benign
+  false-positive rate is 100%. Mean end-to-end 0.844 s.
+- `pca_reconstruction_32`: quantized-clear Bot F1 0.9840, recall 0.9845,
+  benign false-positive rate 0.48%. Simulation Bot F1 0.7603, recall 0.9818,
+  benign false-positive rate 17.3%. Mean end-to-end 9.834 s. Latency is the
+  only formal gate failure. The anomaly gate does not score simulation benign
+  false-positive rate.
+
+There is no FHE Bot-detection result against future benign traffic. Do not
+rerun the benchmark, and do not rescore distance or PCA on more rows.
+
 ## Next action
 
-Run this on the machine that has the CIC-IDS-2018 CSVs and Concrete ML. Do
-not run it in the agent workspace.
+Add a streaming clear-mode rescore of `known_lr_c1` and `known_lr_c10` on
+every row in the known-family test blocks from
+`qualified_fhe_runs/20261031_170906_440932`. Use the saved preprocessor and
+the frozen thresholds above. Read the ten CSVs in chunks. Do not refit, do
+not recompile, and do not load all 16.2 million rows at once. The scorer is
+not in the repo yet. Run it on the dataset machine once it exists. Do not
+run it in the agent workspace.
 
-```bash
-cd cicids2018-kdd-models
-python qualified_fhe_benchmark.py --device auto
-```
-
-Read `qualified_fhe_runs/<timestamp>/report.txt`. Describe a passing logistic
-regression as known-family detection. Describe a passing distance or PCA
-circuit as Bot detection against future benign traffic.
+The full test set is on the order of 1.3 million rows. This checks whether
+the sample F1 and per-label recalls hold on the rest of the same blocks. It
+does not add a new capture day. The LOIC-HTTP test block remains most of the
+attack rows.
 
 Full-data loading remains unsafe under the 20 GiB RAM cap.
-`anomaly_model_experiments.py --sample-rows 0` materializes all 16.2 million
-rows.
+`anomaly_model_experiments.py --sample-rows 0` and
+`qualified_fhe_benchmark.py --sample-rows 0` must not be used. The earlier
+full load, `anomaly_experiment_runs/20261030_233818_174372`, read all
+16,233,002 rows and stopped.
 
 ## Repository state at handoff
 
 - Existing result directories and reports have been preserved.
 - The corrected two-million-row quality run is complete and passes gates 1–5.
-- `qualified_fhe_benchmark.py` times all four qualified models. It has not
-  been run.
+- The qualified FHE benchmark has been run on CUDA. `known_lr_c1` and
+  `known_lr_c10` pass. Distance and PCA fail.
+- The full-block clear rescore script has not been added.
 - Experiments are executed outside this workspace. The CIC-IDS-2018 CSV files
   are not stored in the repository.
