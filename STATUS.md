@@ -338,18 +338,31 @@ rerun the benchmark, and do not rescore distance or PCA on more rows.
 
 ## Next action
 
-Add a streaming clear-mode rescore of `known_lr_c1` and `known_lr_c10` on
-every row in the known-family test blocks from
-`qualified_fhe_runs/20261031_170906_440932`. Use the saved preprocessor and
-the frozen thresholds above. Read the ten CSVs in chunks. Do not refit, do
-not recompile, and do not load all 16.2 million rows at once. The scorer is
-not in the repo yet. Run it on the dataset machine once it exists. Do not
-run it in the agent workspace.
+Score `known_lr_c1` and `known_lr_c10` on the flows the source-run coin flip
+left out of the original 28 test blocks, in plaintext and in FHE simulation.
+The plaintext estimators were not saved, so the script refits the float model
+and the 5-bit clear model on the source run's training blocks, using the
+saved preprocessor and the frozen 5-bit thresholds. FHE scores are simulation
+of the saved circuits. There is no new parameter search and no real encrypt /
+inference / decrypt.
 
-The full test set is on the order of 1.3 million rows. This checks whether
-the sample F1 and per-label recalls hold on the rest of the same blocks. It
-does not add a new capture day. The LOIC-HTTP test block remains most of the
-attack rows.
+The published result stays the 159,917 sampled test rows. This run is the
+complement inside those same blocks. Training blocks are not scored.
+
+Run this on the machine that has the CIC-IDS-2018 CSVs, Concrete ML, and the
+saved circuit zips. Do not run it in the agent workspace.
+
+```bash
+cd cicids2018-kdd-models
+python score_known_lr_unsampled_test.py \
+  --source-run qualified_fhe_runs/20261031_170906_440932
+```
+
+Read `qualified_fhe_runs/<timestamp>_unsampled_test/report.txt`. A census pass
+first checks that the coin flip still keeps 1,998,881 source rows and counts
+the unsampled test-block rows. FHE simulation of those rows is on the order
+of one hour per model. Plaintext scoring is included in that same pass. The
+100-record latency numbers stay the ones above.
 
 Full-data loading remains unsafe under the 20 GiB RAM cap.
 `anomaly_model_experiments.py --sample-rows 0` and
@@ -363,6 +376,8 @@ full load, `anomaly_experiment_runs/20261030_233818_174372`, read all
 - The corrected two-million-row quality run is complete and passes gates 1–5.
 - The qualified FHE benchmark has been run on CUDA. `known_lr_c1` and
   `known_lr_c10` pass. Distance and PCA fail.
-- The full-block clear rescore script has not been added.
+- `score_known_lr_unsampled_test.py` scores both passing logistic regressions
+  on the unsampled flows in the original 28 test blocks, in float plaintext,
+  5-bit clear, and FHE simulation. It has not been run.
 - Experiments are executed outside this workspace. The CIC-IDS-2018 CSV files
   are not stored in the repository.
