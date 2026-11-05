@@ -1,6 +1,6 @@
 # PPML-5G experiment status
 
-Updated: 2026-11-03
+Updated: 2026-11-05
 
 ## Objective
 
@@ -289,6 +289,22 @@ for distance and 0.9845 for PCA-32, and clear 5-bit test F1 near 0.9761 for
 `known_lr_c1` and 0.9747 for `known_lr_c10`. Those matches are recorded. The
 pass/fail decision uses the compiled circuit.
 
+### `score_known_lr_unsampled_test.py`
+
+Location:
+
+`cicids2018-kdd-models/score_known_lr_unsampled_test.py`
+
+Scores `known_lr_c1` and `known_lr_c10` on the flows the source-run coin flip
+left out of the original 28 test blocks. The plaintext estimators were not
+saved, so the script refits the float model and the 5-bit clear model on the
+source training blocks, using the saved preprocessor and the frozen 5-bit
+thresholds. FHE scores are simulation of the saved circuits. There is no new
+parameter search and no real encrypt / inference / decrypt. Training blocks
+and the sampled test rows are not scored.
+
+The completed run is the unsampled test-block rescore below. Do not repeat it.
+
 ## Qualified FHE result
 
 Completed CUDA run:
@@ -336,33 +352,66 @@ The Bot circuits fail. Both still match the float quality run.
 There is no FHE Bot-detection result against future benign traffic. Do not
 rerun the benchmark, and do not rescore distance or PCA on more rows.
 
+## Unsampled test-block rescore
+
+Completed run:
+
+`cicids2018-kdd-models/qualified_fhe_runs/20261103_232756_062792_unsampled_test/`
+
+Wall clock 2026-11-03 23:27 to 2026-11-04 01:36 (−03). Same coin flip as
+`20261031_170906_440932`: probability 0.123206, 1,998,881 sampled source
+rows, cleaned sample 1,987,045. The split replay has 130/29/28 blocks and
+`cross_split_block_overlap_count` 0. Refitting both logistic regressions on
+the 1,438,231 replayed training rows reproduced the published 5-bit clear F1
+with delta 0 (`known_lr_c1` 0.976132, `known_lr_c10` 0.974651).
+
+Scored rows are the 1,136,774 cleaned flows inside the original 28 test
+blocks that the coin flip skipped. That is 7.11 times the 159,917 sampled
+test rows; the expected ratio at this probability is 7.12. Attack prevalence
+is 15.0%. Of 170,177 attack rows, 132,909 (78.1%) are DDoS LOIC-HTTP.
+
+Float thresholds were refit on the replayed validation blocks. The 5-bit
+thresholds stayed frozen. `known_lr_c1` threshold 0.667279:
+
+- Float: F1 0.9925, benign false-positive rate 0.22%. Float threshold
+  0.626061.
+- 5-bit clear: F1 0.9767, benign false-positive rate 0.79%.
+- FHE simulation: F1 0.9767, benign false-positive rate 0.79%.
+
+`known_lr_c10` threshold 0.821242:
+
+- Float: F1 0.9932, benign false-positive rate 0.21%. Float threshold
+  0.735486.
+- 5-bit clear: F1 0.9752, benign false-positive rate 0.86%.
+- FHE simulation: F1 0.9752, benign false-positive rate 0.86%.
+
+Simulation matches 5-bit clear at four decimals for both models. The only
+printed per-label gap is `known_lr_c1` on LOIC-HTTP: clear recall 0.9970,
+simulation recall 0.9969.
+
+Per-label support: benign 966,597, Bot 14,073, FTP brute force 18,476, SSH
+brute force 4,625, LOIC-HTTP 132,909, web brute force 74, XSS 20. SQL
+injection has no unsampled row in these blocks; its only cleaned test row
+was in the sampled set. Bot, FTP brute force, and SSH brute force recall are
+1.0 in float, 5-bit clear, and simulation for both models. Web brute force
+recall is 28/74 in every mode. XSS recall is 8/20, except `known_lr_c10` at
+5 bits and in simulation, where it is 11/20.
+
+Both models were scored in one streaming pass, 6,571.7 seconds, about 174
+rows/s. The 100-record end-to-end latencies stay 0.0156 s and 0.0157 s.
+
+The published F1 remains the score on the 159,917 sampled test rows. This
+run is the rest of those same blocks. The Bot rows are still the held-out
+block of the Friday 2018-03-02 capture. Do not repeat this rescore.
+
 ## Next action
 
-Score `known_lr_c1` and `known_lr_c10` on the flows the source-run coin flip
-left out of the original 28 test blocks, in plaintext and in FHE simulation.
-The plaintext estimators were not saved, so the script refits the float model
-and the 5-bit clear model on the source run's training blocks, using the
-saved preprocessor and the frozen 5-bit thresholds. FHE scores are simulation
-of the saved circuits. There is no new parameter search and no real encrypt /
-inference / decrypt.
+None on this sample. Cite the sampled test in `20261031_170906_440932`. The
+unsampled run checks those same blocks and does not replace that score.
 
-The published result stays the 159,917 sampled test rows. This run is the
-complement inside those same blocks. Training blocks are not scored.
-
-Run this on the machine that has the CIC-IDS-2018 CSVs, Concrete ML, and the
-saved circuit zips. Do not run it in the agent workspace.
-
-```bash
-cd cicids2018-kdd-models
-python score_known_lr_unsampled_test.py \
-  --source-run qualified_fhe_runs/20261031_170906_440932
-```
-
-Read `qualified_fhe_runs/<timestamp>_unsampled_test/report.txt`. A census pass
-first checks that the coin flip still keeps 1,998,881 source rows and counts
-the unsampled test-block rows. FHE simulation of those rows is on the order
-of one hour per model. Plaintext scoring is included in that same pass. The
-100-record latency numbers stay the ones above.
+An independent Bot recording is still required before calling this botnet
+detection beyond CIC-IDS-2018. There is still no passing FHE circuit for Bot
+detection against future benign traffic.
 
 Full-data loading remains unsafe under the 20 GiB RAM cap.
 `anomaly_model_experiments.py --sample-rows 0` and
@@ -376,8 +425,9 @@ full load, `anomaly_experiment_runs/20261030_233818_174372`, read all
 - The corrected two-million-row quality run is complete and passes gates 1–5.
 - The qualified FHE benchmark has been run on CUDA. `known_lr_c1` and
   `known_lr_c10` pass. Distance and PCA fail.
-- `score_known_lr_unsampled_test.py` scores both passing logistic regressions
-  on the unsampled flows in the original 28 test blocks, in float plaintext,
-  5-bit clear, and FHE simulation. It has not been run.
+- The unsampled rescore has been run. On the other 1,136,774 flows in the
+  original 28 test blocks, both logistic regressions stay above F1 0.97 in
+  float, 5-bit clear, and FHE simulation. The published F1 is still the
+  sampled test.
 - Experiments are executed outside this workspace. The CIC-IDS-2018 CSV files
   are not stored in the repository.
