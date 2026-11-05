@@ -1,0 +1,103 @@
+CIC-IDS-2018 unsampled test-block rescore
+============================================
+Run directory: qualified_fhe_runs/20261103_232756_062792_unsampled_test
+Generated: 2026-11-04T01:36:53.249322-03:00
+Source run: qualified_fhe_runs/20261031_170906_440932
+Sampling probability: 0.123206
+Replayed sampled source rows: 1998881
+Unsampled cleaned test-block rows: 1136774
+
+Only flows skipped by the source-run coin flip, and only when they
+fall in the original 28 held-out 30-minute blocks, are scored.
+Training blocks and the 159,917 sampled test rows are left out.
+Float and 5-bit clear models are refit on the source training blocks.
+FHE scores come from simulation of the saved circuit.
+
+Included labels: benign, bot, brute force -web, brute force -xss, ddos attacks-loic-http, ftp-bruteforce, sql injection, ssh-bruteforce
+
+
+known_lr_c1
+-----------
+quantized_threshold: 0.667279
+float_threshold: 0.626061
+float_validation_f1: 0.993527
+replay_clear_f1: 0.976132
+replay_clear_f1_delta: -0.000000
+pass_seconds: 6571.7
+
+unsampled_test_blocks
+  float_plaintext: rows=1136774 f1=0.9925 precision=0.9874 recall=0.9977 benign_fpr=0.0022
+  concrete_clear_5bit: rows=1136774 f1=0.9767 precision=0.9569 recall=0.9973 benign_fpr=0.0079
+  fhe_simulation: rows=1136774 f1=0.9767 precision=0.9569 recall=0.9973 benign_fpr=0.0079
+
+unsampled_test_blocks per-label
+  float_plaintext
+                  benign     966597   0.0022  false_positive_rate
+                     bot      14073   1.0000  detection_recall
+        brute force -web         74   0.3784  detection_recall
+        brute force -xss         20   0.4000  detection_recall
+  ddos attacks-loic-http     132909   0.9975  detection_recall
+          ftp-bruteforce      18476   1.0000  detection_recall
+          ssh-bruteforce       4625   1.0000  detection_recall
+  concrete_clear_5bit
+                  benign     966597   0.0079  false_positive_rate
+                     bot      14073   1.0000  detection_recall
+        brute force -web         74   0.3784  detection_recall
+        brute force -xss         20   0.4000  detection_recall
+  ddos attacks-loic-http     132909   0.9970  detection_recall
+          ftp-bruteforce      18476   1.0000  detection_recall
+          ssh-bruteforce       4625   1.0000  detection_recall
+  fhe_simulation
+                  benign     966597   0.0079  false_positive_rate
+                     bot      14073   1.0000  detection_recall
+        brute force -web         74   0.3784  detection_recall
+        brute force -xss         20   0.4000  detection_recall
+  ddos attacks-loic-http     132909   0.9969  detection_recall
+          ftp-bruteforce      18476   1.0000  detection_recall
+          ssh-bruteforce       4625   1.0000  detection_recall
+
+known_lr_c10
+------------
+quantized_threshold: 0.821242
+float_threshold: 0.735486
+float_validation_f1: 0.995372
+replay_clear_f1: 0.974651
+replay_clear_f1_delta: +0.000000
+pass_seconds: 6571.7
+
+unsampled_test_blocks
+  float_plaintext: rows=1136774 f1=0.9932 precision=0.9884 recall=0.9981 benign_fpr=0.0021
+  concrete_clear_5bit: rows=1136774 f1=0.9752 precision=0.9532 recall=0.9983 benign_fpr=0.0086
+  fhe_simulation: rows=1136774 f1=0.9752 precision=0.9532 recall=0.9983 benign_fpr=0.0086
+
+unsampled_test_blocks per-label
+  float_plaintext
+                  benign     966597   0.0021  false_positive_rate
+                     bot      14073   1.0000  detection_recall
+        brute force -web         74   0.3784  detection_recall
+        brute force -xss         20   0.4000  detection_recall
+  ddos attacks-loic-http     132909   0.9980  detection_recall
+          ftp-bruteforce      18476   1.0000  detection_recall
+          ssh-bruteforce       4625   1.0000  detection_recall
+  concrete_clear_5bit
+                  benign     966597   0.0086  false_positive_rate
+                     bot      14073   1.0000  detection_recall
+        brute force -web         74   0.3784  detection_recall
+        brute force -xss         20   0.5500  detection_recall
+  ddos attacks-loic-http     132909   0.9983  detection_recall
+          ftp-bruteforce      18476   1.0000  detection_recall
+          ssh-bruteforce       4625   1.0000  detection_recall
+  fhe_simulation
+                  benign     966597   0.0086  false_positive_rate
+                     bot      14073   1.0000  detection_recall
+        brute force -web         74   0.3784  detection_recall
+        brute force -xss         20   0.5500  detection_recall
+  ddos attacks-loic-http     132909   0.9983  detection_recall
+          ftp-bruteforce      18476   1.0000  detection_recall
+          ssh-bruteforce       4625   1.0000  detection_recall
+
+Claim
+-----
+unsampled_test_blocks is the rest of the original held-out blocks.
+The published F1 remains the score on the 159,917 sampled test rows.
+The 100-record latency measurement from the source run is unchanged.

@@ -1,0 +1,85 @@
+[2026-11-03T23:27:56-03:00] Unsampled test-block rescore: qualified_fhe_runs/20261103_232756_062792_unsampled_test
+[2026-11-03T23:27:56-03:00] Plaintext models are refit on the source training blocks. FHE uses the saved circuits.
+[2026-11-03T23:27:56-03:00] Replay sources: 10 files.
+[2026-11-03T23:27:56-03:00] Counting source rows to set an unbiased streaming sampling probability...
+[2026-11-03T23:28:03-03:00] Source rows: 16,233,002; sampling probability: 0.123206; requested target: 2,000,000.
+[2026-11-03T23:28:03-03:00] Reading source 1/10: CIC-IDS-2018/Friday-02-03-2018_TrafficForML_CICFlowMeter.csv
+[2026-11-03T23:28:15-03:00] Sample accumulated: 129,074 rows.
+[2026-11-03T23:28:15-03:00] Reading source 2/10: CIC-IDS-2018/Friday-16-02-2018_TrafficForML_CICFlowMeter.csv
+[2026-11-03T23:28:29-03:00] Sample accumulated: 258,163 rows.
+[2026-11-03T23:28:29-03:00] Reading source 3/10: CIC-IDS-2018/Friday-23-02-2018_TrafficForML_CICFlowMeter.csv
+[2026-11-03T23:28:41-03:00] Sample accumulated: 387,484 rows.
+[2026-11-03T23:28:41-03:00] Reading source 4/10: CIC-IDS-2018/Thuesday-20-02-2018_TrafficForML_CICFlowMeter.csv
+[2026-11-03T23:30:22-03:00] Sample accumulated: 1,366,601 rows.
+[2026-11-03T23:30:22-03:00] Reading source 5/10: CIC-IDS-2018/Thursday-01-03-2018_TrafficForML_CICFlowMeter.csv
+[2026-11-03T23:30:29-03:00] Sample accumulated: 1,407,297 rows.
+[2026-11-03T23:30:29-03:00] Reading source 6/10: CIC-IDS-2018/Thursday-15-02-2018_TrafficForML_CICFlowMeter.csv
+[2026-11-03T23:30:41-03:00] Sample accumulated: 1,536,636 rows.
+[2026-11-03T23:30:41-03:00] Reading source 7/10: CIC-IDS-2018/Thursday-22-02-2018_TrafficForML_CICFlowMeter.csv
+[2026-11-03T23:30:53-03:00] Sample accumulated: 1,665,091 rows.
+[2026-11-03T23:30:53-03:00] Reading source 8/10: CIC-IDS-2018/Wednesday-14-02-2018_TrafficForML_CICFlowMeter.csv
+[2026-11-03T23:31:04-03:00] Sample accumulated: 1,794,752 rows.
+[2026-11-03T23:31:04-03:00] Reading source 9/10: CIC-IDS-2018/Wednesday-21-02-2018_TrafficForML_CICFlowMeter.csv
+[2026-11-03T23:31:15-03:00] Sample accumulated: 1,923,770 rows.
+[2026-11-03T23:31:15-03:00] Reading source 10/10: CIC-IDS-2018/Wednesday-28-02-2018_TrafficForML_CICFlowMeter.csv
+[2026-11-03T23:31:28-03:00] Sample accumulated: 1,998,881 rows.
+[2026-11-03T23:31:33-03:00] Loaded unbiased sample with 1,998,881 rows.
+[2026-11-03T23:33:41-03:00] Clean compact-flow sample: 1,987,045 rows (11,836 removed for invalid features).
+[2026-11-03T23:34:06-03:00] Known-family replay: {'block_minutes': 30, 'included_label_block_counts': {'bot': 12, 'brute force -web': 6, 'brute force -xss': 5, 'ddos attacks-loic-http': 4, 'ftp-bruteforce': 4, 'sql injection': 4, 'ssh-bruteforce': 4, 'benign': 187}, 'excluded_label_block_counts': {'ddos attack-hoic': 2, 'ddos attack-loic-udp': 2, 'dos attacks-goldeneye': 2, 'dos attacks-hulk': 1, 'dos attacks-slowhttptest': 2, 'dos attacks-slowloris': 2}, 'scope_excluded_label_block_counts': {'infilteration': 14}, 'global_split_block_counts': {'train': 130, 'validation': 29, 'test': 28}, 'cross_split_block_overlap_count': 0, 'rows_without_parseable_timestamp': 0}
+[2026-11-03T23:34:15-03:00] Loaded frozen 5-bit threshold 0.667279 from qualified_fhe_runs/20261031_170906_440932/fhe/known_lr_c1_q5/cuda/run_meta.json.
+[2026-11-03T23:34:19-03:00] Fitting float and 5-bit known_lr_c1 on 1,438,231 replayed training rows.
+[2026-11-03T23:35:51-03:00] Fit finished in 92.1s.
+[2026-11-03T23:35:51-03:00] known_lr_c1 replayed 5-bit clear F1 on the original test sample is 0.9761 (source run 0.9761, delta -0.0000).
+[2026-11-03T23:35:51-03:00] Loaded frozen 5-bit threshold 0.821242 from qualified_fhe_runs/20261031_170906_440932/fhe/known_lr_c10_q5/cuda/run_meta.json.
+[2026-11-03T23:35:51-03:00] Fitting float and 5-bit known_lr_c10 on 1,438,231 replayed training rows.
+[2026-11-03T23:37:28-03:00] Fit finished in 96.7s.
+[2026-11-03T23:37:28-03:00] known_lr_c10 replayed 5-bit clear F1 on the original test sample is 0.9747 (source run 0.9747, delta +0.0000).
+[2026-11-03T23:37:29-03:00] Checking the coin flip before FHE simulation.
+[2026-11-03T23:37:38-03:00] Reading 1/10 CIC-IDS-2018/Friday-02-03-2018_TrafficForML_CICFlowMeter.csv
+[2026-11-03T23:38:23-03:00] Reading 2/10 CIC-IDS-2018/Friday-16-02-2018_TrafficForML_CICFlowMeter.csv
+[2026-11-03T23:38:46-03:00] Reading 3/10 CIC-IDS-2018/Friday-23-02-2018_TrafficForML_CICFlowMeter.csv
+[2026-11-03T23:39:17-03:00] Reading 4/10 CIC-IDS-2018/Thuesday-20-02-2018_TrafficForML_CICFlowMeter.csv
+[2026-11-03T23:44:29-03:00] Reading 5/10 CIC-IDS-2018/Thursday-01-03-2018_TrafficForML_CICFlowMeter.csv
+[2026-11-03T23:44:52-03:00] Reading 6/10 CIC-IDS-2018/Thursday-15-02-2018_TrafficForML_CICFlowMeter.csv
+[2026-11-03T23:45:23-03:00] Reading 7/10 CIC-IDS-2018/Thursday-22-02-2018_TrafficForML_CICFlowMeter.csv
+[2026-11-03T23:46:02-03:00] Reading 8/10 CIC-IDS-2018/Wednesday-14-02-2018_TrafficForML_CICFlowMeter.csv
+[2026-11-03T23:46:37-03:00] Reading 9/10 CIC-IDS-2018/Wednesday-21-02-2018_TrafficForML_CICFlowMeter.csv
+[2026-11-03T23:46:51-03:00] Reading 10/10 CIC-IDS-2018/Wednesday-28-02-2018_TrafficForML_CICFlowMeter.csv
+[2026-11-03T23:47:21-03:00] Coin flip kept 1,998,881 source rows. Unsampled cleaned test-block rows: 1,136,774.
+[2026-11-03T23:47:21-03:00] Loading saved circuit from qualified_fhe_runs/20261031_170906_440932/fhe/known_lr_c1_q5/cuda/server.zip in simulation mode.
+[2026-11-03T23:47:21-03:00] Simulation backend ready in 0.1s.
+[2026-11-03T23:47:21-03:00] Loading saved circuit from qualified_fhe_runs/20261031_170906_440932/fhe/known_lr_c10_q5/cuda/server.zip in simulation mode.
+[2026-11-03T23:47:21-03:00] Simulation backend ready in 0.1s.
+[2026-11-03T23:47:30-03:00] Reading 1/10 CIC-IDS-2018/Friday-02-03-2018_TrafficForML_CICFlowMeter.csv
+[2026-11-03T23:52:11-03:00] Scored 52,008 unsampled test rows in 4.8 min (179.0 rows/s).
+[2026-11-03T23:56:56-03:00] Scored 104,353 unsampled test rows in 9.6 min (181.3 rows/s).
+[2026-11-04T00:01:41-03:00] Scored 156,482 unsampled test rows in 14.3 min (181.9 rows/s).
+[2026-11-04T00:06:32-03:00] Scored 209,610 unsampled test rows in 19.2 min (182.1 rows/s).
+[2026-11-04T00:11:11-03:00] Scored 262,250 unsampled test rows in 23.8 min (183.4 rows/s).
+[2026-11-04T00:11:43-03:00] Reading 2/10 CIC-IDS-2018/Friday-16-02-2018_TrafficForML_CICFlowMeter.csv
+[2026-11-04T00:12:04-03:00] Reading 3/10 CIC-IDS-2018/Friday-23-02-2018_TrafficForML_CICFlowMeter.csv
+[2026-11-04T00:15:48-03:00] Reading 4/10 CIC-IDS-2018/Thuesday-20-02-2018_TrafficForML_CICFlowMeter.csv
+[2026-11-04T00:16:38-03:00] Scored 313,276 unsampled test rows in 29.3 min (178.3 rows/s).
+[2026-11-04T00:21:18-03:00] Scored 366,127 unsampled test rows in 33.9 min (179.7 rows/s).
+[2026-11-04T00:26:00-03:00] Scored 419,375 unsampled test rows in 38.7 min (180.8 rows/s).
+[2026-11-04T00:30:44-03:00] Scored 470,447 unsampled test rows in 43.4 min (180.7 rows/s).
+[2026-11-04T00:35:34-03:00] Scored 521,016 unsampled test rows in 48.2 min (180.1 rows/s).
+[2026-11-04T00:40:36-03:00] Scored 571,690 unsampled test rows in 53.3 min (178.9 rows/s).
+[2026-11-04T00:45:42-03:00] Scored 622,376 unsampled test rows in 58.4 min (177.8 rows/s).
+[2026-11-04T00:50:58-03:00] Scored 674,371 unsampled test rows in 63.6 min (176.7 rows/s).
+[2026-11-04T00:56:15-03:00] Scored 726,350 unsampled test rows in 68.9 min (175.7 rows/s).
+[2026-11-04T01:01:40-03:00] Scored 779,524 unsampled test rows in 74.3 min (174.8 rows/s).
+[2026-11-04T01:06:48-03:00] Reading 5/10 CIC-IDS-2018/Thursday-01-03-2018_TrafficForML_CICFlowMeter.csv
+[2026-11-04T01:07:49-03:00] Scored 833,592 unsampled test rows in 80.5 min (172.6 rows/s).
+[2026-11-04T01:12:30-03:00] Scored 886,840 unsampled test rows in 85.1 min (173.6 rows/s).
+[2026-11-04T01:17:14-03:00] Scored 940,013 unsampled test rows in 89.9 min (174.3 rows/s).
+[2026-11-04T01:21:22-03:00] Reading 6/10 CIC-IDS-2018/Thursday-15-02-2018_TrafficForML_CICFlowMeter.csv
+[2026-11-04T01:21:53-03:00] Reading 7/10 CIC-IDS-2018/Thursday-22-02-2018_TrafficForML_CICFlowMeter.csv
+[2026-11-04T01:22:19-03:00] Scored 991,653 unsampled test rows in 95.0 min (174.0 rows/s).
+[2026-11-04T01:27:19-03:00] Scored 1,043,247 unsampled test rows in 100.0 min (173.9 rows/s).
+[2026-11-04T01:28:39-03:00] Reading 8/10 CIC-IDS-2018/Wednesday-14-02-2018_TrafficForML_CICFlowMeter.csv
+[2026-11-04T01:32:09-03:00] Scored 1,095,092 unsampled test rows in 104.8 min (174.1 rows/s).
+[2026-11-04T01:36:07-03:00] Reading 9/10 CIC-IDS-2018/Wednesday-21-02-2018_TrafficForML_CICFlowMeter.csv
+[2026-11-04T01:36:23-03:00] Reading 10/10 CIC-IDS-2018/Wednesday-28-02-2018_TrafficForML_CICFlowMeter.csv
+[2026-11-04T01:36:53-03:00] Finished 1,136,774 unsampled test rows in 1.83 h. The coin flip kept 1,998,881 source rows.
+[2026-11-04T01:36:53-03:00] Rescore complete. Read qualified_fhe_runs/20261103_232756_062792_unsampled_test/report.txt
