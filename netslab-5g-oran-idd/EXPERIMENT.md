@@ -39,7 +39,9 @@ python screen_radio_xapp.py --lower-layer-dir data/lower_layer
 
 Identifiers stay out of the model: `timestamp`, `ue_id`, `cellid`. Two UEs
 and one cell would let a model memorize the lab. `ue_id` and `timestamp` are
-used only to build scenarios and one-second deltas.
+used only to build scenarios and one-second deltas. A table that only names
+the UE as `rnti` uses that column as `ue_id`. When both are present, `ue_id`
+is kept and `rnti` is dropped. `rnti` is not a model feature in either case.
 
 No SVD, no PCA, no one-hot, no SMOTE. Byte counts use `log1p` (values below
 0 clipped to 0). `MinMaxScaler` is fit on the training scenarios only, and

@@ -355,23 +355,42 @@ def feature_hit_count(columns: Any) -> int:
     return len(found)
 
 
-def rename_columns(frame: pd.DataFrame) -> tuple[pd.DataFrame, dict[str, str]]:
-    mapping: dict[str, str] = {}
-    used: dict[str, str] = {}
+def rename_columns(frame: pd.DataFrame) -> tuple[pd.DataFrame, dict[str, str], list[str]]:
+    """Map known aliases onto canonical names.
+
+    A table that already has the canonical column keeps it. Extra aliases,
+    such as ``rnti`` beside ``ue_id``, are dropped so they are not features
+    and are not collapsed onto the identifier. Two aliases and no canonical
+    column still stop the run.
+    """
+    grouped: dict[str, list[str]] = {}
     for column in frame.columns:
-        key = normalize_key(column)
-        canonical = FEATURE_ALIASES.get(key)
+        canonical = FEATURE_ALIASES.get(normalize_key(column))
         if canonical is None:
             continue
-        previous = used.get(canonical)
-        if previous is not None and previous != str(column):
+        grouped.setdefault(canonical, []).append(str(column))
+
+    mapping: dict[str, str] = {}
+    ignored: list[str] = []
+    for canonical, columns in grouped.items():
+        if len(columns) == 1:
+            mapping[columns[0]] = canonical
+            continue
+        exact_key = normalize_key(canonical)
+        exact = [column for column in columns if normalize_key(column) == exact_key]
+        if len(exact) != 1:
+            names = "', '".join(columns)
             raise SystemExit(
-                f"Columns '{previous}' and '{column}' both map to {canonical}."
+                f"Columns '{names}' all map to {canonical}, "
+                "and more than one could be that field."
             )
-        used[canonical] = str(column)
-        mapping[str(column)] = canonical
+        mapping[exact[0]] = canonical
+        ignored.extend(column for column in columns if column != exact[0])
+
     renamed = frame.rename(columns=mapping)
-    return renamed, mapping
+    if ignored:
+        renamed = renamed.drop(columns=ignored)
+    return renamed, mapping, ignored
 
 
 def coerce_numeric(series: pd.Series) -> pd.Series:
@@ -581,7 +600,13 @@ def read_lower_layer_dir(root: Path) -> tuple[pd.DataFrame, dict[str, Any]]:
 
 
 def prepare_frame(raw: pd.DataFrame, source_info: dict[str, Any], gap_seconds: float, log) -> tuple[pd.DataFrame, dict[str, Any]]:
-    renamed, mapping = rename_columns(raw)
+    renamed, mapping, ignored_aliases = rename_columns(raw)
+    if ignored_aliases:
+        log(
+            "Dropped identifier aliases already covered by a canonical column: "
+            + ", ".join(ignored_aliases)
+            + "."
+        )
     missing = [name for name in FULL_FEATURES if name not in renamed.columns]
     if missing:
         raise SystemExit(
@@ -688,6 +713,7 @@ def prepare_frame(raw: pd.DataFrame, source_info: dict[str, Any], gap_seconds: f
         **source_info,
         **legacy_info,
         "renamed_columns": mapping,
+        "ignored_alias_columns": ignored_aliases,
         "label_column": label_column,
         "scenario_source": scenario_source,
         "timestamp": timestamp_note,
@@ -2090,6 +2116,25 @@ def run_self_check() -> None:
         raise SystemExit("6-class grid must not compile XGBClassifier or any other shape.")
     if radio_group("Web") != "LowRate" or radio_group("DoS") != "HighRate" or radio_group("Benign") != "Benign":
         raise SystemExit("3-class radio grouping failed.")
+    both, both_mapping, both_ignored = rename_columns(
+        pd.DataFrame({"ue_id": ["ue-1"], "rnti": [99], "timestamp": [0.0]})
+    )
+    if (
+        list(both["ue_id"]) != ["ue-1"]
+        or "rnti" in both.columns
+        or both_ignored != ["rnti"]
+        or both_mapping.get("ue_id") != "ue_id"
+    ):
+        raise SystemExit(f"ue_id should win over rnti: {both_mapping}, {both_ignored}")
+    rnti_only, rnti_mapping, rnti_ignored = rename_columns(pd.DataFrame({"rnti": [99]}))
+    if rnti_mapping != {"rnti": "ue_id"} or rnti_ignored or "ue_id" not in rnti_only.columns:
+        raise SystemExit("A table with only rnti should still use it as ue_id.")
+    try:
+        rename_columns(pd.DataFrame({"time": [1.0], "frametime": [2.0]}))
+    except SystemExit:
+        pass
+    else:
+        raise SystemExit("Ambiguous timestamp aliases were accepted.")
     print("self-check ok")
 
 

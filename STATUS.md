@@ -421,6 +421,10 @@ python screen_radio_xapp.py --db data/Lower_Layer_Data.db
 python screen_network_benchmark.py --csv data/Network_Dataset.csv
 ```
 
+`Lower_Layer_Data.db` has both `ue_id` and `rnti`. The radio loader keeps
+`ue_id` and drops `rnti`. Re-run the same `screen_radio_xapp.py` command
+after this script is on the dataset machine.
+
 The radio screen is plaintext and Concrete ML quantized-clear. Task A is
 binary. Task B scores 3-class (`Benign` / high-rate / low-rate) and the six
 Version 2 categories. `--compile-fhe` compiles one binary `load` or `delta`
