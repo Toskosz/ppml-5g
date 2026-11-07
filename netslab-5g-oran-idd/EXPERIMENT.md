@@ -46,7 +46,8 @@ is kept and `rnti` is dropped. `rnti` is not a model feature in either case.
 No SVD, no PCA, no one-hot, no SMOTE. Byte counts use `log1p` (values below
 0 clipped to 0). `MinMaxScaler` is fit on the training scenarios only, and
 transformed values are clipped to `[0, 1]` so a later quantizer stays inside
-the training range. `ri`, `pmi`, `cqi`, MCS, and `in_sync` stay numeric.
+the training range. `ri`, `pmi`, `cqi`, MCS, and `in_sync` stay numeric. `pmi` may be stored as a
+pair such as `(0, 0)`; the feature is the first number.
 
 1. **load** — `log1p(dlBytes)`, `log1p(ulBytes)`, `dlBler`, `ulBler`, `dlMcs`,
    `ulMcs`, `phr`, `pcmax`, `ri`, `pmi`, `in_sync`.
@@ -77,7 +78,12 @@ Scenario id, in order:
 
 1. A source-file column, when it is present and is not a row id.
 2. Otherwise the label subtype plus a new run wherever the timestamp gap
-   inside that subtype exceeds 5 seconds (`--scenario-gap-seconds`).
+   inside that subtype exceeds 5 seconds (`--scenario-gap-seconds`). The
+   subtype is `attack_subcategory` when that column is present (`DoS_SYN`,
+   `Web_XSS`), not the coarse category. A series sampled about once a second
+   still splits at 5 seconds. A slower series starts a new run only after a
+   gap of at least 15 times its median spacing, so a few missing samples are
+   not a new capture.
 
 Assignment is deterministic. Scenario ids are sorted within each Version 2
 category (`Benign`, `DoS`, `DDoS`, `Probe`, `BruteForce`, `Web`):

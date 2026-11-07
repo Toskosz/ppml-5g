@@ -137,6 +137,12 @@ LABEL_ALIASES = {
     "target",
     "type",
 }
+SUBTYPE_ALIASES = {
+    "attacksubcategory",
+    "subcategory",
+    "attacksubtype",
+    "subtype",
+}
 SCENARIO_ALIASES = {
     "sourcefile",
     "filename",
@@ -397,10 +403,19 @@ def coerce_numeric(series: pd.Series) -> pd.Series:
     if pd.api.types.is_bool_dtype(series):
         return series.astype(np.float64)
     numeric = pd.to_numeric(series, errors="coerce")
-    if numeric.notna().mean() >= 0.9:
+    if float(numeric.notna().mean()) >= 0.9:
         return numeric.astype(np.float64)
     text = series.astype(str).str.strip().str.lower().map(BOOL_TEXT)
-    return numeric.fillna(text).astype(np.float64)
+    filled = numeric.fillna(text)
+    if float(filled.notna().mean()) >= 0.9:
+        return filled.astype(np.float64)
+    # OAI writes PMI as a pair, for example "(0, 0)". The feature is the first number.
+    pairs = series.astype(str).str.extract(
+        r"^\s*[\[\(]\s*([+-]?\d+(?:\.\d+)?)",
+        expand=False,
+    )
+    filled = filled.fillna(pd.to_numeric(pairs, errors="coerce"))
+    return filled.astype(np.float64)
 
 
 def to_seconds(series: pd.Series) -> pd.Series:
@@ -443,6 +458,18 @@ def choose_label_column(frame: pd.DataFrame) -> str | None:
             best_score = score
             best_name = str(column)
     return best_name
+
+
+def choose_subtype_column(frame: pd.DataFrame, label_column: str | None) -> str | None:
+    banned = set(FULL_FEATURES) | set(ID_COLUMNS)
+    if label_column is not None:
+        banned.add(label_column)
+    for column in frame.columns:
+        if str(column) in banned:
+            continue
+        if normalize_key(column) in SUBTYPE_ALIASES:
+            return str(column)
+    return None
 
 
 def choose_scenario_column(frame: pd.DataFrame, label_column: str | None) -> str | None:
@@ -629,9 +656,13 @@ def prepare_frame(raw: pd.DataFrame, source_info: dict[str, Any], gap_seconds: f
         working[column] = coerce_numeric(working[column])
     finite = np.ones(len(working), dtype=bool)
     negative_bytes = 0
+    nonfinite_columns: list[str] = []
     for column in FULL_FEATURES:
         values = working[column].to_numpy(dtype=np.float64)
-        finite &= np.isfinite(values)
+        bad = ~np.isfinite(values)
+        if bad.any():
+            nonfinite_columns.append(f"{column} ({int(bad.sum())})")
+        finite &= ~bad
         if column in BYTE_COLUMNS:
             negative = np.isfinite(values) & (values < 0)
             negative_bytes += int(negative.sum())
@@ -668,7 +699,12 @@ def prepare_frame(raw: pd.DataFrame, source_info: dict[str, Any], gap_seconds: f
         {"benign", "dos", "ddos", "probe", "bruteforce", "web", "attack", "normal", "malicious"}
     )
     # A file stem or a fine attack name is the subtype. A bare category is not.
-    if scenario_column == "source_file":
+    subtype_column = choose_subtype_column(working, label_column)
+    if subtype_column is not None:
+        working["subtype"] = working[subtype_column].astype(str).str.strip()
+        empty_subtype = working["subtype"].map(normalize_key).isin({"", "nan", "none", "null"})
+        working.loc[empty_subtype, "subtype"] = working.loc[empty_subtype, "category"]
+    elif scenario_column == "source_file":
         working["subtype"] = (
             raw_text.where(~coarse, working["source_file"].map(lambda path: Path(str(path)).stem))
         )
@@ -720,6 +756,8 @@ def prepare_frame(raw: pd.DataFrame, source_info: dict[str, Any], gap_seconds: f
         "ue_id": ue_note,
         "rows_after_legacy_filter": int(len(filtered)),
         "rows_dropped_nonfinite": dropped_nonfinite,
+        "nonfinite_columns": nonfinite_columns,
+        "subtype_column": subtype_column,
         "negative_byte_values_clipped": negative_bytes,
         "rows_dropped_unknown_label": dropped_unknown,
         "folder_label_disagreements": folder_label_disagreements,
@@ -743,8 +781,32 @@ def prepare_frame(raw: pd.DataFrame, source_info: dict[str, Any], gap_seconds: f
     )
     log(f"Class counts: {schema['class_counts']}")
     if schema["binary_counts"]["benign"] == 0 or schema["binary_counts"]["attack"] == 0:
-        raise SystemExit("Need both benign and attack rows after cleaning.")
+        detail = (
+            f"rows after legacy filter={schema['rows_after_legacy_filter']}, "
+            f"dropped nonfinite={schema['rows_dropped_nonfinite']}, "
+            f"dropped unknown label={schema['rows_dropped_unknown_label']}, "
+            f"dropped bad timestamp={schema['rows_dropped_bad_timestamp']}"
+        )
+        if nonfinite_columns:
+            detail += ". Non-finite columns: " + ", ".join(nonfinite_columns)
+        raise SystemExit("Need both benign and attack rows after cleaning. " + detail)
     return working, schema
+
+
+def scenario_gap_threshold(times: np.ndarray, gap_seconds: float) -> float:
+    """Separate captures without splitting a slow but continuous sample.
+
+    A series whose samples are about a second apart uses ``gap_seconds``.
+    A slower series, such as DoS rows a few seconds apart, starts a new run
+    only after a gap of at least 15 times its median spacing.
+    """
+    if len(times) < 2:
+        return gap_seconds
+    spacing = np.diff(np.sort(times.astype(np.float64)))
+    median = float(np.median(spacing))
+    if not np.isfinite(median) or median <= 1.5:
+        return gap_seconds
+    return max(gap_seconds, 15.0 * median)
 
 
 def assign_time_gap_scenarios(frame: pd.DataFrame, gap_seconds: float) -> pd.Series:
@@ -753,11 +815,12 @@ def assign_time_gap_scenarios(frame: pd.DataFrame, gap_seconds: float) -> pd.Ser
         safe_subtype = re.sub(r"\s+", "_", str(subtype)).replace("|", "/")
         times = np.unique(group["timestamp_seconds"].to_numpy(dtype=np.float64))
         times.sort()
+        threshold = scenario_gap_threshold(times, gap_seconds)
         run_of_time: dict[float, int] = {}
         run = 0
         previous = None
         for stamp in times:
-            if previous is not None and float(stamp - previous) > gap_seconds:
+            if previous is not None and float(stamp - previous) > threshold:
                 run += 1
             run_of_time[float(stamp)] = run
             previous = float(stamp)
@@ -2001,6 +2064,7 @@ def run_self_check() -> None:
         "portscan_masscan": "Probe",
         "ssh_hydra": "BruteForce",
         "sqlmap": "Web",
+        "Web Attacks": "Web",
         "http_flood": "DoS",
     }
     for raw, expected in categories.items():
@@ -2135,6 +2199,54 @@ def run_self_check() -> None:
         pass
     else:
         raise SystemExit("Ambiguous timestamp aliases were accepted.")
+    pmi_values = coerce_numeric(pd.Series(["(0, 0)", "(1, 2)", "3"]))
+    if pmi_values.tolist() != [0.0, 1.0, 3.0]:
+        raise SystemExit(f"PMI pair was not read as its first number: {pmi_values.tolist()}")
+    slow = pd.DataFrame(
+        {
+            "category": ["DoS", "DoS", "DoS", "DoS"],
+            "subtype": ["DoS_ACK", "DoS_ACK", "DoS_ACK", "DoS_ACK"],
+            "timestamp_seconds": [0.0, 6.0, 12.0, 400.0],
+        }
+    )
+    if assign_time_gap_scenarios(slow, 5.0).nunique() != 2:
+        raise SystemExit("A slow DoS capture was split on its sample spacing.")
+    fast = pd.DataFrame(
+        {
+            "category": ["Benign"] * 5,
+            "subtype": ["Benign"] * 5,
+            "timestamp_seconds": [0.0, 1.0, 2.0, 3.0, 100.0],
+        }
+    )
+    if assign_time_gap_scenarios(fast, 5.0).nunique() != 2:
+        raise SystemExit("A one-second capture did not split at the 5 second gap.")
+    pmi_rows = []
+    for start, label, subtype in (
+        (0, "Benign", "Benign"),
+        (100, "DoS", "DoS_SYN"),
+        (200, "Web Attacks", "Web_XSS"),
+    ):
+        for offset in range(5):
+            row = {name: 0.0 for name in FULL_FEATURES}
+            row["pmi"] = "(0, 0)"
+            row["timestamp"] = start + offset
+            row["ue_id"] = "1"
+            row["rnti"] = "9999"
+            row["attack_category"] = label
+            row["attack_subcategory"] = subtype
+            pmi_rows.append(row)
+    prepared_pmi, pmi_schema = prepare_frame(
+        pd.DataFrame(pmi_rows),
+        {"source": "self-check-pmi"},
+        5.0,
+        lambda _message: None,
+    )
+    if pmi_schema["rows"] != 15 or pmi_schema["class_counts"].get("Web") != 5:
+        raise SystemExit(f"PMI text rows were dropped: {pmi_schema['class_counts']}")
+    if set(prepared_pmi["subtype"]) != {"Benign", "DoS_SYN", "Web_XSS"}:
+        raise SystemExit(f"Subtype column was ignored: {set(prepared_pmi['subtype'])}")
+    if pmi_schema["ignored_alias_columns"] != ["rnti"]:
+        raise SystemExit(f"rnti was not dropped beside ue_id: {pmi_schema['ignored_alias_columns']}")
     print("self-check ok")
 
 

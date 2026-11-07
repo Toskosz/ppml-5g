@@ -421,9 +421,10 @@ python screen_radio_xapp.py --db data/Lower_Layer_Data.db
 python screen_network_benchmark.py --csv data/Network_Dataset.csv
 ```
 
-`Lower_Layer_Data.db` has both `ue_id` and `rnti`. The radio loader keeps
-`ue_id` and drops `rnti`. Re-run the same `screen_radio_xapp.py` command
-after this script is on the dataset machine.
+`Lower_Layer_Data.db` stores `pmi` as the text `(0, 0)` on every row. The
+radio loader reads the first number, keeps `ue_id`, drops `rnti`, and uses
+`attack_subcategory` as the capture subtype. Re-run the same
+`screen_radio_xapp.py` command after this script is on the dataset machine.
 
 The radio screen is plaintext and Concrete ML quantized-clear. Task A is
 binary. Task B scores 3-class (`Benign` / high-rate / low-rate) and the six
