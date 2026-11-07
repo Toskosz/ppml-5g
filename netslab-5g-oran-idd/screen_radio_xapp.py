@@ -1488,19 +1488,19 @@ def indices_for(mask: pd.Series) -> np.ndarray:
     return np.flatnonzero(mask.to_numpy())
 
 
-def save_joblib(payload: Any, path: Path, log) -> None:
-    """Save a fitted model when the runtime can pickle it.
+# Quantized trees, forests, boosting, and the MLP embed objects joblib cannot
+# store (an ONNX lambda, or a Brevitas quantizer). Their scores are kept.
+UNSAVED_QUANTIZED_FAMILIES = {"tree", "forest", "xgb", "mlp"}
 
-    A Concrete ML quantized tree carries a local lambda in its ONNX forward
-    pass. joblib cannot store that object. The screen scores are already
-    recorded, so a failed save must not stop the run.
-    """
+
+def save_joblib(payload: Any, path: Path, log) -> None:
+    """Save a fitted model when the runtime can pickle it."""
     if joblib is None:
         return
     try:
         joblib.dump(payload, path)
     except Exception as exc:
-        log(f"Could not save {path.name}: {type(exc).__name__}: {exc}")
+        log(f"Could not save {path.name}: {type(exc).__name__}")
 
 
 def screen_matrices(
@@ -1663,11 +1663,12 @@ def screen_matrices(
                     "categories": categories,
                     "result": row,
                 }
-            save_joblib(
-                {"model": model, "threshold": row["selected_threshold"], "result": row},
-                model_dir / f"{config['id']}_q{n_bits}.joblib",
-                log,
-            )
+            if config["family"] not in UNSAVED_QUANTIZED_FAMILIES:
+                save_joblib(
+                    {"model": model, "threshold": row["selected_threshold"], "result": row},
+                    model_dir / f"{config['id']}_q{n_bits}.joblib",
+                    log,
+                )
     return float_rows, quant_rows, breakdown, kept
 
 
