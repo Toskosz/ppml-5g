@@ -1,0 +1,88 @@
+[2026-11-07T15:52:43-03:00] New run directory: screen_runs/20261107_155243_165220
+[2026-11-07T15:52:43-03:00] Dropped identifier aliases already covered by a canonical column: rnti.
+[2026-11-07T15:52:44-03:00] Loaded 45,244 rows, 62 scenarios, label column 'attack_category', scenario source 'time_gap'.
+[2026-11-07T15:52:44-03:00] Class counts: {'Benign': 10664, 'BruteForce': 3057, 'DDoS': 15084, 'DoS': 4721, 'Probe': 8445, 'Web': 3273}
+[2026-11-07T15:52:46-03:00] Training-split mutual information does not match the paper drop.
+[2026-11-07T15:52:46-03:00] scenario_holdout/binary/load/lr_c1: fitting on 32,636 rows...
+[2026-11-07T15:52:47-03:00] scenario_holdout/binary/load/lr_c1: F1=0.9589, benign FPR=1.0000, threshold=0.009469781452220384.
+[2026-11-07T15:52:47-03:00] scenario_holdout/binary/load/lr_c10: fitting on 32,636 rows...
+[2026-11-07T15:52:49-03:00] scenario_holdout/binary/load/lr_c10: F1=0.9587, benign FPR=1.0000, threshold=0.005707984438249434.
+[2026-11-07T15:52:49-03:00] scenario_holdout/binary/load/linear_svc: fitting on 32,636 rows...
+[2026-11-07T15:52:49-03:00] scenario_holdout/binary/load/linear_svc: F1=0.9587, benign FPR=1.0000, threshold=-1.6951385116030622.
+[2026-11-07T15:52:49-03:00] scenario_holdout/binary/load/tree_depth_3: fitting on 32,636 rows...
+[2026-11-07T15:52:49-03:00] scenario_holdout/binary/load/tree_depth_3: F1=0.9589, benign FPR=1.0000, threshold=0.020968756552736424.
+[2026-11-07T15:52:49-03:00] scenario_holdout/binary/load/tree_depth_4: fitting on 32,636 rows...
+[2026-11-07T15:52:49-03:00] scenario_holdout/binary/load/tree_depth_4: F1=0.9589, benign FPR=1.0000, threshold=0.07278020378457059.
+[2026-11-07T15:52:49-03:00] scenario_holdout/binary/load/tree_depth_6: fitting on 32,636 rows...
+[2026-11-07T15:52:49-03:00] scenario_holdout/binary/load/tree_depth_6: F1=0.9589, benign FPR=1.0000, threshold=0.0.
+[2026-11-07T15:52:49-03:00] scenario_holdout/binary/load/rf_10_depth_3: fitting on 32,636 rows...
+[2026-11-07T15:52:49-03:00] scenario_holdout/binary/load/rf_10_depth_3: F1=0.8977, benign FPR=0.9826, threshold=0.7677767219641247.
+[2026-11-07T15:52:49-03:00] scenario_holdout/binary/load/rf_20_depth_4: fitting on 32,636 rows...
+[2026-11-07T15:52:50-03:00] scenario_holdout/binary/load/rf_20_depth_4: F1=0.8667, benign FPR=1.0000, threshold=0.8113421647435087.
+[2026-11-07T15:52:50-03:00] scenario_holdout/binary/load/xgb_10_depth_3: fitting on 32,636 rows...
+[2026-11-07T15:52:50-03:00] scenario_holdout/binary/load/xgb_10_depth_3: F1=0.8734, benign FPR=0.9981, threshold=0.7903337478637695.
+[2026-11-07T15:52:50-03:00] scenario_holdout/binary/load/xgb_20_depth_4: fitting on 32,636 rows...
+[2026-11-07T15:52:50-03:00] scenario_holdout/binary/load/xgb_20_depth_4: F1=0.9031, benign FPR=0.9981, threshold=0.83859783411026.
+[2026-11-07T15:52:50-03:00] scenario_holdout/binary/load/qmlp_32: fitting on 32,636 rows...
+[2026-11-07T15:52:51-03:00] scenario_holdout/binary/load/qmlp_32: F1=0.9167, benign FPR=1.0000, threshold=0.5019034147262573.
+[2026-11-07T15:52:53-03:00] scenario_holdout/binary/load/lr_c1/q6: fitting on 32,636 rows...
+[2026-11-07T15:52:55-03:00] scenario_holdout/binary/load/lr_c1/q6: F1=0.9148, benign FPR=1.0000, threshold=0.22770958765454122.
+[2026-11-07T15:52:55-03:00] scenario_holdout/binary/load/lr_c1/q8: fitting on 32,636 rows...
+[2026-11-07T15:52:56-03:00] scenario_holdout/binary/load/lr_c1/q8: F1=0.9589, benign FPR=1.0000, threshold=0.00845536118813448.
+[2026-11-07T15:52:56-03:00] scenario_holdout/binary/load/lr_c10/q6: fitting on 32,636 rows...
+[2026-11-07T15:52:57-03:00] scenario_holdout/binary/load/lr_c10/q6: F1=0.9589, benign FPR=1.0000, threshold=0.002566090327786471.
+[2026-11-07T15:52:57-03:00] scenario_holdout/binary/load/linear_svc/q6: fitting on 32,636 rows...
+[2026-11-07T15:52:57-03:00] scenario_holdout/binary/load/linear_svc/q6: F1=0.9589, benign FPR=1.0000, threshold=0.12381124930403938.
+[2026-11-07T15:52:57-03:00] scenario_holdout/binary/load/linear_svc/q8: fitting on 32,636 rows...
+[2026-11-07T15:52:57-03:00] scenario_holdout/binary/load/linear_svc/q8: F1=0.9587, benign FPR=1.0000, threshold=0.14679822994932804.
+[2026-11-07T15:52:57-03:00] scenario_holdout/binary/load/tree_depth_3/q6: fitting on 32,636 rows...
+[2026-11-07T15:52:58-03:00] scenario_holdout/binary/load/tree_depth_3/q6: F1=0.9325, benign FPR=1.0000, threshold=0.7777777777777777.
+[2026-11-07T15:52:58-03:00] Traceback (most recent call last):
+  File "/home/thiago.tokarski/ppml-5g/netslab-5g-oran-idd/screen_radio_xapp.py", line 2348, in main
+    run_set("scenario_holdout", feature_set, columns, base_configs)
+  File "/home/thiago.tokarski/ppml-5g/netslab-5g-oran-idd/screen_radio_xapp.py", line 2326, in run_set
+    produced_float, produced_quant, produced_breakdown, produced_kept = screen_matrices(
+                                                                        ^^^^^^^^^^^^^^^^
+  File "/home/thiago.tokarski/ppml-5g/netslab-5g-oran-idd/screen_radio_xapp.py", line 1653, in screen_matrices
+    joblib.dump(
+  File "/home/thiago.tokarski/ppml-5g/.venv/lib/python3.12/site-packages/joblib/numpy_pickle.py", line 600, in dump
+    NumpyPickler(f, protocol=protocol).dump(value)
+  File "/home/thiago.tokarski/.pyenv/versions/3.12.8/lib/python3.12/pickle.py", line 484, in dump
+    self.save(obj)
+  File "/home/thiago.tokarski/ppml-5g/.venv/lib/python3.12/site-packages/joblib/numpy_pickle.py", line 395, in save
+    return Pickler.save(self, obj)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thiago.tokarski/.pyenv/versions/3.12.8/lib/python3.12/pickle.py", line 558, in save
+    f(self, obj)  # Call unbound method with explicit self
+    ^^^^^^^^^^^^
+  File "/home/thiago.tokarski/.pyenv/versions/3.12.8/lib/python3.12/pickle.py", line 990, in save_dict
+    self._batch_setitems(obj.items())
+  File "/home/thiago.tokarski/.pyenv/versions/3.12.8/lib/python3.12/pickle.py", line 1014, in _batch_setitems
+    save(v)
+  File "/home/thiago.tokarski/ppml-5g/.venv/lib/python3.12/site-packages/joblib/numpy_pickle.py", line 395, in save
+    return Pickler.save(self, obj)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thiago.tokarski/.pyenv/versions/3.12.8/lib/python3.12/pickle.py", line 601, in save
+    self.save_reduce(obj=obj, *rv)
+  File "/home/thiago.tokarski/.pyenv/versions/3.12.8/lib/python3.12/pickle.py", line 715, in save_reduce
+    save(state)
+  File "/home/thiago.tokarski/ppml-5g/.venv/lib/python3.12/site-packages/joblib/numpy_pickle.py", line 395, in save
+    return Pickler.save(self, obj)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thiago.tokarski/.pyenv/versions/3.12.8/lib/python3.12/pickle.py", line 558, in save
+    f(self, obj)  # Call unbound method with explicit self
+    ^^^^^^^^^^^^
+  File "/home/thiago.tokarski/.pyenv/versions/3.12.8/lib/python3.12/pickle.py", line 990, in save_dict
+    self._batch_setitems(obj.items())
+  File "/home/thiago.tokarski/.pyenv/versions/3.12.8/lib/python3.12/pickle.py", line 1014, in _batch_setitems
+    save(v)
+  File "/home/thiago.tokarski/ppml-5g/.venv/lib/python3.12/site-packages/joblib/numpy_pickle.py", line 395, in save
+    return Pickler.save(self, obj)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thiago.tokarski/.pyenv/versions/3.12.8/lib/python3.12/pickle.py", line 558, in save
+    f(self, obj)  # Call unbound method with explicit self
+    ^^^^^^^^^^^^
+  File "/home/thiago.tokarski/.pyenv/versions/3.12.8/lib/python3.12/pickle.py", line 1087, in save_global
+    raise PicklingError(
+_pickle.PicklingError: Can't pickle <function get_equivalent_numpy_forward_from_onnx_tree.<locals>.<lambda> at 0x7f0ca1c17e20>: it's not found as concrete.ml.onnx.convert.get_equivalent_numpy_forward_from_onnx_tree.<locals>.<lambda>
+

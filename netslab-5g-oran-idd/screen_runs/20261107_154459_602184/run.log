@@ -1,0 +1,5 @@
+[2026-11-07T15:44:59-03:00] New run directory: screen_runs/20261107_154459_602184
+[2026-11-07T15:44:59-03:00] Dropped identifier aliases already covered by a canonical column: rnti.
+[2026-11-07T15:45:00-03:00] Loaded 0 rows, 0 scenarios, label column 'attack_category', scenario source 'time_gap'.
+[2026-11-07T15:45:00-03:00] Class counts: {}
+[2026-11-07T15:45:00-03:00] Need both benign and attack rows after cleaning.
