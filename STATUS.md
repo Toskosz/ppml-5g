@@ -1,6 +1,6 @@
 # PPML-5G experiment status
 
-Updated: 2026-11-05
+Updated: 2026-11-07
 
 ## Objective
 
@@ -406,12 +406,33 @@ block of the Friday 2018-03-02 capture. Do not repeat this rescore.
 
 ## Next action
 
-None on this sample. Cite the sampled test in `20261031_170906_440932`. The
-unsampled run checks those same blocks and does not replace that score.
+None on the CIC-IDS-2018 sample. Cite the sampled test in
+`20261031_170906_440932`. The unsampled run checks those same blocks and
+does not replace that score.
 
-An independent Bot recording is still required before calling this botnet
-detection beyond CIC-IDS-2018. There is still no passing FHE circuit for Bot
-detection against future benign traffic.
+The separate radio xApp track is `netslab-5g-oran-idd/`. Protocol:
+`netslab-5g-oran-idd/EXPERIMENT.md`. Run it on the dataset machine from
+that directory, after `Lower_Layer_Data.db` is local. Do not run it in
+this workspace.
+
+```bash
+cd netslab-5g-oran-idd
+python screen_radio_xapp.py --db data/Lower_Layer_Data.db
+python screen_network_benchmark.py --csv data/Network_Dataset.csv
+```
+
+The radio screen is plaintext and Concrete ML quantized-clear. Task A is
+binary. Task B scores 3-class (`Benign` / high-rate / low-rate) and the six
+Version 2 categories. `--compile-fhe` compiles one binary `load` or `delta`
+linear model, or one tree of depth at most 4. Forests, XGBoost, and the
+quantized MLP are accuracy screens. The Zeek script does not compile.
+A row-random split is refused. If the summary table cannot name capture
+scenarios, rerun the radio screen with `--lower-layer-dir` pointed at the
+per-scenario `lower_layer` text files.
+
+CIC-IDS-2018 is unchanged. An independent Bot recording is still required
+before calling this botnet detection beyond CIC-IDS-2018. There is still no
+passing FHE circuit for Bot detection against future benign traffic.
 
 Full-data loading remains unsafe under the 20 GiB RAM cap.
 `anomaly_model_experiments.py --sample-rows 0` and
