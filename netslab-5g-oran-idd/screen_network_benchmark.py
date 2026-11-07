@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import argparse
 import sys
+import time
 from pathlib import Path
 from typing import Any
 
@@ -35,6 +36,7 @@ from screen_radio_xapp import (
     choose_scenario_column,
     create_run_dir,
     make_logger,
+    map_uniques,
     masks_for,
     multiclass_model_configs,
     normalize_category,
@@ -97,7 +99,7 @@ def load_table(path: Path) -> pd.DataFrame:
 
 
 def prepare_network(raw: pd.DataFrame, gap_seconds: float, log) -> tuple[pd.DataFrame, dict[str, Any]]:
-    label_column = choose_label_column(raw)
+    label_column = choose_label_column(raw, log)
     if label_column is None:
         raise SystemExit(
             "No Benign/Attack label column was found. Columns: "
@@ -106,7 +108,8 @@ def prepare_network(raw: pd.DataFrame, gap_seconds: float, log) -> tuple[pd.Data
     working = raw.drop(columns=[column for column in raw.columns if is_identifier(column)]).copy()
     if label_column not in working.columns:
         working[label_column] = raw[label_column]
-    working["category"] = working[label_column].map(normalize_category)
+    log(f"Mapping categories from '{label_column}'.")
+    working["category"] = map_uniques(working[label_column], normalize_category)
     known = working["category"].isin(("Benign", "DoS", "DDoS", "Probe", "BruteForce", "Web", "Attack"))
     dropped_unknown = int((~known).sum())
     working = working.loc[known].copy()
@@ -114,7 +117,7 @@ def prepare_network(raw: pd.DataFrame, gap_seconds: float, log) -> tuple[pd.Data
     working["radio6_label"] = working["category"].map(RADIO6_CLASS)
     working["radio3_label"] = working["category"].map(RADIO3_CLASS)
     raw_text = working[label_column].astype(str).str.strip()
-    coarse = raw_text.map(normalize_key).isin(
+    coarse = map_uniques(raw_text, normalize_key).isin(
         {"benign", "dos", "ddos", "probe", "bruteforce", "web", "attack", "normal", "malicious"}
     )
     working["subtype"] = raw_text.where(~coarse, working["category"])
@@ -134,9 +137,11 @@ def prepare_network(raw: pd.DataFrame, gap_seconds: float, log) -> tuple[pd.Data
         timestamp_note = "missing"
         working["timestamp_seconds"] = np.nan
     if scenario_column is not None:
+        log(f"Scenario column '{scenario_column}'.")
         working["scenario_id"] = working[scenario_column].astype(str)
         scenario_source = scenario_column
     elif timestamp_column is not None:
+        log("No scenario column. Building time-gap scenarios.")
         working["scenario_id"] = assign_time_gap_scenarios(working, gap_seconds)
         scenario_source = "time_gap"
     else:
@@ -185,6 +190,7 @@ def encode_candidates(frame: pd.DataFrame, train_mask: pd.Series, log) -> tuple[
     }
     encoded = pd.DataFrame(index=frame.index)
     logged: list[str] = []
+    log(f"Encoding Zeek columns from {frame.shape[1]} fields on {len(frame):,} rows.")
     for column in frame.columns:
         if column in reserved or is_identifier(column):
             continue
@@ -261,14 +267,28 @@ def main(argv: list[str] | None = None) -> int:
     if args.compile_fhe:
         log("Refusing FHE compilation. Zeek features are not the E2 xApp input.")
     try:
-        raw = load_table(Path(args.csv))
+        csv_path = Path(args.csv)
+        if not csv_path.is_file():
+            raise SystemExit(f"Network table not found: {csv_path}")
+        log(f"Reading {csv_path} ({csv_path.stat().st_size / 1e6:.1f} MB).")
+        started = time.perf_counter()
+        raw = load_table(csv_path)
+        log(
+            f"Read {len(raw):,} rows and {raw.shape[1]} columns "
+            f"in {time.perf_counter() - started:.1f}s."
+        )
         frame, schema = prepare_network(raw, args.scenario_gap_seconds, log)
         split_summary = assign_scenarios(frame)
         frame = apply_split(frame, split_summary["assignment"])
         train_mask, _validation, _test = masks_for(frame, "scenario_holdout")
         encoded, logged = encode_candidates(frame, train_mask, log)
         y = frame["binary_label"].to_numpy(dtype=np.int64)
-        ranking = mutual_information_rank(encoded, y, np.flatnonzero(train_mask.to_numpy()))
+        train_index = np.flatnonzero(train_mask.to_numpy())
+        log(
+            f"Ranking mutual information on {min(len(train_index), MI_ROW_CAP):,} "
+            f"of {len(train_index):,} training rows."
+        )
+        ranking = mutual_information_rank(encoded, y, train_index)
         write_json(run_dir / "mutual_information.json", ranking)
         write_json(run_dir / "schema.json", {**schema, "log1p_columns": logged})
         write_json(

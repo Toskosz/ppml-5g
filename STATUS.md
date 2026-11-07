@@ -410,14 +410,22 @@ None on the CIC-IDS-2018 sample. Cite the sampled test in
 `20261031_170906_440932`. The unsampled run checks those same blocks and
 does not replace that score.
 
-The separate radio xApp track is `netslab-5g-oran-idd/`. Protocol:
-`netslab-5g-oran-idd/EXPERIMENT.md`. Run it on the dataset machine from
-that directory, after `Lower_Layer_Data.db` is local. Do not run it in
-this workspace.
+The radio screen finished in
+`netslab-5g-oran-idd/screen_runs/20261107_155459_423954`. No model cleared
+the scenario-holdout gate. Binary F1 values near 0.9589 match always-attack
+on a test set of 6,532 rows (6,016 attack, 516 benign). The lowest benign
+false-positive rate is 0.655 (`delta`, 20 trees, depth 4). Do not compile
+that screen again.
+
+The Zeek run was interrupted on 2026-11-07 inside `choose_label_column`,
+which applied `normalize_category` to every cell before printing anything.
+Label detection now uses distinct values, and the script logs before the
+CSV read, after the read, and while it picks the label column. Rerun it on
+the dataset machine. The first log line should appear before the file is
+parsed. `--compile-fhe` stays refused.
 
 ```bash
 cd netslab-5g-oran-idd
-python screen_radio_xapp.py --db data/Lower_Layer_Data.db
 python screen_network_benchmark.py --csv data/Network_Dataset.csv
 ```
 
@@ -425,8 +433,8 @@ python screen_network_benchmark.py --csv data/Network_Dataset.csv
 radio loader reads the first number, keeps `ue_id`, drops `rnti`, and uses
 `attack_subcategory` as the capture subtype. Quantized trees, forests,
 boosting, and the MLP are not written with joblib. Their scores still go to
-the result tables. Leave the current screen running. This save change applies
-to the next run.
+the result tables. The one-byte `*_q*.joblib` files in the finished radio
+run are truncated saves from the earlier pickling error.
 
 The radio screen is plaintext and Concrete ML quantized-clear. Task A is
 binary. Task B scores 3-class (`Benign` / high-rate / low-rate) and the six

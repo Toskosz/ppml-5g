@@ -204,6 +204,13 @@ def normalize_category(value: object) -> str:
     return "Unknown"
 
 
+def map_uniques(series: pd.Series, function) -> pd.Series:
+    """Apply ``function`` once per distinct value, then broadcast the result."""
+    text = series.astype(str)
+    mapping = {value: function(value) for value in pd.unique(text)}
+    return text.map(mapping)
+
+
 def refuse_row_random(argv: list[str]) -> None:
     """Stop before argparse when the caller asks to shuffle or subsample rows."""
     if any(arg in {"-h", "--help"} for arg in argv):
@@ -435,28 +442,71 @@ def to_seconds(series: pd.Series) -> pd.Series:
     return seconds
 
 
-def choose_label_column(frame: pd.DataFrame) -> str | None:
+# A label column has a handful of names. Unique ids and byte counters do not.
+# The probe rejects those before any full-column string conversion.
+_LABEL_CARDINALITY_CAP = 128
+_LABEL_PROBE_ROWS = 4096
+
+
+def _label_probe(series: pd.Series) -> pd.Series:
+    count = len(series)
+    if count <= _LABEL_PROBE_ROWS:
+        return series
+    step = max(1, count // _LABEL_PROBE_ROWS)
+    return series.iloc[::step]
+
+
+def _label_column_score(series: pd.Series, key: str) -> tuple[float, int, int] | None:
+    if pd.api.types.is_float_dtype(series):
+        return None
+    if len(pd.unique(_label_probe(series).astype(str))) > _LABEL_CARDINALITY_CAP:
+        return None
+    values = series.astype(str)
+    uniques = pd.unique(values)
+    if len(uniques) < 2 or len(uniques) > _LABEL_CARDINALITY_CAP:
+        return None
+    categories = values.map({value: normalize_category(value) for value in uniques})
+    known = categories.isin(VERSION2_CATEGORIES + ("Attack",))
+    fraction = float(known.mean()) if len(series) else 0.0
+    distinct_categories = int(categories[known].nunique()) if bool(known.any()) else 0
+    if fraction < 0.5 or distinct_categories < 2:
+        return None
+    alias_bonus = 0.05 if key in LABEL_ALIASES else 0.0
+    return (fraction + alias_bonus, distinct_categories, int(values[known].nunique()))
+
+
+def choose_label_column(frame: pd.DataFrame, log=None) -> str | None:
     banned = set(FULL_FEATURES) | set(ID_COLUMNS) | {"folder_category", "source_file"}
-    best_name = None
-    best_score = (-1.0, -1, -1)
+    named: list[tuple[str, str]] = []
+    others: list[tuple[str, str]] = []
     for column in frame.columns:
         if column in banned:
             continue
         key = normalize_key(column)
-        series = frame[column]
-        values = series.astype(str)
-        categories = values.map(normalize_category)
-        known = categories.isin(VERSION2_CATEGORIES + ("Attack",))
-        fraction = float(known.mean()) if len(series) else 0.0
-        distinct_categories = int(categories[known].nunique())
-        distinct_raw = int(values[known].nunique())
-        alias_bonus = 0.05 if key in LABEL_ALIASES else 0.0
-        if fraction < 0.5 or distinct_categories < 2:
-            continue
-        score = (fraction + alias_bonus, distinct_categories, distinct_raw)
-        if score > best_score:
-            best_score = score
-            best_name = str(column)
+        bucket = named if key in LABEL_ALIASES else others
+        bucket.append((str(column), key))
+    if log is not None:
+        log(
+            f"Choosing a label column from {len(named)} named columns and "
+            f"{len(others)} others on {len(frame):,} rows."
+        )
+    best_name = None
+    best_score = (-1.0, -1, -1)
+
+    def consider(columns: list[tuple[str, str]]) -> None:
+        nonlocal best_name, best_score
+        for name, key in columns:
+            score = _label_column_score(frame[name], key)
+            if score is not None and score > best_score:
+                best_score = score
+                best_name = name
+
+    consider(named)
+    # An alias at this score cannot lose to a column with no alias bonus.
+    if best_score[0] <= 1.0:
+        consider(others)
+    if log is not None and best_name is not None:
+        log(f"Label column '{best_name}'.")
     return best_name
 
 
@@ -643,7 +693,7 @@ def prepare_frame(raw: pd.DataFrame, source_info: dict[str, Any], gap_seconds: f
             + ", ".join(map(str, renamed.columns))
         )
     filtered, legacy_info = drop_legacy_rows(renamed)
-    label_column = choose_label_column(filtered)
+    label_column = choose_label_column(filtered, log)
     if label_column is None and "folder_category" not in filtered.columns:
         columns = ", ".join(map(str, filtered.columns))
         raise SystemExit("No Benign/Attack label column was found. Columns: " + columns)

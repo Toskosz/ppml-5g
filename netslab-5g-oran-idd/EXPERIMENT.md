@@ -158,7 +158,9 @@ The family-holdout report refits only those compile candidates.
 
 ## Network benchmark
 
-`screen_network_benchmark.py` reads `Network_Dataset.csv`. It drops
+`screen_network_benchmark.py` reads `Network_Dataset.csv`. It prints a
+line before that read. Label detection scores distinct values, so a wide
+table does not run the category parser on every cell. The script drops
 identifiers, log-compresses heavy numeric tails, one-hot encodes
 categoricals with at most 16 levels, and keeps the top 16 and top 32
 mutual-information columns on a training-scenario sample of at most
