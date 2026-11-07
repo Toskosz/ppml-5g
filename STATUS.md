@@ -417,17 +417,12 @@ on a test set of 6,532 rows (6,016 attack, 516 benign). The lowest benign
 false-positive rate is 0.655 (`delta`, 20 trees, depth 4). Do not compile
 that screen again.
 
-The Zeek run was interrupted on 2026-11-07 inside `choose_label_column`,
-which applied `normalize_category` to every cell before printing anything.
-Label detection now uses distinct values, and the script logs before the
-CSV read, after the read, and while it picks the label column. Rerun it on
-the dataset machine. The first log line should appear before the file is
-parsed. `--compile-fhe` stays refused.
-
-```bash
-cd netslab-5g-oran-idd
-python screen_network_benchmark.py --csv data/Network_Dataset.csv
-```
+The Zeek aggregate was read on 2026-11-07: `Network_Dataset.csv`, 227.2 MB,
+1,723,817 rows, 26 columns, label `attack_category`. It has no scenario
+column and no timestamp, so the run stopped. A row-random split is refused.
+Do not rerun `screen_network_benchmark.py` on this summary. The capture
+name is the pcap filename and is not in the combined table. Re-extracting
+Zeek per pcap is a different job, and those features are not the E2 input.
 
 `Lower_Layer_Data.db` stores `pmi` as the text `(0, 0)` on every row. The
 radio loader reads the first number, keeps `ue_id`, drops `rnti`, and uses

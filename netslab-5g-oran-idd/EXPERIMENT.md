@@ -165,8 +165,10 @@ identifiers, log-compresses heavy numeric tails, one-hot encodes
 categoricals with at most 16 levels, and keeps the top 16 and top 32
 mutual-information columns on a training-scenario sample of at most
 200,000 rows. The model fit still uses every training row. The same
-scenario rule applies. The script refuses `--compile-fhe`: these features
-are not on the E2 path an xApp reads.
+scenario rule applies. The published aggregate has no capture id and no
+timestamp, so the script stops instead of splitting rows. Capture identity
+lives in the per-scenario pcap names and is not in this summary. The script
+refuses `--compile-fhe`: these features are not on the E2 path an xApp reads.
 
 ## Gates
 

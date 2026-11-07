@@ -147,7 +147,8 @@ def prepare_network(raw: pd.DataFrame, gap_seconds: float, log) -> tuple[pd.Data
     else:
         raise ScenarioSplitError(
             "Network table has no scenario id and no timestamp. "
-            "A row-random split is not used."
+            "A row-random split is not used. Columns: "
+            + ", ".join(map(str, raw.columns))
         )
     drop_columns = []
     if label_column not in {"category", "scenario_id"}:
