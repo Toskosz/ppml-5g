@@ -423,8 +423,11 @@ python screen_network_benchmark.py --csv data/Network_Dataset.csv
 
 `Lower_Layer_Data.db` stores `pmi` as the text `(0, 0)` on every row. The
 radio loader reads the first number, keeps `ue_id`, drops `rnti`, and uses
-`attack_subcategory` as the capture subtype. Re-run the same
+`attack_subcategory` as the capture subtype. A Concrete ML quantized tree
+cannot be saved with joblib (its ONNX forward pass closes over a lambda).
+That save is skipped and the screen continues. Re-run the same
 `screen_radio_xapp.py` command after this script is on the dataset machine.
+The interrupted run did not write `results.csv`.
 
 The radio screen is plaintext and Concrete ML quantized-clear. Task A is
 binary. Task B scores 3-class (`Benign` / high-rate / low-rate) and the six

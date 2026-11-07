@@ -1488,6 +1488,21 @@ def indices_for(mask: pd.Series) -> np.ndarray:
     return np.flatnonzero(mask.to_numpy())
 
 
+def save_joblib(payload: Any, path: Path, log) -> None:
+    """Save a fitted model when the runtime can pickle it.
+
+    A Concrete ML quantized tree carries a local lambda in its ONNX forward
+    pass. joblib cannot store that object. The screen scores are already
+    recorded, so a failed save must not stop the run.
+    """
+    if joblib is None:
+        return
+    try:
+        joblib.dump(payload, path)
+    except Exception as exc:
+        log(f"Could not save {path.name}: {type(exc).__name__}: {exc}")
+
+
 def screen_matrices(
     frame: pd.DataFrame,
     feature_set: str,
@@ -1524,13 +1539,13 @@ def screen_matrices(
     y_test = label_values[test_index].astype(np.int64)
     categories = frame["category"].to_numpy(dtype=str)[test_index]
     task_name = configs[0].get("task", "binary") if configs else "binary"
-    if joblib is not None:
-        model_dir = run_dir / "models" / protocol / task_name / feature_set
-        model_dir.mkdir(parents=True, exist_ok=True)
-        joblib.dump(
-            {"scaler": scaler, "columns": columns, "feature_set": feature_set},
-            model_dir / "scaler.joblib",
-        )
+    model_dir = run_dir / "models" / protocol / task_name / feature_set
+    model_dir.mkdir(parents=True, exist_ok=True)
+    save_joblib(
+        {"scaler": scaler, "columns": columns, "feature_set": feature_set},
+        model_dir / "scaler.joblib",
+        log,
+    )
 
     float_rows: list[dict[str, Any]] = []
     quant_rows: list[dict[str, Any]] = []
@@ -1581,8 +1596,7 @@ def screen_matrices(
         float_rows.append(row)
         float_by_id[config["id"]] = row
         breakdown.extend(rows)
-        if joblib is not None:
-            joblib.dump(model, model_dir / f"{config['id']}.joblib")
+        save_joblib(model, model_dir / f"{config['id']}.joblib", log)
 
     if args.skip_quantized_clear:
         return float_rows, quant_rows, breakdown, kept
@@ -1649,11 +1663,11 @@ def screen_matrices(
                     "categories": categories,
                     "result": row,
                 }
-            if joblib is not None:
-                joblib.dump(
-                    {"model": model, "threshold": row["selected_threshold"], "result": row},
-                    model_dir / f"{config['id']}_q{n_bits}.joblib",
-                )
+            save_joblib(
+                {"model": model, "threshold": row["selected_threshold"], "result": row},
+                model_dir / f"{config['id']}_q{n_bits}.joblib",
+                log,
+            )
     return float_rows, quant_rows, breakdown, kept
 
 
