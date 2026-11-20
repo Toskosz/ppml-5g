@@ -75,6 +75,13 @@ cost and the latency budget is under one second.
    attack F1, the benign false-positive rate, and recall for Shellcode,
    Reconnaissance, Analysis, Backdoor, and Worms, with the feature set, tree
    count, depth, and bit width. The script is `screen_feature_sets.py`.
+8. Compile each winner at the bit width chosen in step 7.
+   `compile_screen_fhe.py` refits that forest, checks the clear scores
+   against the screen report, compiles the circuit, scores FHE simulation
+   on the test rows, and times 100 real records. The latency in the pass
+   rule is the mean of the inference phase alone. Encrypt, decrypt, and
+   their sum are recorded beside it. The command and the pass rule are
+   in `STATUS.md`.
 
 ## How a column earned a place on the full file
 

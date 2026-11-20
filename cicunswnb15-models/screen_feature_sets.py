@@ -3,6 +3,7 @@
 
 Run from this directory on the dataset machine. This workspace does not
 execute the screen. The script does not compile an FHE circuit.
+compile_screen_fhe.py compiles the winners.
 
     python screen_feature_sets.py
     python screen_feature_sets.py --plaintext-only

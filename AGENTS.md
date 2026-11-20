@@ -21,7 +21,7 @@ pip install -r requirements-gpu.txt
 
 Pinned versions matter: `concrete-ml==1.9.0`, `numpy==1.26.4`. Do not upgrade these independently.
 
-FHE device (both model dirs): `PPML_FHE_DEVICE=auto|cpu|cuda` or `run_all_and_report.py --device ...`. Default `auto` uses CUDA when the GPU Concrete wheel reports available+enabled; otherwise CPU.
+FHE device: `PPML_FHE_DEVICE=auto|cpu|cuda`, or `--device` on `run_all_and_report.py` and `compile_screen_fhe.py`. Default `auto` uses CUDA when the GPU Concrete wheel reports available+enabled; otherwise CPU.
 
 ## Running
 
@@ -29,9 +29,9 @@ FHE device (both model dirs): `PPML_FHE_DEVICE=auto|cpu|cuda` or `run_all_and_re
 
 ```bash
 cd cicids2018-kdd-models && PPML_FHE_DEVICE=auto python svd_model.py
-cd cicunswnb15-models && PPML_FHE_DEVICE=auto python svd100_model_fast.py
-# Full suite + run_logs/<timestamp>/report.txt from inside the model directory.
-# cicunswnb15: --only-fast runs the *_fast trainers.
+cd cicunswnb15-models && python screen_feature_sets.py
+cd cicunswnb15-models && python compile_screen_fhe.py
+# CIC-IDS full suite + run_logs/<timestamp>/report.txt from inside that model directory.
 python run_all_and_report.py --device auto
 ```
 
@@ -39,12 +39,13 @@ python run_all_and_report.py --device auto
 
 ```bash
 python cicids2018-kdd-models/best_model_single_record.py
-python cicunswnb15-models/single_record_inference.py
 ```
 
 FHE circuit compilation for large models (many estimators / deep trees) can take hours.
 
 The current CIC-IDS-2018 latency step is `cicids2018-kdd-models/qualified_fhe_benchmark.py`. Run it on the dataset machine. The command and pass rule are in `STATUS.md`.
+
+The current CIC-UNSW-NB15 step is `cicunswnb15-models/compile_screen_fhe.py`. Run it on the dataset machine after the feature-set screen. The command and pass rule are in `STATUS.md`.
 
 ## Datasets
 
@@ -61,15 +62,14 @@ Training scripts expect data at the working directory (e.g. `CIC-IDS-2018/` fold
 
 - No package structure, no tests, no CI, no linter/formatter — each directory is a standalone experiment.
 - `cicids2018-kdd-models/` is a **binary** classifier (benign/attack), training with `TruncatedSVD` at 15, 25, 40, and 100 components (`svd_model.py`, 5-bit quantization).
-- `cicunswnb15-models/` is a **binary** classifier (benign/attack), with `svd100_model.py` / `svd200_model.py` plus `*_fast.py` variants, latency helpers, GPU support, and `run_all_and_report.py`.
-- Both share the same 7-feature CICFlowMeter schema: `syn_flag_cnt`, `ack_flag_cnt`, `fin_flag_cnt`, `rst_flag_cnt`, `totlen_fwd_pkts` (numerical) + `protocol`, `dst_port` (categorical).
-- Preprocessing pipeline: `MinMaxScaler` + `OneHotEncoder` → `TruncatedSVD(n_components)` → saved as `.pkl`.
+- `cicunswnb15-models/` is a **binary** classifier (benign/attack) on CIC-UNSW-NB15. `screen_feature_sets.py` screens the columns in `FEATURES.md`. `compile_screen_fhe.py` compiles those winning forests and times 100 real FHE records.
+- CIC-IDS-2018 uses the 7-feature CICFlowMeter schema: `syn_flag_cnt`, `ack_flag_cnt`, `fin_flag_cnt`, `rst_flag_cnt`, `totlen_fwd_pkts` (numerical) + `protocol`, `dst_port` (categorical). Its preprocessing is `MinMaxScaler` + `OneHotEncoder` → `TruncatedSVD(n_components)` → saved as `.pkl`.
 
 ## Gotchas
 
 - **CWD matters.** All scripts use relative paths. Run the selected trainer from inside the model directory.
 - **`*.pkl` is gitignored**, but some legacy `.pkl` files were committed before the gitignore rule. Do not assume all preprocessors are in the repo.
 - **`cicids2018-kdd-models/`** trains with `TruncatedSVD` at 15, 25, 40, and 100 components.
-- Inference scripts (`best_model_single_record.py`, `single_record_inference.py`) re-read the CSV and apply saved preprocessor/SVD on every invocation. This is a known performance issue documented in README TODOs.
+- `cicids2018-kdd-models/best_model_single_record.py` re-reads the CSV and applies the saved preprocessor/SVD on every invocation. This is a known performance issue documented in README TODOs.
 - The `cicunswnb15-models/` label column is `Label` (capital L), while the CIC-IDS-2018 models use `label` (lowercase) after `clean_col_names()`.
 - `Train.txt` and `Test.txt` at the repo root are legacy KDD Cup 1999 data files — they are **not** used by any current model.

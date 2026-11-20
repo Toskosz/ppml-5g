@@ -4,36 +4,72 @@ Updated: 2026-11-20
 
 ## CIC-UNSW-NB15 feature-set screen
 
-Not run yet. Run it on the dataset machine from `cicunswnb15-models/`.
-The script does not compile an FHE circuit.
+Completed run: `cicunswnb15-models/screen_runs/20261120_125444_465319/`.
+Wall clock 12:54:44–12:55:53 (−03). Seed 0, stratified row split
+268,749/89,583/89,583. No failed fits. The file has no capture id, so
+these scores are an optimistic screen.
+
+Every plaintext winner is depth 5. Test attack F1 is 0.9052 on the
+four-column core (4 trees, benign false-positive rate 4.98%) and 0.9484
+on the core plus `Fwd Seg Size Min` (4 trees, benign false-positive rate
+2.65%). Length or the backward window on top of segment size does not
+raise validation F1. Segment-size matrices keep that test F1 from 8 bits
+down to 5. The core drops from 0.9053 at 8 bits to 0.8952 at 5 bits.
+
+`Fwd Seg Size Min` is the column `FEATURES.md` flagged: value 32 is 81.4%
+of benign flows and never an attack. The jump from 0.905 to 0.948 is that
+code. The screen command remains:
 
 ```bash
 cd cicunswnb15-models
 python screen_feature_sets.py
-python screen_feature_sets.py --plaintext-only
-python screen_feature_sets.py --quantize-from screen_runs/<timestamp>
 ```
 
-`dataset/Data.csv` joined by row to `dataset/Label.csv`. Binary target is
-code 0 against the rest. The split is stratified on the ten family codes,
-60/20/20, seed 0. It is a row split: this file has no capture id.
+## CIC-UNSW-NB15 FHE compile
 
-Eight matrices: the core (`Bwd Packets/s`, `Down/Up Ratio`, `Fwd IAT Mean`,
-`FIN Flag Count`) and every subset of `Fwd Packet Length Mean`,
-`Fwd Seg Size Min`, and `Bwd Init Win Bytes`. `log1p` on the two rates and
-the packet-length mean, clip the ratio at 6, min–max fit on the training
-rows. Plaintext forests at depth 3, 4, 5 and 3, 4, 5 trees,
-`class_weight="balanced"`. Validation attack F1 picks one shape per matrix.
-Those eight are refit at 8, 7, 6, and 5 bits and predicted with
-`fhe="disable"`. Bit width is chosen from validation. `--bits-high` raises
-the clear sweep; Concrete ML 1.9 has no lower ceiling than a positive
-integer, and 8 is the tree ciphertext format.
+Not run yet. Run it on the dataset machine from `cicunswnb15-models/`.
+`compile_screen_fhe.py` refits each plaintext winner from the screen above,
+checks the clear scores against that report, compiles the validation-chosen
+bit width, scores FHE simulation on the test rows, and times 100 real
+records. Compilation of a depth-5 forest can take a long time. One model
+failing does not stop the next.
 
-Output: `screen_runs/<local timestamp>/`. `run.log` records each fit as it
-finishes, and the phase csv grows with that fit. Also `arguments.json`,
-`status.json`, `split_counts.csv`,
-`{plaintext,winners,plaintext_test,quantized}.csv`, and `report.txt`.
-The protocol is in `cicunswnb15-models/FEATURES.md`.
+```bash
+cd cicunswnb15-models
+python compile_screen_fhe.py
+python compile_screen_fhe.py --device cpu
+python compile_screen_fhe.py --only core core+segment
+python compile_screen_fhe.py --bits 5
+```
+
+Bit width is the highest validation attack F1 in the source report, then
+the lower benign false-positive rate, then fewer bits. That is 8 bits for
+`core`, `core+length`, `core+window`, and `core+length+window`; 7 bits for
+`core+segment`, `core+segment+window`, and `core+length+segment+window`;
+and 5 bits for `core+length+segment`. `--bits` compiles that width for
+every selected matrix instead. `--only` names feature sets. The default is
+all eight winners. `--sim-rows 10000` subsamples simulation; the default
+scores every test row. Output is `fhe_runs/<local timestamp>/`.
+
+Inference latency is the mean of the inference phase alone, with encrypt
+and decrypt left out. Those two phases and their sum are recorded beside
+it. One-time key generation is reported separately and is outside both
+means. The same 100 stratified test rows, seed 0, are used for every
+model. `p_error` is 0.01, the same value as the CIC-IDS-2018 forest compiles.
+
+A model passes when all of these hold:
+
+- Refit clear validation and test attack F1 and benign false-positive rate
+  are within 0.001 of `screen_runs/20261120_125444_465319/report.txt`.
+- Clear attack F1 and simulation attack F1 are >= 0.70.
+- Simulation attack F1 and benign false-positive rate, on the same rows as
+  the clear score, are within 0.005 of that clear score.
+- Mean inference latency on 100 records is <= 0.70 seconds. Encrypt
+  and decrypt are not part of that mean.
+
+Real-FHE label mismatches on those 100 records are printed and do not
+change the gate. The row split remains an optimistic screen. The protocol
+is in `cicunswnb15-models/FEATURES.md`.
 
 ## Objective
 
