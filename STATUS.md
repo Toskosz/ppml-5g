@@ -1,6 +1,39 @@
 # PPML-5G experiment status
 
-Updated: 2026-11-07
+Updated: 2026-11-20
+
+## CIC-UNSW-NB15 feature-set screen
+
+Not run yet. Run it on the dataset machine from `cicunswnb15-models/`.
+The script does not compile an FHE circuit.
+
+```bash
+cd cicunswnb15-models
+python screen_feature_sets.py
+python screen_feature_sets.py --plaintext-only
+python screen_feature_sets.py --quantize-from screen_runs/<timestamp>
+```
+
+`dataset/Data.csv` joined by row to `dataset/Label.csv`. Binary target is
+code 0 against the rest. The split is stratified on the ten family codes,
+60/20/20, seed 0. It is a row split: this file has no capture id.
+
+Eight matrices: the core (`Bwd Packets/s`, `Down/Up Ratio`, `Fwd IAT Mean`,
+`FIN Flag Count`) and every subset of `Fwd Packet Length Mean`,
+`Fwd Seg Size Min`, and `Bwd Init Win Bytes`. `log1p` on the two rates and
+the packet-length mean, clip the ratio at 6, min–max fit on the training
+rows. Plaintext forests at depth 3, 4, 5 and 3, 4, 5 trees,
+`class_weight="balanced"`. Validation attack F1 picks one shape per matrix.
+Those eight are refit at 8, 7, 6, and 5 bits and predicted with
+`fhe="disable"`. Bit width is chosen from validation. `--bits-high` raises
+the clear sweep; Concrete ML 1.9 has no lower ceiling than a positive
+integer, and 8 is the tree ciphertext format.
+
+Output: `screen_runs/<local timestamp>/`. `run.log` records each fit as it
+finishes, and the phase csv grows with that fit. Also `arguments.json`,
+`status.json`, `split_counts.csv`,
+`{plaintext,winners,plaintext_test,quantized}.csv`, and `report.txt`.
+The protocol is in `cicunswnb15-models/FEATURES.md`.
 
 ## Objective
 
