@@ -418,11 +418,15 @@ false-positive rate is 0.655 (`delta`, 20 trees, depth 4). Do not compile
 that screen again.
 
 The Zeek aggregate was read on 2026-11-07: `Network_Dataset.csv`, 227.2 MB,
-1,723,817 rows, 26 columns, label `attack_category`. It has no scenario
-column and no timestamp, so the run stopped. A row-random split is refused.
-Do not rerun `screen_network_benchmark.py` on this summary. The capture
-name is the pcap filename and is not in the combined table. Re-extracting
-Zeek per pcap is a different job, and those features are not the E2 input.
+1,723,817 rows, 26 columns, label `attack_category`. The columns are Zeek
+conn fields (`uid`, `src_ip`, `src_port`, `dst_ip`, `dst_port`, `proto`,
+`service`, `duration`, byte and packet counts, `conn_state`, `history`,
+`community_id`) plus `attack_category`, `attack_type`, and file/HTTP flags.
+There is no `ts` and no pcap name, so the run stopped. `duration` is flow
+length. `attack_type` names the variant, not the capture. A row-random split
+is refused. Do not rerun `screen_network_benchmark.py` on this summary.
+Re-extracting Zeek per pcap is a different job, and those features are not
+the E2 input.
 
 `Lower_Layer_Data.db` stores `pmi` as the text `(0, 0)` on every row. The
 radio loader reads the first number, keeps `ue_id`, drops `rnti`, and uses
