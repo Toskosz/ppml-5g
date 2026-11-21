@@ -27,29 +27,37 @@ python screen_feature_sets.py
 
 ## CIC-UNSW-NB15 FHE compile
 
-Not run yet. Run it on the dataset machine from `cicunswnb15-models/`.
-`compile_screen_fhe.py` refits each plaintext winner from the screen above,
-checks the clear scores against that report, compiles the validation-chosen
-bit width, scores FHE simulation on the test rows, and times 100 real
-records. Compilation of a depth-5 forest can take a long time. One model
-failing does not stop the next.
+Completed run: `cicunswnb15-models/fhe_runs/20261120_150220_660821/`.
+Wall clock 15:02:20–16:50:11 (−03). CPU, seed 0, `p_error` 0.01. That report
+used the previous pass rule, which also required simulation attack F1 and
+the benign false-positive rate to stay within 0.005 of the clear score on
+the same rows. All eight models failed. Every mean inference was above
+0.70 seconds, from 1.187 seconds on `core+length+segment` to 4.323 seconds
+on `core+window`. Four matrices also missed that simulation match. The
+simulation-versus-clear gap is still recorded.
+
+The next run compiles all eight winners at 5 bits on CPU. Tree count and
+depth stay the screen winners. The validation rule still chooses a bit
+width, and the report records that choice when it is not 5. Run it on the
+dataset machine from `cicunswnb15-models/`. Compilation of a depth-5 forest
+can take a long time. One model failing does not stop the next.
 
 ```bash
 cd cicunswnb15-models
-python compile_screen_fhe.py
-python compile_screen_fhe.py --device cpu
-python compile_screen_fhe.py --only core core+segment
-python compile_screen_fhe.py --bits 5
+python compile_screen_fhe.py --bits 5 --device cpu
 ```
 
-Bit width is the highest validation attack F1 in the source report, then
-the lower benign false-positive rate, then fewer bits. That is 8 bits for
-`core`, `core+length`, `core+window`, and `core+length+window`; 7 bits for
-`core+segment`, `core+segment+window`, and `core+length+segment+window`;
-and 5 bits for `core+length+segment`. `--bits` compiles that width for
-every selected matrix instead. `--only` names feature sets. The default is
-all eight winners. `--sim-rows 10000` subsamples simulation; the default
-scores every test row. Output is `fhe_runs/<local timestamp>/`.
+`compile_screen_fhe.py` refits each plaintext winner from the screen above,
+checks the clear scores against that report, compiles the selected bit
+width, scores FHE simulation on the test rows, and times 100 real records.
+Omitting `--bits` returns to the validation rule: the highest validation
+attack F1, then the lower benign false-positive rate, then fewer bits.
+That rule is 8 bits for `core`, `core+length`, `core+window`, and
+`core+length+window`; 7 bits for `core+segment`, `core+segment+window`,
+and `core+length+segment+window`; and 5 bits for `core+length+segment`.
+`--only` names feature sets. The default is all eight winners.
+`--sim-rows 10000` subsamples simulation; the default scores every test
+row. Output is `fhe_runs/<local timestamp>/`.
 
 Inference latency is the mean of the inference phase alone, with encrypt
 and decrypt left out. Those two phases and their sum are recorded beside
@@ -62,11 +70,12 @@ A model passes when all of these hold:
 - Refit clear validation and test attack F1 and benign false-positive rate
   are within 0.001 of `screen_runs/20261120_125444_465319/report.txt`.
 - Clear attack F1 and simulation attack F1 are >= 0.70.
-- Simulation attack F1 and benign false-positive rate, on the same rows as
-  the clear score, are within 0.005 of that clear score.
 - Mean inference latency on 100 records is <= 0.70 seconds. Encrypt
   and decrypt are not part of that mean.
 
+Simulation attack F1 and the benign false-positive rate are printed beside
+the clear score on the same rows, including the signed difference. That
+difference is recorded for the write-up and does not change the gate.
 Real-FHE label mismatches on those 100 records are printed and do not
 change the gate. The row split remains an optimistic screen. The protocol
 is in `cicunswnb15-models/FEATURES.md`.

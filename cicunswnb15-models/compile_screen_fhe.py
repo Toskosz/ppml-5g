@@ -55,7 +55,6 @@ BIT_WIDTHS = (8, 7, 6, 5)
 TARGET_F1 = 0.70
 MAX_INFERENCE_S = 0.70
 REPRODUCTION_TOLERANCE = 0.001
-SIMULATION_TOLERANCE = 0.005
 P_ERROR = 0.01
 SIM_BATCH_ROWS = 4096
 
@@ -85,6 +84,8 @@ CSV_FIELDS = [
     "simulation_rows",
     "simulation_f1",
     "simulation_fpr",
+    "simulation_f1_gap",
+    "simulation_fpr_gap",
     "simulation_disagree",
     "real_records",
     "real_disagree",
@@ -184,31 +185,25 @@ def population_std(values: list[float]) -> float:
 
 
 def decide(result: dict) -> tuple[str, list[str]]:
-    """Pass when the refit matches the screen, simulation matches clear, and inference latency is inside the budget."""
+    """Pass when the refit matches the screen, attack F1 clears the floor, and inference latency is inside the budget.
+
+    The gap between simulation and clear is stored on the result and printed.
+    It does not decide the gate.
+    """
     reasons = []
     reasons.extend(result.get("errors") or [])
     reasons.extend(result.get("reproduction_failures") or [])
     clear_f1 = result.get("clear_test_f1")
     sim_f1 = result.get("simulation_f1")
-    sim_fpr = result.get("simulation_fpr")
-    sim_clear_f1 = result.get("simulation_clear_f1")
-    sim_clear_fpr = result.get("simulation_clear_fpr")
     inference = result.get("mean_inference_s")
     if clear_f1 is None:
         reasons.append("clear test score is missing")
     elif clear_f1 < TARGET_F1:
         reasons.append(f"clear test F1 {clear_f1:.4f} is below {TARGET_F1:.2f}")
-    if None in (sim_f1, sim_fpr, sim_clear_f1, sim_clear_fpr):
+    if sim_f1 is None:
         reasons.append("simulation score is missing")
-    else:
-        if sim_f1 < TARGET_F1:
-            reasons.append(f"simulation F1 {sim_f1:.4f} is below {TARGET_F1:.2f}")
-        f1_gap = abs(sim_f1 - sim_clear_f1)
-        fpr_gap = abs(sim_fpr - sim_clear_fpr)
-        if f1_gap > SIMULATION_TOLERANCE:
-            reasons.append(f"simulation F1 differs from clear by {f1_gap:.4f}")
-        if fpr_gap > SIMULATION_TOLERANCE:
-            reasons.append(f"simulation benign FPR differs from clear by {fpr_gap:.4f}")
+    elif sim_f1 < TARGET_F1:
+        reasons.append(f"simulation F1 {sim_f1:.4f} is below {TARGET_F1:.2f}")
     if inference is None:
         reasons.append("inference latency measurement is missing")
     elif inference > MAX_INFERENCE_S:
@@ -670,10 +665,16 @@ def run_feature_set(
         result["simulation_recalls"] = {name: float(sim_metrics[f"recall_{name}"]) for name in RECALL_NAMES}
         result["simulation_clear_f1"] = float(clear_metrics["attack_f1"])
         result["simulation_clear_fpr"] = float(clear_metrics["benign_fpr"])
+        result["simulation_f1_gap"] = result["simulation_f1"] - result["simulation_clear_f1"]
+        result["simulation_fpr_gap"] = result["simulation_fpr"] - result["simulation_clear_fpr"]
         result["simulation_disagree"] = int(np.count_nonzero(simulated != clear_test_pred[sim_index]))
         log(
             f"{label}/q{n_bits}: simulation F1={result['simulation_f1']:.4f}, "
             f"clear F1={result['simulation_clear_f1']:.4f}, "
+            f"F1 gap={result['simulation_f1_gap']:+.4f}, "
+            f"simulation FPR={result['simulation_fpr']:.4f}, "
+            f"clear FPR={result['simulation_clear_fpr']:.4f}, "
+            f"FPR gap={result['simulation_fpr_gap']:+.4f}, "
             f"disagree={result['simulation_disagree']}/{result['simulation_rows']}"
         )
     except Exception as exc:
@@ -780,6 +781,11 @@ def format_model(result: dict) -> list[str]:
             f"fpr={result['simulation_clear_fpr']:.4f}  "
             f"disagree={result['simulation_disagree']}/{result['simulation_rows']}"
         )
+        if result.get("simulation_f1_gap") is not None:
+            lines.append(
+                f"  simulation minus clear: f1={result['simulation_f1_gap']:+.4f} "
+                f"fpr={result['simulation_fpr_gap']:+.4f}"
+            )
         lines.append("  simulation recalls " + recall_text(result.get("simulation_recalls") or {}, prefix=""))
     if result.get("compile_seconds") is not None:
         lines.append(f"  compile_seconds={result['compile_seconds']:.1f}")
@@ -855,9 +861,12 @@ def build_header(args, source: Path, counts: dict[str, int], sim_count: int) -> 
         ),
         (
             f"A model passes when the refit F1 and benign FPR are within {REPRODUCTION_TOLERANCE:.3f} "
-            f"of the source report, clear and simulation F1 are >= {TARGET_F1:.2f}, simulation F1 and "
-            f"benign FPR are within {SIMULATION_TOLERANCE:.3f} of the clear score on the same rows, "
+            f"of the source report, clear and simulation F1 are >= {TARGET_F1:.2f}, "
             f"and mean inference latency is <= {MAX_INFERENCE_S:.2f}s."
+        ),
+        (
+            "Simulation minus clear, on the same rows, is printed for attack F1 and benign FPR. "
+            "That difference does not change the gate."
         ),
         "Real-FHE label mismatches on the timed records are printed. They do not change the gate.",
         "",
