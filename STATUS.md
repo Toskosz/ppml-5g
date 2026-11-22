@@ -41,16 +41,20 @@ Wall clock 22:53:08–00:24:44 (−03). CPU. Every winner was compiled at 5
 bits. All eight still failed the 0.70-second inference gate. The fastest
 was `core+length+segment`, 3 trees at depth 5, at 1.178 seconds.
 
-The next run is set 2: the best shallower forest in each feature set.
-Set 1 is the depth-5 validation winners already compiled. Shallower means
-depth below 5, because those circuits stayed above 0.70 seconds. Inside
-that group the rule is the screen's: highest validation attack F1, then
-the lower benign false-positive rate, then fewer trees. These shapes were
-not quantized in the screen. The run fits them at 5 bits, records clear
-and simulation scores, and does not check the refit against the screen
-report. A later tier is the next number in `MODEL_SETS`. Run it on the
-dataset machine from `cicunswnb15-models/`. One model failing does not
-stop the next.
+Completed set 2: `cicunswnb15-models/fhe_runs/20261121_214929_955570/`.
+Wall clock 21:49:29–23:06:16 (−03), 1 hour 17 minutes. CPU, 5 bits. 4 of
+the 8 depth-below-5 forests passed the 0.70-second inference gate.
+
+The next run is set 3: the other 56 forests. Sets 1 and 2 already cover
+16 of the 72. Set 3 is every remaining tree count and depth, seven per
+feature set, fitted at 5 bits. Sixteen of those 56 are still depth 5.
+From the two finished 5-bit runs, eight forests took 1 hour 17 minutes
+at depth 3 or 4 and 1 hour 32 minutes at depth 5, so this run is about
+9.5 hours. The report is rewritten after each forest. One model failing
+does not stop the next. Run it on the dataset machine from
+`cicunswnb15-models/`.
+
+Set 2, already compiled:
 
 | Feature set | Trees | Depth | Validation F1 | Benign FPR |
 |---|---:|---:|---:|---:|
@@ -65,10 +69,10 @@ stop the next.
 
 ```bash
 cd cicunswnb15-models
-python compile_screen_fhe.py --set 2 --bits 5 --device cpu
+python compile_screen_fhe.py --set 3 --bits 5 --device cpu
 ```
 
-`--set 2` is the current command. `--set 1`, the default, refits each
+`--set 3` is the current command. `--set 1`, the default, refits each
 plaintext winner from the screen above, checks the clear scores against
 that report, compiles the selected bit width, scores FHE simulation on
 the test rows, and times 100 real records.

@@ -11,11 +11,13 @@ execute the script. The source report is the finished screen:
     python compile_screen_fhe.py --only core core+segment
     python compile_screen_fhe.py --bits 5
     python compile_screen_fhe.py --set 2 --bits 5 --device cpu
+    python compile_screen_fhe.py --set 3 --bits 5 --device cpu
     python compile_screen_fhe.py --sim-rows 10000
 
---set 1, the default, is the plaintext validation winners. Later sets are
-explicit shapes in MODEL_SETS. Add the next smaller tier as the next
-number. A set of explicit shapes needs --bits.
+--set 1, the default, is the plaintext validation winners. Set 2 is the
+best depth-below-5 forest in each feature set. Set 3 is every other
+forest in the 72. An explicit set needs --bits. Add a later tier as the
+next number in MODEL_SETS.
 
 Each set-1 winner is refit at 8, 7, 6, and 5 bits. Clear validation
 and test scores are compared with that report. The bit width is the
@@ -58,9 +60,11 @@ FEATURE_SETS = (
 RECALL_NAMES = ("Shellcode", "Reconnaissance", "Analysis", "Backdoor", "Worms")
 BIT_WIDTHS = (8, 7, 6, 5)
 # Set number -> (label, shapes). None means the plaintext validation
-# winners in the source report. An explicit set is (feature set, trees,
-# depth) for each matrix. Add the next smaller tier as the next number.
-MODEL_SETS: dict[int, tuple[str, tuple[tuple[str, int, int], ...] | None]] = {
+# winners in the source report. REMAINING means every forest in the
+# 3/4/5 tree and depth grid that an earlier set did not take. An explicit
+# tuple is (feature set, trees, depth). Add a later tier as the next number.
+REMAINING = "remaining"
+MODEL_SETS: dict[int, tuple[str, tuple[tuple[str, int, int], ...] | str | None]] = {
     1: ("validation winners", None),
     2: (
         "best depth below 5",
@@ -75,6 +79,7 @@ MODEL_SETS: dict[int, tuple[str, tuple[tuple[str, int, int], ...] | None]] = {
             ("core+length+segment+window", 4, 3),
         ),
     ),
+    3: ("the other 56 forests", REMAINING),
 }
 TARGET_F1 = 0.70
 MAX_INFERENCE_S = 0.70
@@ -156,6 +161,25 @@ def parse_report(text: str) -> tuple[list[dict], dict[tuple, dict]]:
     if not winners:
         raise SystemExit("source report has no plaintext validation winners")
     return winners, rows
+
+
+def remaining_shapes(
+    winners: list[dict],
+    trees: tuple[int, ...],
+    depths: tuple[int, ...],
+) -> tuple[tuple[str, int, int], ...]:
+    """Forests in the screen grid that no earlier set already names."""
+    taken = {(row["feature_set"], int(row["trees"]), int(row["depth"])) for row in winners}
+    for _set_id, (_label, shapes) in MODEL_SETS.items():
+        if isinstance(shapes, tuple):
+            taken.update(shapes)
+    return tuple(
+        (name, n_estimators, depth)
+        for name in FEATURE_SETS
+        for n_estimators in trees
+        for depth in depths
+        if (name, n_estimators, depth) not in taken
+    )
 
 
 def choose_bit(validation_rows: list[dict]) -> dict:
@@ -961,7 +985,8 @@ def parse_args() -> argparse.Namespace:
         default=1,
         help=(
             "Which model set to compile. 1 is the validation winners. "
-            "Later sets are explicit shapes in MODEL_SETS and require --bits."
+            "Set 2 is the depth-below-5 forests. Set 3 is the other 56. "
+            "Explicit sets require --bits."
         ),
     )
     parser.add_argument("--only", nargs="+", choices=FEATURE_SETS, default=None)
@@ -1000,6 +1025,10 @@ def main() -> None:
     if winner_names != list(FEATURE_SETS):
         raise SystemExit(f"source winners are {winner_names}, expected {list(FEATURE_SETS)}")
     _label, shapes = MODEL_SETS[args.set]
+    if shapes == REMAINING:
+        shapes = remaining_shapes(winners, screen.TREES, screen.DEPTHS)
+        if len(shapes) != 56:
+            raise SystemExit(f"--set 3 resolved to {len(shapes)} forests, expected 56")
     if shapes is None:
         selected = [row for row in winners if args.only is None or row["feature_set"] in args.only]
     else:
