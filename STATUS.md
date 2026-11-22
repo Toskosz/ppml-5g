@@ -1,6 +1,6 @@
 # PPML-5G experiment status
 
-Updated: 2026-11-20
+Updated: 2026-11-22
 
 ## CIC-UNSW-NB15 feature-set screen
 
@@ -45,14 +45,20 @@ Completed set 2: `cicunswnb15-models/fhe_runs/20261121_214929_955570/`.
 Wall clock 21:49:29–23:06:16 (−03), 1 hour 17 minutes. CPU, 5 bits. 4 of
 the 8 depth-below-5 forests passed the 0.70-second inference gate.
 
-The next run is set 3: the other 56 forests. Sets 1 and 2 already cover
-16 of the 72. Set 3 is every remaining tree count and depth, seven per
-feature set, fitted at 5 bits. Sixteen of those 56 are still depth 5.
-From the two finished 5-bit runs, eight forests took 1 hour 17 minutes
-at depth 3 or 4 and 1 hour 32 minutes at depth 5, so this run is about
-9.5 hours. The report is rewritten after each forest. One model failing
-does not stop the next. Run it on the dataset machine from
-`cicunswnb15-models/`.
+Completed set 3: `cicunswnb15-models/fhe_runs/20261122_010337_007840/`.
+Wall clock 01:03:37–10:42:16 (−03), 9 hours 39 minutes. CPU, 5 bits. 11 of
+the 56 remaining forests passed the 0.70-second inference gate. With the
+5-bit winner run and set 2, all 72 forests now have a 5-bit FHE report.
+
+The next run is set 4 at 8 bits: all 72 forests, the same grid as the
+plaintext screen. Four depth-5 winners already have an 8-bit compile in
+`fhe_runs/20261120_150220_660821/`. This run measures every forest at 8
+bits, including those four again. Compile time and full-test simulation
+stayed flat between 5 and 8 bits, and the 100-record inference phase was
+the part that grew. The 56-model 5-bit run took 9 hours 39 minutes, so
+72 forests at 8 bits is about 14 hours. The report is rewritten after
+each forest. One model failing does not stop the next. Run it on the
+dataset machine from `cicunswnb15-models/`.
 
 Set 2, already compiled:
 
@@ -69,17 +75,10 @@ Set 2, already compiled:
 
 ```bash
 cd cicunswnb15-models
-python compile_screen_fhe.py --set 3 --bits 5 --device cpu
+python compile_screen_fhe.py --set 4 --bits 8 --device cpu
 ```
 
-Set 4 is all 72 forests, the same grid as the plaintext screen, at one bit width:
-
-```bash
-cd cicunswnb15-models
-python compile_screen_fhe.py --set 4 --bits 5 --device cpu
-```
-
-`--set 3` is the current command. `--set 1`, the default, refits each
+`--set 4` is the current command. `--set 1`, the default, refits each
 plaintext winner from the screen above, checks the clear scores against
 that report, compiles the selected bit width, scores FHE simulation on
 the test rows, and times 100 real records.
