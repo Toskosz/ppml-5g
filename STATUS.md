@@ -72,6 +72,13 @@ cd cicunswnb15-models
 python compile_screen_fhe.py --set 3 --bits 5 --device cpu
 ```
 
+Set 4 is all 72 forests, the same grid as the plaintext screen, at one bit width:
+
+```bash
+cd cicunswnb15-models
+python compile_screen_fhe.py --set 4 --bits 5 --device cpu
+```
+
 `--set 3` is the current command. `--set 1`, the default, refits each
 plaintext winner from the screen above, checks the clear scores against
 that report, compiles the selected bit width, scores FHE simulation on
