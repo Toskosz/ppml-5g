@@ -1,0 +1,122 @@
+CIC-UNSW-NB15 FHE compile
+source=screen_runs/20261120_125444_465319/report.txt
+seed=0 device=cpu p_error=0.01
+train/validation/test=268749/89583/89583. The split is the screen's stratified row split.
+Flows from the same attack can sit on both sides, so these scores are an optimistic screen.
+Models: set 2, best depth below 5. Bit width: 5 bits on every matrix.
+Clear scores are a new fit at the same seed and shape, predict(..., fhe='disable').
+Simulation scores every test row with fhe='simulate'.
+Inference latency is the mean of the inference phase on 100 shared test records. Encrypt, decrypt, and their sum are recorded beside it. Key generation is outside both means.
+Set 2 shapes that are not quantized winners in the source report are not checked against it. A model passes when clear and simulation F1 are >= 0.70 and mean inference latency is <= 0.70s.
+Simulation minus clear, on the same rows, is printed for attack F1 and benign FPR. That difference does not change the gate.
+Real-FHE label mismatches on the timed records are printed. They do not change the gate.
+
+A star marks the compiled bit width.
+
+core  trees=4 depth=3 bits=5  device=cpu  gate=PASS
+  columns: Bwd Packets/s, Down/Up Ratio, Fwd IAT Mean, FIN Flag Count
+  * q5 clear validation f1=0.8905 fpr=0.0570  test f1=0.8904 fpr=0.0576 precision=0.8109 recall=0.9872
+  clear test recalls Shellcode=0.993 Reconnaissance=0.970 Analysis=0.987 Backdoor=0.956 Worms=1.000
+  simulation rows=89583 f1=0.8887 fpr=0.0583 precision=0.8088 recall=0.9861  clear-on-same-rows f1=0.8904 fpr=0.0576  disagree=94/89583
+  simulation minus clear: f1=-0.0017 fpr=+0.0007
+  simulation recalls Shellcode=0.990 Reconnaissance=0.968 Analysis=0.987 Backdoor=0.956 Worms=1.000
+  compile_seconds=172.3
+  mean inference of 100 records=0.605158s std=0.072176s (encrypt and decrypt excluded)
+  mean encrypt=0.003275s std=0.000047s  mean decrypt=0.001514s std=0.000029s  mean end-to-end=0.609946s std=0.072186s
+  keygen_seconds=1.5077 (once, outside both means)
+  real-fhe label disagreements=3/100
+
+core+length  trees=3 depth=4 bits=5  device=cpu  gate=FAIL
+  columns: Bwd Packets/s, Down/Up Ratio, Fwd IAT Mean, FIN Flag Count, Fwd Packet Length Mean
+  * q5 clear validation f1=0.9098 fpr=0.0483  test f1=0.9080 fpr=0.0495 precision=0.8342 recall=0.9962
+  clear test recalls Shellcode=1.000 Reconnaissance=1.000 Analysis=0.987 Backdoor=1.000 Worms=1.000
+  simulation rows=89583 f1=0.9004 fpr=0.0532 precision=0.8235 recall=0.9932  clear-on-same-rows f1=0.9080 fpr=0.0495  disagree=479/89583
+  simulation minus clear: f1=-0.0076 fpr=+0.0037
+  simulation recalls Shellcode=0.998 Reconnaissance=0.996 Analysis=0.987 Backdoor=1.000 Worms=0.980
+  compile_seconds=172.3
+  mean inference of 100 records=0.912811s std=0.058851s (encrypt and decrypt excluded)
+  mean encrypt=0.003432s std=0.000036s  mean decrypt=0.001495s std=0.000048s  mean end-to-end=0.917737s std=0.058891s
+  keygen_seconds=1.6918 (once, outside both means)
+  real-fhe label disagreements=8/100
+  mean inference 0.9128s is above 0.70s
+
+core+segment  trees=3 depth=4 bits=5  device=cpu  gate=FAIL
+  columns: Bwd Packets/s, Down/Up Ratio, Fwd IAT Mean, FIN Flag Count, Fwd Seg Size Min
+  * q5 clear validation f1=0.9470 fpr=0.0264  test f1=0.9476 fpr=0.0264 precision=0.9040 recall=0.9955
+  clear test recalls Shellcode=1.000 Reconnaissance=1.000 Analysis=1.000 Backdoor=0.956 Worms=1.000
+  simulation rows=89583 f1=0.9409 fpr=0.0281 precision=0.8977 recall=0.9884  clear-on-same-rows f1=0.9476 fpr=0.0264  disagree=291/89583
+  simulation minus clear: f1=-0.0067 fpr=+0.0017
+  simulation recalls Shellcode=0.998 Reconnaissance=0.993 Analysis=0.987 Backdoor=0.956 Worms=1.000
+  compile_seconds=169.9
+  mean inference of 100 records=0.889681s std=0.058315s (encrypt and decrypt excluded)
+  mean encrypt=0.003429s std=0.000038s  mean decrypt=0.001502s std=0.000049s  mean end-to-end=0.894612s std=0.058340s
+  keygen_seconds=1.6926 (once, outside both means)
+  real-fhe label disagreements=2/100
+  mean inference 0.8897s is above 0.70s
+
+core+window  trees=3 depth=3 bits=5  device=cpu  gate=PASS
+  columns: Bwd Packets/s, Down/Up Ratio, Fwd IAT Mean, FIN Flag Count, Bwd Init Win Bytes
+  * q5 clear validation f1=0.9127 fpr=0.0435  test f1=0.9117 fpr=0.0446 precision=0.8469 recall=0.9872
+  clear test recalls Shellcode=0.993 Reconnaissance=0.970 Analysis=0.987 Backdoor=0.956 Worms=1.000
+  simulation rows=89583 f1=0.9064 fpr=0.0461 precision=0.8420 recall=0.9815  clear-on-same-rows f1=0.9117 fpr=0.0446  disagree=252/89583
+  simulation minus clear: f1=-0.0053 fpr=+0.0015
+  simulation recalls Shellcode=0.981 Reconnaissance=0.964 Analysis=0.987 Backdoor=0.956 Worms=1.000
+  compile_seconds=170.5
+  mean inference of 100 records=0.516934s std=0.052373s (encrypt and decrypt excluded)
+  mean encrypt=0.003395s std=0.000040s  mean decrypt=0.001482s std=0.000049s  mean end-to-end=0.521811s std=0.052421s
+  keygen_seconds=1.5059 (once, outside both means)
+  real-fhe label disagreements=2/100
+
+core+length+segment  trees=3 depth=4 bits=5  device=cpu  gate=FAIL
+  columns: Bwd Packets/s, Down/Up Ratio, Fwd IAT Mean, FIN Flag Count, Fwd Packet Length Mean, Fwd Seg Size Min
+  * q5 clear validation f1=0.9470 fpr=0.0264  test f1=0.9476 fpr=0.0264 precision=0.9040 recall=0.9955
+  clear test recalls Shellcode=1.000 Reconnaissance=1.000 Analysis=1.000 Backdoor=0.956 Worms=1.000
+  simulation rows=89583 f1=0.9414 fpr=0.0278 precision=0.8989 recall=0.9882  clear-on-same-rows f1=0.9476 fpr=0.0264  disagree=260/89583
+  simulation minus clear: f1=-0.0062 fpr=+0.0014
+  simulation recalls Shellcode=0.993 Reconnaissance=0.991 Analysis=1.000 Backdoor=0.956 Worms=1.000
+  compile_seconds=170.4
+  mean inference of 100 records=0.889889s std=0.057852s (encrypt and decrypt excluded)
+  mean encrypt=0.003539s std=0.000039s  mean decrypt=0.001497s std=0.000041s  mean end-to-end=0.894925s std=0.057883s
+  keygen_seconds=1.6891 (once, outside both means)
+  real-fhe label disagreements=2/100
+  mean inference 0.8899s is above 0.70s
+
+core+length+window  trees=4 depth=4 bits=5  device=cpu  gate=FAIL
+  columns: Bwd Packets/s, Down/Up Ratio, Fwd IAT Mean, FIN Flag Count, Fwd Packet Length Mean, Bwd Init Win Bytes
+  * q5 clear validation f1=0.9157 fpr=0.0448  test f1=0.9142 fpr=0.0460 precision=0.8441 recall=0.9970
+  clear test recalls Shellcode=1.000 Reconnaissance=1.000 Analysis=0.987 Backdoor=1.000 Worms=1.000
+  simulation rows=89583 f1=0.9100 fpr=0.0472 precision=0.8402 recall=0.9924  clear-on-same-rows f1=0.9142 fpr=0.0460  disagree=189/89583
+  simulation minus clear: f1=-0.0042 fpr=+0.0012
+  simulation recalls Shellcode=0.995 Reconnaissance=0.994 Analysis=0.987 Backdoor=1.000 Worms=1.000
+  compile_seconds=170.2
+  mean inference of 100 records=1.171290s std=0.059127s (encrypt and decrypt excluded)
+  mean encrypt=0.003562s std=0.000043s  mean decrypt=0.001559s std=0.000072s  mean end-to-end=1.176412s std=0.059203s
+  keygen_seconds=1.6876 (once, outside both means)
+  real-fhe label disagreements=9/100
+  mean inference 1.1713s is above 0.70s
+
+core+segment+window  trees=4 depth=3 bits=5  device=cpu  gate=PASS
+  columns: Bwd Packets/s, Down/Up Ratio, Fwd IAT Mean, FIN Flag Count, Fwd Seg Size Min, Bwd Init Win Bytes
+  * q5 clear validation f1=0.9248 fpr=0.0406  test f1=0.9274 fpr=0.0391 precision=0.8647 recall=0.9999
+  clear test recalls Shellcode=1.000 Reconnaissance=1.000 Analysis=1.000 Backdoor=1.000 Worms=1.000
+  simulation rows=89583 f1=0.9238 fpr=0.0390 precision=0.8640 recall=0.9924  clear-on-same-rows f1=0.9274 fpr=0.0391  disagree=165/89583
+  simulation minus clear: f1=-0.0036 fpr=-0.0001
+  simulation recalls Shellcode=0.990 Reconnaissance=0.991 Analysis=0.987 Backdoor=0.989 Worms=1.000
+  compile_seconds=170.0
+  mean inference of 100 records=0.597144s std=0.051630s (encrypt and decrypt excluded)
+  mean encrypt=0.003509s std=0.000047s  mean decrypt=0.001580s std=0.000072s  mean end-to-end=0.602233s std=0.051687s
+  keygen_seconds=1.5013 (once, outside both means)
+  real-fhe label disagreements=1/100
+
+core+length+segment+window  trees=4 depth=3 bits=5  device=cpu  gate=PASS
+  columns: Bwd Packets/s, Down/Up Ratio, Fwd IAT Mean, FIN Flag Count, Fwd Packet Length Mean, Fwd Seg Size Min, Bwd Init Win Bytes
+  * q5 clear validation f1=0.9248 fpr=0.0406  test f1=0.9274 fpr=0.0391 precision=0.8647 recall=0.9999
+  clear test recalls Shellcode=1.000 Reconnaissance=1.000 Analysis=1.000 Backdoor=1.000 Worms=1.000
+  simulation rows=89583 f1=0.9248 fpr=0.0390 precision=0.8643 recall=0.9944  clear-on-same-rows f1=0.9274 fpr=0.0391  disagree=124/89583
+  simulation minus clear: f1=-0.0026 fpr=-0.0001
+  simulation recalls Shellcode=0.998 Reconnaissance=0.996 Analysis=0.987 Backdoor=1.000 Worms=1.000
+  compile_seconds=169.9
+  mean inference of 100 records=0.605356s std=0.050931s (encrypt and decrypt excluded)
+  mean encrypt=0.003621s std=0.000034s  mean decrypt=0.001573s std=0.000057s  mean end-to-end=0.610550s std=0.050985s
+  keygen_seconds=1.4997 (once, outside both means)
+  real-fhe label disagreements=2/100

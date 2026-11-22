@@ -1,0 +1,320 @@
+[2026-11-21T21:49:29-03:00] New isolated run directory: fhe_runs/20261121_214929_955570
+[2026-11-21T21:49:29-03:00] Source report: screen_runs/20261120_125444_465319/report.txt
+[2026-11-21T21:49:31-03:00] Set=2, matrices=8, bits=[5], seed=0, train/validation/test=268749/89583/89583.
+[2026-11-21T21:49:31-03:00] core/trees4_depth3/q5: fitting quantized-clear model on 268,749 rows...
+[2026-11-21T21:49:33-03:00] core/trees4_depth3/q5: validation F1=0.8905, test F1=0.8904, test FPR=0.0576, fit=0.355s
+[2026-11-21T21:49:33-03:00] core/trees4_depth3/q5: compiling FHE circuit (this can take a long time)...
+[2026-11-21T21:49:33-03:00] GPU status — available=True, enabled(runtime)=True
+[2026-11-21T21:49:33-03:00] FHE device: cpu (requested)
+[2026-11-21T21:49:33-03:00] Compiling FHE circuit with device='cpu'...
+[2026-11-21T21:52:26-03:00] FHE compilation succeeded on device='cpu'.
+[2026-11-21T21:52:26-03:00] core/trees4_depth3/q5: compiled in 172.3s on device=cpu.
+[2026-11-21T21:52:26-03:00] core/trees4_depth3/q5: saved circuit to 'fhe_runs/20261121_214929_955570/fhe/core/cpu'.
+[2026-11-21T21:52:26-03:00] core/trees4_depth3/q5: simulate on 89,583 rows...
+[2026-11-21T21:53:11-03:00] core/trees4_depth3/q5: simulated 12,288/89,583
+[2026-11-21T21:53:40-03:00] core/trees4_depth3/q5: simulated 20,480/89,583
+[2026-11-21T21:54:10-03:00] core/trees4_depth3/q5: simulated 28,672/89,583
+[2026-11-21T21:54:39-03:00] core/trees4_depth3/q5: simulated 36,864/89,583
+[2026-11-21T21:55:08-03:00] core/trees4_depth3/q5: simulated 45,056/89,583
+[2026-11-21T21:55:53-03:00] core/trees4_depth3/q5: simulated 57,344/89,583
+[2026-11-21T21:56:22-03:00] core/trees4_depth3/q5: simulated 65,536/89,583
+[2026-11-21T21:56:51-03:00] core/trees4_depth3/q5: simulated 73,728/89,583
+[2026-11-21T21:57:20-03:00] core/trees4_depth3/q5: simulated 81,920/89,583
+[2026-11-21T21:57:47-03:00] core/trees4_depth3/q5: simulated 89,583/89,583
+[2026-11-21T21:57:48-03:00] core/trees4_depth3/q5: simulation F1=0.8887, clear F1=0.8904, F1 gap=-0.0017, simulation FPR=0.0583, clear FPR=0.0576, FPR gap=+0.0007, disagree=94/89583
+[2026-11-21T21:57:48-03:00] Loading FHE client/server from 'fhe_runs/20261121_214929_955570/fhe/core/cpu' for latency measurement...
+[2026-11-21T21:57:48-03:00] Model compiled for device='cpu' (from fhe_device.txt).
+[2026-11-21T21:57:49-03:00] Generating evaluation keys...
+[2026-11-21T21:57:51-03:00] Evaluation keys ready in 1.508s (29,606,808 bytes).
+[2026-11-21T21:57:51-03:00] Evaluation keys deserialized once in 0.038s.
+[2026-11-21T21:57:51-03:00] Measuring encrypt / inference / decrypt on 100 records...
+[2026-11-21T21:57:57-03:00]   10/100 — avg encrypt=0.003308s, avg infer=0.676150s, avg decrypt=0.001509s
+[2026-11-21T21:58:04-03:00]   20/100 — avg encrypt=0.003297s, avg infer=0.642580s, avg decrypt=0.001516s
+[2026-11-21T21:58:10-03:00]   30/100 — avg encrypt=0.003285s, avg infer=0.628385s, avg decrypt=0.001513s
+[2026-11-21T21:58:16-03:00]   40/100 — avg encrypt=0.003280s, avg infer=0.620686s, avg decrypt=0.001516s
+[2026-11-21T21:58:22-03:00]   50/100 — avg encrypt=0.003275s, avg infer=0.615594s, avg decrypt=0.001513s
+[2026-11-21T21:58:28-03:00]   60/100 — avg encrypt=0.003276s, avg infer=0.612003s, avg decrypt=0.001513s
+[2026-11-21T21:58:34-03:00]   70/100 — avg encrypt=0.003276s, avg infer=0.609588s, avg decrypt=0.001514s
+[2026-11-21T21:58:40-03:00]   80/100 — avg encrypt=0.003273s, avg infer=0.607721s, avg decrypt=0.001514s
+[2026-11-21T21:58:46-03:00]   90/100 — avg encrypt=0.003273s, avg infer=0.606191s, avg decrypt=0.001513s
+[2026-11-21T21:58:52-03:00]   100/100 — avg encrypt=0.003275s, avg infer=0.605158s, avg decrypt=0.001514s
+[2026-11-21T21:58:52-03:00] core/trees4_depth3/q5: mean inference=0.605158s on 100 records (encrypt=0.003275s, decrypt=0.001514s, end-to-end=0.609946s), real disagreements=3.
+[2026-11-21T21:58:52-03:00] core/trees4_depth3/q5: gate=PASS
+[2026-11-21T21:58:52-03:00] core+length/trees3_depth4/q5: fitting quantized-clear model on 268,749 rows...
+[2026-11-21T21:58:52-03:00] core+length/trees3_depth4/q5: validation F1=0.9098, test F1=0.9080, test FPR=0.0495, fit=0.364s
+[2026-11-21T21:58:52-03:00] core+length/trees3_depth4/q5: compiling FHE circuit (this can take a long time)...
+[2026-11-21T21:58:52-03:00] GPU status — available=True, enabled(runtime)=True
+[2026-11-21T21:58:52-03:00] FHE device: cpu (requested)
+[2026-11-21T21:58:52-03:00] Compiling FHE circuit with device='cpu'...
+[2026-11-21T22:01:45-03:00] FHE compilation succeeded on device='cpu'.
+[2026-11-21T22:01:45-03:00] core+length/trees3_depth4/q5: compiled in 172.3s on device=cpu.
+[2026-11-21T22:01:45-03:00] core+length/trees3_depth4/q5: saved circuit to 'fhe_runs/20261121_214929_955570/fhe/core+length/cpu'.
+[2026-11-21T22:01:45-03:00] core+length/trees3_depth4/q5: simulate on 89,583 rows...
+[2026-11-21T22:02:30-03:00] core+length/trees3_depth4/q5: simulated 12,288/89,583
+[2026-11-21T22:02:59-03:00] core+length/trees3_depth4/q5: simulated 20,480/89,583
+[2026-11-21T22:03:29-03:00] core+length/trees3_depth4/q5: simulated 28,672/89,583
+[2026-11-21T22:03:59-03:00] core+length/trees3_depth4/q5: simulated 36,864/89,583
+[2026-11-21T22:04:28-03:00] core+length/trees3_depth4/q5: simulated 45,056/89,583
+[2026-11-21T22:05:12-03:00] core+length/trees3_depth4/q5: simulated 57,344/89,583
+[2026-11-21T22:05:42-03:00] core+length/trees3_depth4/q5: simulated 65,536/89,583
+[2026-11-21T22:06:12-03:00] core+length/trees3_depth4/q5: simulated 73,728/89,583
+[2026-11-21T22:06:41-03:00] core+length/trees3_depth4/q5: simulated 81,920/89,583
+[2026-11-21T22:07:09-03:00] core+length/trees3_depth4/q5: simulated 89,583/89,583
+[2026-11-21T22:07:09-03:00] core+length/trees3_depth4/q5: simulation F1=0.9004, clear F1=0.9080, F1 gap=-0.0076, simulation FPR=0.0532, clear FPR=0.0495, FPR gap=+0.0037, disagree=479/89583
+[2026-11-21T22:07:09-03:00] Loading FHE client/server from 'fhe_runs/20261121_214929_955570/fhe/core+length/cpu' for latency measurement...
+[2026-11-21T22:07:09-03:00] Model compiled for device='cpu' (from fhe_device.txt).
+[2026-11-21T22:07:11-03:00] Generating evaluation keys...
+[2026-11-21T22:07:12-03:00] Evaluation keys ready in 1.692s (37,278,616 bytes).
+[2026-11-21T22:07:13-03:00] Evaluation keys deserialized once in 0.052s.
+[2026-11-21T22:07:13-03:00] Measuring encrypt / inference / decrypt on 100 records...
+[2026-11-21T22:07:22-03:00]   10/100 — avg encrypt=0.003440s, avg infer=0.957716s, avg decrypt=0.001517s
+[2026-11-21T22:07:31-03:00]   20/100 — avg encrypt=0.003432s, avg infer=0.928493s, avg decrypt=0.001503s
+[2026-11-21T22:07:40-03:00]   30/100 — avg encrypt=0.003435s, avg infer=0.920039s, avg decrypt=0.001500s
+[2026-11-21T22:07:49-03:00]   40/100 — avg encrypt=0.003434s, avg infer=0.915584s, avg decrypt=0.001503s
+[2026-11-21T22:07:59-03:00]   50/100 — avg encrypt=0.003433s, avg infer=0.914952s, avg decrypt=0.001498s
+[2026-11-21T22:08:08-03:00]   60/100 — avg encrypt=0.003431s, avg infer=0.914363s, avg decrypt=0.001496s
+[2026-11-21T22:08:17-03:00]   70/100 — avg encrypt=0.003428s, avg infer=0.912926s, avg decrypt=0.001494s
+[2026-11-21T22:08:26-03:00]   80/100 — avg encrypt=0.003431s, avg infer=0.912847s, avg decrypt=0.001492s
+[2026-11-21T22:08:35-03:00]   90/100 — avg encrypt=0.003434s, avg infer=0.912885s, avg decrypt=0.001492s
+[2026-11-21T22:08:44-03:00]   100/100 — avg encrypt=0.003432s, avg infer=0.912811s, avg decrypt=0.001495s
+[2026-11-21T22:08:44-03:00] core+length/trees3_depth4/q5: mean inference=0.912811s on 100 records (encrypt=0.003432s, decrypt=0.001495s, end-to-end=0.917737s), real disagreements=8.
+[2026-11-21T22:08:44-03:00] core+length/trees3_depth4/q5: gate=FAIL
+[2026-11-21T22:08:44-03:00] core+length/trees3_depth4/q5: mean inference 0.9128s is above 0.70s
+[2026-11-21T22:08:45-03:00] core+segment/trees3_depth4/q5: fitting quantized-clear model on 268,749 rows...
+[2026-11-21T22:08:45-03:00] core+segment/trees3_depth4/q5: validation F1=0.9470, test F1=0.9476, test FPR=0.0264, fit=0.332s
+[2026-11-21T22:08:45-03:00] core+segment/trees3_depth4/q5: compiling FHE circuit (this can take a long time)...
+[2026-11-21T22:08:45-03:00] GPU status — available=True, enabled(runtime)=True
+[2026-11-21T22:08:45-03:00] FHE device: cpu (requested)
+[2026-11-21T22:08:45-03:00] Compiling FHE circuit with device='cpu'...
+[2026-11-21T22:11:35-03:00] FHE compilation succeeded on device='cpu'.
+[2026-11-21T22:11:35-03:00] core+segment/trees3_depth4/q5: compiled in 169.9s on device=cpu.
+[2026-11-21T22:11:35-03:00] core+segment/trees3_depth4/q5: saved circuit to 'fhe_runs/20261121_214929_955570/fhe/core+segment/cpu'.
+[2026-11-21T22:11:35-03:00] core+segment/trees3_depth4/q5: simulate on 89,583 rows...
+[2026-11-21T22:12:20-03:00] core+segment/trees3_depth4/q5: simulated 12,288/89,583
+[2026-11-21T22:12:50-03:00] core+segment/trees3_depth4/q5: simulated 20,480/89,583
+[2026-11-21T22:13:19-03:00] core+segment/trees3_depth4/q5: simulated 28,672/89,583
+[2026-11-21T22:13:49-03:00] core+segment/trees3_depth4/q5: simulated 36,864/89,583
+[2026-11-21T22:14:18-03:00] core+segment/trees3_depth4/q5: simulated 45,056/89,583
+[2026-11-21T22:15:03-03:00] core+segment/trees3_depth4/q5: simulated 57,344/89,583
+[2026-11-21T22:15:32-03:00] core+segment/trees3_depth4/q5: simulated 65,536/89,583
+[2026-11-21T22:16:02-03:00] core+segment/trees3_depth4/q5: simulated 73,728/89,583
+[2026-11-21T22:16:31-03:00] core+segment/trees3_depth4/q5: simulated 81,920/89,583
+[2026-11-21T22:16:59-03:00] core+segment/trees3_depth4/q5: simulated 89,583/89,583
+[2026-11-21T22:16:59-03:00] core+segment/trees3_depth4/q5: simulation F1=0.9409, clear F1=0.9476, F1 gap=-0.0067, simulation FPR=0.0281, clear FPR=0.0264, FPR gap=+0.0017, disagree=291/89583
+[2026-11-21T22:16:59-03:00] Loading FHE client/server from 'fhe_runs/20261121_214929_955570/fhe/core+segment/cpu' for latency measurement...
+[2026-11-21T22:16:59-03:00] Model compiled for device='cpu' (from fhe_device.txt).
+[2026-11-21T22:17:01-03:00] Generating evaluation keys...
+[2026-11-21T22:17:02-03:00] Evaluation keys ready in 1.693s (37,278,616 bytes).
+[2026-11-21T22:17:02-03:00] Evaluation keys deserialized once in 0.051s.
+[2026-11-21T22:17:02-03:00] Measuring encrypt / inference / decrypt on 100 records...
+[2026-11-21T22:17:12-03:00]   10/100 — avg encrypt=0.003434s, avg infer=0.939901s, avg decrypt=0.001543s
+[2026-11-21T22:17:21-03:00]   20/100 — avg encrypt=0.003431s, avg infer=0.910535s, avg decrypt=0.001524s
+[2026-11-21T22:17:30-03:00]   30/100 — avg encrypt=0.003430s, avg infer=0.899948s, avg decrypt=0.001511s
+[2026-11-21T22:17:38-03:00]   40/100 — avg encrypt=0.003429s, avg infer=0.894844s, avg decrypt=0.001510s
+[2026-11-21T22:17:47-03:00]   50/100 — avg encrypt=0.003427s, avg infer=0.893460s, avg decrypt=0.001511s
+[2026-11-21T22:17:56-03:00]   60/100 — avg encrypt=0.003426s, avg infer=0.892218s, avg decrypt=0.001506s
+[2026-11-21T22:18:05-03:00]   70/100 — avg encrypt=0.003426s, avg infer=0.891460s, avg decrypt=0.001509s
+[2026-11-21T22:18:14-03:00]   80/100 — avg encrypt=0.003427s, avg infer=0.890862s, avg decrypt=0.001507s
+[2026-11-21T22:18:23-03:00]   90/100 — avg encrypt=0.003430s, avg infer=0.890138s, avg decrypt=0.001505s
+[2026-11-21T22:18:32-03:00]   100/100 — avg encrypt=0.003429s, avg infer=0.889681s, avg decrypt=0.001502s
+[2026-11-21T22:18:32-03:00] core+segment/trees3_depth4/q5: mean inference=0.889681s on 100 records (encrypt=0.003429s, decrypt=0.001502s, end-to-end=0.894612s), real disagreements=2.
+[2026-11-21T22:18:32-03:00] core+segment/trees3_depth4/q5: gate=FAIL
+[2026-11-21T22:18:32-03:00] core+segment/trees3_depth4/q5: mean inference 0.8897s is above 0.70s
+[2026-11-21T22:18:32-03:00] core+window/trees3_depth3/q5: fitting quantized-clear model on 268,749 rows...
+[2026-11-21T22:18:32-03:00] core+window/trees3_depth3/q5: validation F1=0.9127, test F1=0.9117, test FPR=0.0446, fit=0.294s
+[2026-11-21T22:18:32-03:00] core+window/trees3_depth3/q5: compiling FHE circuit (this can take a long time)...
+[2026-11-21T22:18:32-03:00] GPU status — available=True, enabled(runtime)=True
+[2026-11-21T22:18:32-03:00] FHE device: cpu (requested)
+[2026-11-21T22:18:32-03:00] Compiling FHE circuit with device='cpu'...
+[2026-11-21T22:21:23-03:00] FHE compilation succeeded on device='cpu'.
+[2026-11-21T22:21:23-03:00] core+window/trees3_depth3/q5: compiled in 170.5s on device=cpu.
+[2026-11-21T22:21:23-03:00] core+window/trees3_depth3/q5: saved circuit to 'fhe_runs/20261121_214929_955570/fhe/core+window/cpu'.
+[2026-11-21T22:21:23-03:00] core+window/trees3_depth3/q5: simulate on 89,583 rows...
+[2026-11-21T22:22:07-03:00] core+window/trees3_depth3/q5: simulated 12,288/89,583
+[2026-11-21T22:22:37-03:00] core+window/trees3_depth3/q5: simulated 20,480/89,583
+[2026-11-21T22:23:06-03:00] core+window/trees3_depth3/q5: simulated 28,672/89,583
+[2026-11-21T22:23:35-03:00] core+window/trees3_depth3/q5: simulated 36,864/89,583
+[2026-11-21T22:24:04-03:00] core+window/trees3_depth3/q5: simulated 45,056/89,583
+[2026-11-21T22:24:48-03:00] core+window/trees3_depth3/q5: simulated 57,344/89,583
+[2026-11-21T22:25:17-03:00] core+window/trees3_depth3/q5: simulated 65,536/89,583
+[2026-11-21T22:25:46-03:00] core+window/trees3_depth3/q5: simulated 73,728/89,583
+[2026-11-21T22:26:15-03:00] core+window/trees3_depth3/q5: simulated 81,920/89,583
+[2026-11-21T22:26:43-03:00] core+window/trees3_depth3/q5: simulated 89,583/89,583
+[2026-11-21T22:26:43-03:00] core+window/trees3_depth3/q5: simulation F1=0.9064, clear F1=0.9117, F1 gap=-0.0053, simulation FPR=0.0461, clear FPR=0.0446, FPR gap=+0.0015, disagree=252/89583
+[2026-11-21T22:26:43-03:00] Loading FHE client/server from 'fhe_runs/20261121_214929_955570/fhe/core+window/cpu' for latency measurement...
+[2026-11-21T22:26:43-03:00] Model compiled for device='cpu' (from fhe_device.txt).
+[2026-11-21T22:26:44-03:00] Generating evaluation keys...
+[2026-11-21T22:26:46-03:00] Evaluation keys ready in 1.506s (29,606,808 bytes).
+[2026-11-21T22:26:46-03:00] Evaluation keys deserialized once in 0.041s.
+[2026-11-21T22:26:46-03:00] Measuring encrypt / inference / decrypt on 100 records...
+[2026-11-21T22:26:51-03:00]   10/100 — avg encrypt=0.003413s, avg infer=0.564755s, avg decrypt=0.001508s
+[2026-11-21T22:26:57-03:00]   20/100 — avg encrypt=0.003403s, avg infer=0.538556s, avg decrypt=0.001510s
+[2026-11-21T22:27:02-03:00]   30/100 — avg encrypt=0.003400s, avg infer=0.530192s, avg decrypt=0.001496s
+[2026-11-21T22:27:07-03:00]   40/100 — avg encrypt=0.003398s, avg infer=0.526283s, avg decrypt=0.001491s
+[2026-11-21T22:27:12-03:00]   50/100 — avg encrypt=0.003401s, avg infer=0.523455s, avg decrypt=0.001485s
+[2026-11-21T22:27:17-03:00]   60/100 — avg encrypt=0.003399s, avg infer=0.521390s, avg decrypt=0.001484s
+[2026-11-21T22:27:22-03:00]   70/100 — avg encrypt=0.003398s, avg infer=0.520125s, avg decrypt=0.001483s
+[2026-11-21T22:27:28-03:00]   80/100 — avg encrypt=0.003396s, avg infer=0.518744s, avg decrypt=0.001483s
+[2026-11-21T22:27:33-03:00]   90/100 — avg encrypt=0.003397s, avg infer=0.517684s, avg decrypt=0.001481s
+[2026-11-21T22:27:38-03:00]   100/100 — avg encrypt=0.003395s, avg infer=0.516934s, avg decrypt=0.001482s
+[2026-11-21T22:27:38-03:00] core+window/trees3_depth3/q5: mean inference=0.516934s on 100 records (encrypt=0.003395s, decrypt=0.001482s, end-to-end=0.521811s), real disagreements=2.
+[2026-11-21T22:27:38-03:00] core+window/trees3_depth3/q5: gate=PASS
+[2026-11-21T22:27:38-03:00] core+length+segment/trees3_depth4/q5: fitting quantized-clear model on 268,749 rows...
+[2026-11-21T22:27:39-03:00] core+length+segment/trees3_depth4/q5: validation F1=0.9470, test F1=0.9476, test FPR=0.0264, fit=0.343s
+[2026-11-21T22:27:39-03:00] core+length+segment/trees3_depth4/q5: compiling FHE circuit (this can take a long time)...
+[2026-11-21T22:27:39-03:00] GPU status — available=True, enabled(runtime)=True
+[2026-11-21T22:27:39-03:00] FHE device: cpu (requested)
+[2026-11-21T22:27:39-03:00] Compiling FHE circuit with device='cpu'...
+[2026-11-21T22:30:29-03:00] FHE compilation succeeded on device='cpu'.
+[2026-11-21T22:30:29-03:00] core+length+segment/trees3_depth4/q5: compiled in 170.4s on device=cpu.
+[2026-11-21T22:30:29-03:00] core+length+segment/trees3_depth4/q5: saved circuit to 'fhe_runs/20261121_214929_955570/fhe/core+length+segment/cpu'.
+[2026-11-21T22:30:29-03:00] core+length+segment/trees3_depth4/q5: simulate on 89,583 rows...
+[2026-11-21T22:31:14-03:00] core+length+segment/trees3_depth4/q5: simulated 12,288/89,583
+[2026-11-21T22:31:44-03:00] core+length+segment/trees3_depth4/q5: simulated 20,480/89,583
+[2026-11-21T22:32:14-03:00] core+length+segment/trees3_depth4/q5: simulated 28,672/89,583
+[2026-11-21T22:32:43-03:00] core+length+segment/trees3_depth4/q5: simulated 36,864/89,583
+[2026-11-21T22:33:13-03:00] core+length+segment/trees3_depth4/q5: simulated 45,056/89,583
+[2026-11-21T22:33:57-03:00] core+length+segment/trees3_depth4/q5: simulated 57,344/89,583
+[2026-11-21T22:34:27-03:00] core+length+segment/trees3_depth4/q5: simulated 65,536/89,583
+[2026-11-21T22:34:57-03:00] core+length+segment/trees3_depth4/q5: simulated 73,728/89,583
+[2026-11-21T22:35:26-03:00] core+length+segment/trees3_depth4/q5: simulated 81,920/89,583
+[2026-11-21T22:35:54-03:00] core+length+segment/trees3_depth4/q5: simulated 89,583/89,583
+[2026-11-21T22:35:54-03:00] core+length+segment/trees3_depth4/q5: simulation F1=0.9414, clear F1=0.9476, F1 gap=-0.0062, simulation FPR=0.0278, clear FPR=0.0264, FPR gap=+0.0014, disagree=260/89583
+[2026-11-21T22:35:54-03:00] Loading FHE client/server from 'fhe_runs/20261121_214929_955570/fhe/core+length+segment/cpu' for latency measurement...
+[2026-11-21T22:35:54-03:00] Model compiled for device='cpu' (from fhe_device.txt).
+[2026-11-21T22:35:56-03:00] Generating evaluation keys...
+[2026-11-21T22:35:57-03:00] Evaluation keys ready in 1.689s (37,278,616 bytes).
+[2026-11-21T22:35:57-03:00] Evaluation keys deserialized once in 0.051s.
+[2026-11-21T22:35:57-03:00] Measuring encrypt / inference / decrypt on 100 records...
+[2026-11-21T22:36:07-03:00]   10/100 — avg encrypt=0.003565s, avg infer=0.934639s, avg decrypt=0.001523s
+[2026-11-21T22:36:16-03:00]   20/100 — avg encrypt=0.003560s, avg infer=0.904863s, avg decrypt=0.001506s
+[2026-11-21T22:36:25-03:00]   30/100 — avg encrypt=0.003546s, avg infer=0.897370s, avg decrypt=0.001498s
+[2026-11-21T22:36:33-03:00]   40/100 — avg encrypt=0.003542s, avg infer=0.893750s, avg decrypt=0.001503s
+[2026-11-21T22:36:42-03:00]   50/100 — avg encrypt=0.003539s, avg infer=0.891666s, avg decrypt=0.001501s
+[2026-11-21T22:36:51-03:00]   60/100 — avg encrypt=0.003537s, avg infer=0.890772s, avg decrypt=0.001502s
+[2026-11-21T22:37:00-03:00]   70/100 — avg encrypt=0.003539s, avg infer=0.890335s, avg decrypt=0.001499s
+[2026-11-21T22:37:09-03:00]   80/100 — avg encrypt=0.003536s, avg infer=0.890172s, avg decrypt=0.001500s
+[2026-11-21T22:37:18-03:00]   90/100 — avg encrypt=0.003536s, avg infer=0.890051s, avg decrypt=0.001498s
+[2026-11-21T22:37:27-03:00]   100/100 — avg encrypt=0.003539s, avg infer=0.889889s, avg decrypt=0.001497s
+[2026-11-21T22:37:27-03:00] core+length+segment/trees3_depth4/q5: mean inference=0.889889s on 100 records (encrypt=0.003539s, decrypt=0.001497s, end-to-end=0.894925s), real disagreements=2.
+[2026-11-21T22:37:27-03:00] core+length+segment/trees3_depth4/q5: gate=FAIL
+[2026-11-21T22:37:27-03:00] core+length+segment/trees3_depth4/q5: mean inference 0.8899s is above 0.70s
+[2026-11-21T22:37:27-03:00] core+length+window/trees4_depth4/q5: fitting quantized-clear model on 268,749 rows...
+[2026-11-21T22:37:28-03:00] core+length+window/trees4_depth4/q5: validation F1=0.9157, test F1=0.9142, test FPR=0.0460, fit=0.424s
+[2026-11-21T22:37:28-03:00] core+length+window/trees4_depth4/q5: compiling FHE circuit (this can take a long time)...
+[2026-11-21T22:37:28-03:00] GPU status — available=True, enabled(runtime)=True
+[2026-11-21T22:37:28-03:00] FHE device: cpu (requested)
+[2026-11-21T22:37:28-03:00] Compiling FHE circuit with device='cpu'...
+[2026-11-21T22:40:18-03:00] FHE compilation succeeded on device='cpu'.
+[2026-11-21T22:40:18-03:00] core+length+window/trees4_depth4/q5: compiled in 170.2s on device=cpu.
+[2026-11-21T22:40:18-03:00] core+length+window/trees4_depth4/q5: saved circuit to 'fhe_runs/20261121_214929_955570/fhe/core+length+window/cpu'.
+[2026-11-21T22:40:18-03:00] core+length+window/trees4_depth4/q5: simulate on 89,583 rows...
+[2026-11-21T22:41:04-03:00] core+length+window/trees4_depth4/q5: simulated 12,288/89,583
+[2026-11-21T22:41:34-03:00] core+length+window/trees4_depth4/q5: simulated 20,480/89,583
+[2026-11-21T22:42:04-03:00] core+length+window/trees4_depth4/q5: simulated 28,672/89,583
+[2026-11-21T22:42:34-03:00] core+length+window/trees4_depth4/q5: simulated 36,864/89,583
+[2026-11-21T22:43:04-03:00] core+length+window/trees4_depth4/q5: simulated 45,056/89,583
+[2026-11-21T22:43:49-03:00] core+length+window/trees4_depth4/q5: simulated 57,344/89,583
+[2026-11-21T22:44:18-03:00] core+length+window/trees4_depth4/q5: simulated 65,536/89,583
+[2026-11-21T22:44:48-03:00] core+length+window/trees4_depth4/q5: simulated 73,728/89,583
+[2026-11-21T22:45:18-03:00] core+length+window/trees4_depth4/q5: simulated 81,920/89,583
+[2026-11-21T22:45:46-03:00] core+length+window/trees4_depth4/q5: simulated 89,583/89,583
+[2026-11-21T22:45:46-03:00] core+length+window/trees4_depth4/q5: simulation F1=0.9100, clear F1=0.9142, F1 gap=-0.0042, simulation FPR=0.0472, clear FPR=0.0460, FPR gap=+0.0012, disagree=189/89583
+[2026-11-21T22:45:46-03:00] Loading FHE client/server from 'fhe_runs/20261121_214929_955570/fhe/core+length+window/cpu' for latency measurement...
+[2026-11-21T22:45:46-03:00] Model compiled for device='cpu' (from fhe_device.txt).
+[2026-11-21T22:45:48-03:00] Generating evaluation keys...
+[2026-11-21T22:45:50-03:00] Evaluation keys ready in 1.688s (37,278,616 bytes).
+[2026-11-21T22:45:50-03:00] Evaluation keys deserialized once in 0.052s.
+[2026-11-21T22:45:50-03:00] Measuring encrypt / inference / decrypt on 100 records...
+[2026-11-21T22:46:02-03:00]   10/100 — avg encrypt=0.003581s, avg infer=1.228140s, avg decrypt=0.001626s
+[2026-11-21T22:46:14-03:00]   20/100 — avg encrypt=0.003569s, avg infer=1.197862s, avg decrypt=0.001582s
+[2026-11-21T22:46:26-03:00]   30/100 — avg encrypt=0.003567s, avg infer=1.186299s, avg decrypt=0.001573s
+[2026-11-21T22:46:37-03:00]   40/100 — avg encrypt=0.003565s, avg infer=1.180694s, avg decrypt=0.001575s
+[2026-11-21T22:46:49-03:00]   50/100 — avg encrypt=0.003563s, avg infer=1.177652s, avg decrypt=0.001571s
+[2026-11-21T22:47:01-03:00]   60/100 — avg encrypt=0.003562s, avg infer=1.175556s, avg decrypt=0.001566s
+[2026-11-21T22:47:12-03:00]   70/100 — avg encrypt=0.003561s, avg infer=1.173893s, avg decrypt=0.001562s
+[2026-11-21T22:47:24-03:00]   80/100 — avg encrypt=0.003564s, avg infer=1.172770s, avg decrypt=0.001561s
+[2026-11-21T22:47:36-03:00]   90/100 — avg encrypt=0.003562s, avg infer=1.171880s, avg decrypt=0.001557s
+[2026-11-21T22:47:48-03:00]   100/100 — avg encrypt=0.003562s, avg infer=1.171290s, avg decrypt=0.001559s
+[2026-11-21T22:47:48-03:00] core+length+window/trees4_depth4/q5: mean inference=1.171290s on 100 records (encrypt=0.003562s, decrypt=0.001559s, end-to-end=1.176412s), real disagreements=9.
+[2026-11-21T22:47:48-03:00] core+length+window/trees4_depth4/q5: gate=FAIL
+[2026-11-21T22:47:48-03:00] core+length+window/trees4_depth4/q5: mean inference 1.1713s is above 0.70s
+[2026-11-21T22:47:48-03:00] core+segment+window/trees4_depth3/q5: fitting quantized-clear model on 268,749 rows...
+[2026-11-21T22:47:48-03:00] core+segment+window/trees4_depth3/q5: validation F1=0.9248, test F1=0.9274, test FPR=0.0391, fit=0.320s
+[2026-11-21T22:47:48-03:00] core+segment+window/trees4_depth3/q5: compiling FHE circuit (this can take a long time)...
+[2026-11-21T22:47:48-03:00] GPU status — available=True, enabled(runtime)=True
+[2026-11-21T22:47:48-03:00] FHE device: cpu (requested)
+[2026-11-21T22:47:48-03:00] Compiling FHE circuit with device='cpu'...
+[2026-11-21T22:50:38-03:00] FHE compilation succeeded on device='cpu'.
+[2026-11-21T22:50:38-03:00] core+segment+window/trees4_depth3/q5: compiled in 170.0s on device=cpu.
+[2026-11-21T22:50:38-03:00] core+segment+window/trees4_depth3/q5: saved circuit to 'fhe_runs/20261121_214929_955570/fhe/core+segment+window/cpu'.
+[2026-11-21T22:50:38-03:00] core+segment+window/trees4_depth3/q5: simulate on 89,583 rows...
+[2026-11-21T22:51:23-03:00] core+segment+window/trees4_depth3/q5: simulated 12,288/89,583
+[2026-11-21T22:51:52-03:00] core+segment+window/trees4_depth3/q5: simulated 20,480/89,583
+[2026-11-21T22:52:22-03:00] core+segment+window/trees4_depth3/q5: simulated 28,672/89,583
+[2026-11-21T22:52:51-03:00] core+segment+window/trees4_depth3/q5: simulated 36,864/89,583
+[2026-11-21T22:53:20-03:00] core+segment+window/trees4_depth3/q5: simulated 45,056/89,583
+[2026-11-21T22:54:04-03:00] core+segment+window/trees4_depth3/q5: simulated 57,344/89,583
+[2026-11-21T22:54:33-03:00] core+segment+window/trees4_depth3/q5: simulated 65,536/89,583
+[2026-11-21T22:55:03-03:00] core+segment+window/trees4_depth3/q5: simulated 73,728/89,583
+[2026-11-21T22:55:32-03:00] core+segment+window/trees4_depth3/q5: simulated 81,920/89,583
+[2026-11-21T22:55:59-03:00] core+segment+window/trees4_depth3/q5: simulated 89,583/89,583
+[2026-11-21T22:55:59-03:00] core+segment+window/trees4_depth3/q5: simulation F1=0.9238, clear F1=0.9274, F1 gap=-0.0036, simulation FPR=0.0390, clear FPR=0.0391, FPR gap=-0.0001, disagree=165/89583
+[2026-11-21T22:55:59-03:00] Loading FHE client/server from 'fhe_runs/20261121_214929_955570/fhe/core+segment+window/cpu' for latency measurement...
+[2026-11-21T22:55:59-03:00] Model compiled for device='cpu' (from fhe_device.txt).
+[2026-11-21T22:56:01-03:00] Generating evaluation keys...
+[2026-11-21T22:56:02-03:00] Evaluation keys ready in 1.501s (29,606,808 bytes).
+[2026-11-21T22:56:02-03:00] Evaluation keys deserialized once in 0.038s.
+[2026-11-21T22:56:02-03:00] Measuring encrypt / inference / decrypt on 100 records...
+[2026-11-21T22:56:09-03:00]   10/100 — avg encrypt=0.003491s, avg infer=0.638835s, avg decrypt=0.001607s
+[2026-11-21T22:56:15-03:00]   20/100 — avg encrypt=0.003495s, avg infer=0.612145s, avg decrypt=0.001585s
+[2026-11-21T22:56:21-03:00]   30/100 — avg encrypt=0.003495s, avg infer=0.604180s, avg decrypt=0.001578s
+[2026-11-21T22:56:27-03:00]   40/100 — avg encrypt=0.003507s, avg infer=0.599770s, avg decrypt=0.001582s
+[2026-11-21T22:56:33-03:00]   50/100 — avg encrypt=0.003505s, avg infer=0.597932s, avg decrypt=0.001580s
+[2026-11-21T22:56:39-03:00]   60/100 — avg encrypt=0.003509s, avg infer=0.597425s, avg decrypt=0.001581s
+[2026-11-21T22:56:45-03:00]   70/100 — avg encrypt=0.003508s, avg infer=0.597406s, avg decrypt=0.001579s
+[2026-11-21T22:56:51-03:00]   80/100 — avg encrypt=0.003509s, avg infer=0.597312s, avg decrypt=0.001577s
+[2026-11-21T22:56:57-03:00]   90/100 — avg encrypt=0.003507s, avg infer=0.597307s, avg decrypt=0.001580s
+[2026-11-21T22:57:03-03:00]   100/100 — avg encrypt=0.003509s, avg infer=0.597144s, avg decrypt=0.001580s
+[2026-11-21T22:57:03-03:00] core+segment+window/trees4_depth3/q5: mean inference=0.597144s on 100 records (encrypt=0.003509s, decrypt=0.001580s, end-to-end=0.602233s), real disagreements=1.
+[2026-11-21T22:57:03-03:00] core+segment+window/trees4_depth3/q5: gate=PASS
+[2026-11-21T22:57:03-03:00] core+length+segment+window/trees4_depth3/q5: fitting quantized-clear model on 268,749 rows...
+[2026-11-21T22:57:03-03:00] core+length+segment+window/trees4_depth3/q5: validation F1=0.9248, test F1=0.9274, test FPR=0.0391, fit=0.335s
+[2026-11-21T22:57:03-03:00] core+length+segment+window/trees4_depth3/q5: compiling FHE circuit (this can take a long time)...
+[2026-11-21T22:57:03-03:00] GPU status — available=True, enabled(runtime)=True
+[2026-11-21T22:57:03-03:00] FHE device: cpu (requested)
+[2026-11-21T22:57:03-03:00] Compiling FHE circuit with device='cpu'...
+[2026-11-21T22:59:53-03:00] FHE compilation succeeded on device='cpu'.
+[2026-11-21T22:59:53-03:00] core+length+segment+window/trees4_depth3/q5: compiled in 169.9s on device=cpu.
+[2026-11-21T22:59:53-03:00] core+length+segment+window/trees4_depth3/q5: saved circuit to 'fhe_runs/20261121_214929_955570/fhe/core+length+segment+window/cpu'.
+[2026-11-21T22:59:53-03:00] core+length+segment+window/trees4_depth3/q5: simulate on 89,583 rows...
+[2026-11-21T23:00:37-03:00] core+length+segment+window/trees4_depth3/q5: simulated 12,288/89,583
+[2026-11-21T23:01:07-03:00] core+length+segment+window/trees4_depth3/q5: simulated 20,480/89,583
+[2026-11-21T23:01:36-03:00] core+length+segment+window/trees4_depth3/q5: simulated 28,672/89,583
+[2026-11-21T23:02:05-03:00] core+length+segment+window/trees4_depth3/q5: simulated 36,864/89,583
+[2026-11-21T23:02:34-03:00] core+length+segment+window/trees4_depth3/q5: simulated 45,056/89,583
+[2026-11-21T23:03:17-03:00] core+length+segment+window/trees4_depth3/q5: simulated 57,344/89,583
+[2026-11-21T23:03:46-03:00] core+length+segment+window/trees4_depth3/q5: simulated 65,536/89,583
+[2026-11-21T23:04:15-03:00] core+length+segment+window/trees4_depth3/q5: simulated 73,728/89,583
+[2026-11-21T23:04:44-03:00] core+length+segment+window/trees4_depth3/q5: simulated 81,920/89,583
+[2026-11-21T23:05:12-03:00] core+length+segment+window/trees4_depth3/q5: simulated 89,583/89,583
+[2026-11-21T23:05:12-03:00] core+length+segment+window/trees4_depth3/q5: simulation F1=0.9248, clear F1=0.9274, F1 gap=-0.0026, simulation FPR=0.0390, clear FPR=0.0391, FPR gap=-0.0001, disagree=124/89583
+[2026-11-21T23:05:12-03:00] Loading FHE client/server from 'fhe_runs/20261121_214929_955570/fhe/core+length+segment+window/cpu' for latency measurement...
+[2026-11-21T23:05:12-03:00] Model compiled for device='cpu' (from fhe_device.txt).
+[2026-11-21T23:05:13-03:00] Generating evaluation keys...
+[2026-11-21T23:05:15-03:00] Evaluation keys ready in 1.500s (29,606,808 bytes).
+[2026-11-21T23:05:15-03:00] Evaluation keys deserialized once in 0.037s.
+[2026-11-21T23:05:15-03:00] Measuring encrypt / inference / decrypt on 100 records...
+[2026-11-21T23:05:21-03:00]   10/100 — avg encrypt=0.003615s, avg infer=0.646460s, avg decrypt=0.001637s
+[2026-11-21T23:05:27-03:00]   20/100 — avg encrypt=0.003626s, avg infer=0.623993s, avg decrypt=0.001598s
+[2026-11-21T23:05:33-03:00]   30/100 — avg encrypt=0.003623s, avg infer=0.615967s, avg decrypt=0.001591s
+[2026-11-21T23:05:39-03:00]   40/100 — avg encrypt=0.003624s, avg infer=0.611390s, avg decrypt=0.001587s
+[2026-11-21T23:05:45-03:00]   50/100 — avg encrypt=0.003621s, avg infer=0.608745s, avg decrypt=0.001586s
+[2026-11-21T23:05:51-03:00]   60/100 — avg encrypt=0.003620s, avg infer=0.607077s, avg decrypt=0.001583s
+[2026-11-21T23:05:58-03:00]   70/100 — avg encrypt=0.003620s, avg infer=0.606076s, avg decrypt=0.001579s
+[2026-11-21T23:06:04-03:00]   80/100 — avg encrypt=0.003621s, avg infer=0.605734s, avg decrypt=0.001576s
+[2026-11-21T23:06:10-03:00]   90/100 — avg encrypt=0.003622s, avg infer=0.605533s, avg decrypt=0.001574s
+[2026-11-21T23:06:16-03:00]   100/100 — avg encrypt=0.003621s, avg infer=0.605356s, avg decrypt=0.001573s
+[2026-11-21T23:06:16-03:00] core+length+segment+window/trees4_depth3/q5: mean inference=0.605356s on 100 records (encrypt=0.003621s, decrypt=0.001573s, end-to-end=0.610550s), real disagreements=2.
+[2026-11-21T23:06:16-03:00] core+length+segment+window/trees4_depth3/q5: gate=PASS
+[2026-11-21T23:06:16-03:00] Experiment complete. 4/8 passed. Read fhe_runs/20261121_214929_955570/report.txt
