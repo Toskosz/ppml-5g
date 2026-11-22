@@ -10,9 +10,14 @@ execute the script. The source report is the finished screen:
     python compile_screen_fhe.py --device cpu
     python compile_screen_fhe.py --only core core+segment
     python compile_screen_fhe.py --bits 5
+    python compile_screen_fhe.py --set 2 --bits 5 --device cpu
     python compile_screen_fhe.py --sim-rows 10000
 
-Each plaintext winner is refit at 8, 7, 6, and 5 bits. Clear validation
+--set 1, the default, is the plaintext validation winners. Later sets are
+explicit shapes in MODEL_SETS. Add the next smaller tier as the next
+number. A set of explicit shapes needs --bits.
+
+Each set-1 winner is refit at 8, 7, 6, and 5 bits. Clear validation
 and test scores are compared with that report. The bit width is the
 highest validation attack F1, then the lower benign false-positive rate,
 then fewer bits. --bits compiles that width instead of the chosen one.
@@ -52,6 +57,25 @@ FEATURE_SETS = (
 )
 RECALL_NAMES = ("Shellcode", "Reconnaissance", "Analysis", "Backdoor", "Worms")
 BIT_WIDTHS = (8, 7, 6, 5)
+# Set number -> (label, shapes). None means the plaintext validation
+# winners in the source report. An explicit set is (feature set, trees,
+# depth) for each matrix. Add the next smaller tier as the next number.
+MODEL_SETS: dict[int, tuple[str, tuple[tuple[str, int, int], ...] | None]] = {
+    1: ("validation winners", None),
+    2: (
+        "best depth below 5",
+        (
+            ("core", 4, 3),
+            ("core+length", 3, 4),
+            ("core+segment", 3, 4),
+            ("core+window", 3, 3),
+            ("core+length+segment", 3, 4),
+            ("core+length+window", 4, 4),
+            ("core+segment+window", 4, 3),
+            ("core+length+segment+window", 4, 3),
+        ),
+    ),
+}
 TARGET_F1 = 0.70
 MAX_INFERENCE_S = 0.70
 REPRODUCTION_TOLERANCE = 0.001
@@ -311,8 +335,20 @@ def import_compile_helpers():
     return compile_for_device, save_fhe_model
 
 
-def reference_row(rows: dict[tuple, dict], feature_set: str, split: str, bits: int) -> dict | None:
-    return rows.get(("quantized", feature_set, split, bits))
+def reference_row(
+    rows: dict[tuple, dict],
+    feature_set: str,
+    split: str,
+    bits: int,
+    trees: int,
+    depth: int,
+) -> dict | None:
+    row = rows.get(("quantized", feature_set, split, bits))
+    if row is None:
+        return None
+    if int(row["trees"]) != trees or int(row["depth"]) != depth:
+        return None
+    return row
 
 
 def recall_text(metrics: dict, prefix: str = "recall_") -> str:
@@ -471,12 +507,22 @@ def refit_width(screen, matrices, y_binary, family, splits, trees: int, depth: i
     return model, scored, predicted_test, fit_seconds
 
 
-def check_reproduction(scored: dict, rows: dict, feature_set: str, n_bits: int) -> list[str]:
+def check_reproduction(
+    scored: dict,
+    rows: dict,
+    feature_set: str,
+    n_bits: int,
+    trees: int,
+    depth: int,
+    *,
+    required: bool,
+) -> list[str]:
     failures = []
     for split_name in ("validation", "test"):
-        expected = reference_row(rows, feature_set, split_name, n_bits)
+        expected = reference_row(rows, feature_set, split_name, n_bits, trees, depth)
         if expected is None:
-            failures.append(f"q{n_bits} {split_name} is not in the source report")
+            if required:
+                failures.append(f"q{n_bits} {split_name} is not in the source report")
             continue
         observed = scored[split_name]
         for kind, observed_key, expected_key in (
@@ -524,18 +570,22 @@ def run_feature_set(
         and row["depth"] == depth
         and row["bits"] in BIT_WIDTHS
     ]
-    chosen = choose_bit(validation_rows)
-    n_bits = int(args.bits) if args.bits is not None else int(chosen["bits"])
+    bit_rule = int(choose_bit(validation_rows)["bits"]) if validation_rows else None
+    n_bits = int(args.bits) if args.bits is not None else bit_rule
     result = {
         "feature_set": feature_set,
         "n_estimators": trees,
         "max_depth": depth,
         "n_bits": n_bits,
-        "bit_rule": int(chosen["bits"]),
+        "bit_rule": bit_rule,
         "errors": [],
         "reproduction_failures": [],
         "widths": [],
     }
+    if n_bits is None:
+        result["errors"].append("no quantized screen row for this shape; pass --bits")
+        result["gate"], result["gate_reasons"] = decide(result)
+        return result
     specs = dict(screen.feature_sets())[feature_set]
     result["columns"] = [spec[1] for spec in specs]
     matrices = screen.scaled_matrices(columns, specs, splits)
@@ -554,7 +604,15 @@ def run_feature_set(
             log(f"{label}/q{width}: FAILED {type(exc).__name__}: {exc}")
             log(traceback.format_exc().rstrip())
             continue
-        failures = check_reproduction(scored, rows, feature_set, width)
+        failures = check_reproduction(
+            scored,
+            rows,
+            feature_set,
+            width,
+            trees,
+            depth,
+            required=MODEL_SETS[args.set][1] is None,
+        )
         result["reproduction_failures"].extend(failures)
         result["widths"].append(
             {
@@ -596,7 +654,7 @@ def run_feature_set(
     result["clear_test_recalls"] = {
         name: float(chosen_scores["test"][f"recall_{name}"]) for name in RECALL_NAMES
     }
-    screen_test = reference_row(rows, feature_set, "test", n_bits)
+    screen_test = reference_row(rows, feature_set, "test", n_bits, trees, depth)
     if screen_test is not None:
         result["screen_test_f1"] = screen_test["f1"]
         result["screen_test_fpr"] = screen_test["fpr"]
@@ -839,7 +897,10 @@ def build_header(args, source: Path, counts: dict[str, int], sim_count: int) -> 
     import os
 
     sim_text = "every test row" if args.sim_rows == 0 else f"{sim_count} stratified test rows"
-    only = "all eight winners" if not args.only else ", ".join(args.only)
+    label, shapes = MODEL_SETS[args.set]
+    only = f"set {args.set}, {label}"
+    if args.only:
+        only += " (" + ", ".join(args.only) + ")"
     bits = "the validation rule" if args.bits is None else f"{args.bits} bits on every matrix"
     device = args.device or os.environ.get("PPML_FHE_DEVICE") or "auto"
     return [
@@ -860,6 +921,11 @@ def build_header(args, source: Path, counts: dict[str, int], sim_count: int) -> 
             "Key generation is outside both means."
         ),
         (
+            f"Set {args.set} shapes that are not quantized winners in the source report "
+            "are not checked against it. A model passes when clear and simulation F1 are "
+            f">= {TARGET_F1:.2f} and mean inference latency is <= {MAX_INFERENCE_S:.2f}s."
+            if shapes is not None
+            else
             f"A model passes when the refit F1 and benign FPR are within {REPRODUCTION_TOLERANCE:.3f} "
             f"of the source report, clear and simulation F1 are >= {TARGET_F1:.2f}, "
             f"and mean inference latency is <= {MAX_INFERENCE_S:.2f}s."
@@ -888,6 +954,16 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--p-error", type=float, default=P_ERROR)
     parser.add_argument("--bits", type=int, choices=BIT_WIDTHS, default=None)
+    parser.add_argument(
+        "--set",
+        type=int,
+        choices=sorted(MODEL_SETS),
+        default=1,
+        help=(
+            "Which model set to compile. 1 is the validation winners. "
+            "Later sets are explicit shapes in MODEL_SETS and require --bits."
+        ),
+    )
     parser.add_argument("--only", nargs="+", choices=FEATURE_SETS, default=None)
     parser.add_argument("--fhe-records", type=int, default=100)
     parser.add_argument(
@@ -923,7 +999,17 @@ def main() -> None:
     winner_names = [row["feature_set"] for row in winners]
     if winner_names != list(FEATURE_SETS):
         raise SystemExit(f"source winners are {winner_names}, expected {list(FEATURE_SETS)}")
-    selected = [row for row in winners if args.only is None or row["feature_set"] in args.only]
+    _label, shapes = MODEL_SETS[args.set]
+    if shapes is None:
+        selected = [row for row in winners if args.only is None or row["feature_set"] in args.only]
+    else:
+        if args.bits is None:
+            raise SystemExit(f"--set {args.set} has no validation bit width; pass --bits")
+        selected = [
+            {"feature_set": name, "trees": trees, "depth": depth}
+            for name, trees, depth in shapes
+            if args.only is None or name in args.only
+        ]
     args.seed = screen.SEED
 
     compile_for_device, save_fhe_model = import_compile_helpers()
@@ -945,7 +1031,7 @@ def main() -> None:
     del frame
     counts = {name: int(len(index)) for name, index in splits.items()}
     log(
-        f"Matrices={len(selected)}, bits={list(BIT_WIDTHS) if args.bits is None else [args.bits]}, "
+        f"Set={args.set}, matrices={len(selected)}, bits={list(BIT_WIDTHS) if args.bits is None else [args.bits]}, "
         f"seed={screen.SEED}, train/validation/test="
         f"{counts['train']}/{counts['validation']}/{counts['test']}."
     )

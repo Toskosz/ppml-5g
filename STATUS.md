@@ -36,20 +36,42 @@ the same rows. All eight models failed. Every mean inference was above
 on `core+window`. Four matrices also missed that simulation match. The
 simulation-versus-clear gap is still recorded.
 
-The next run compiles all eight winners at 5 bits on CPU. Tree count and
-depth stay the screen winners. The validation rule still chooses a bit
-width, and the report records that choice when it is not 5. Run it on the
-dataset machine from `cicunswnb15-models/`. Compilation of a depth-5 forest
-can take a long time. One model failing does not stop the next.
+Completed 5-bit winner run: `cicunswnb15-models/fhe_runs/20261120_225308_898919/`.
+Wall clock 22:53:08–00:24:44 (−03). CPU. Every winner was compiled at 5
+bits. All eight still failed the 0.70-second inference gate. The fastest
+was `core+length+segment`, 3 trees at depth 5, at 1.178 seconds.
+
+The next run is set 2: the best shallower forest in each feature set.
+Set 1 is the depth-5 validation winners already compiled. Shallower means
+depth below 5, because those circuits stayed above 0.70 seconds. Inside
+that group the rule is the screen's: highest validation attack F1, then
+the lower benign false-positive rate, then fewer trees. These shapes were
+not quantized in the screen. The run fits them at 5 bits, records clear
+and simulation scores, and does not check the refit against the screen
+report. A later tier is the next number in `MODEL_SETS`. Run it on the
+dataset machine from `cicunswnb15-models/`. One model failing does not
+stop the next.
+
+| Feature set | Trees | Depth | Validation F1 | Benign FPR |
+|---|---:|---:|---:|---:|
+| core | 4 | 3 | 0.8901 | 0.0576 |
+| core+length | 3 | 4 | 0.9218 | 0.0393 |
+| core+segment | 3 | 4 | 0.9470 | 0.0264 |
+| core+window | 3 | 3 | 0.9135 | 0.0434 |
+| core+length+segment | 3 | 4 | 0.9470 | 0.0264 |
+| core+length+window | 4 | 4 | 0.9164 | 0.0444 |
+| core+segment+window | 4 | 3 | 0.9253 | 0.0403 |
+| core+length+segment+window | 4 | 3 | 0.9253 | 0.0403 |
 
 ```bash
 cd cicunswnb15-models
-python compile_screen_fhe.py --bits 5 --device cpu
+python compile_screen_fhe.py --set 2 --bits 5 --device cpu
 ```
 
-`compile_screen_fhe.py` refits each plaintext winner from the screen above,
-checks the clear scores against that report, compiles the selected bit
-width, scores FHE simulation on the test rows, and times 100 real records.
+`--set 2` is the current command. `--set 1`, the default, refits each
+plaintext winner from the screen above, checks the clear scores against
+that report, compiles the selected bit width, scores FHE simulation on
+the test rows, and times 100 real records.
 Omitting `--bits` returns to the validation rule: the highest validation
 attack F1, then the lower benign false-positive rate, then fewer bits.
 That rule is 8 bits for `core`, `core+length`, `core+window`, and
@@ -65,13 +87,17 @@ it. One-time key generation is reported separately and is outside both
 means. The same 100 stratified test rows, seed 0, are used for every
 model. `p_error` is 0.01, the same value as the CIC-IDS-2018 forest compiles.
 
-A model passes when all of these hold:
+A winner compile passes when all of these hold:
 
 - Refit clear validation and test attack F1 and benign false-positive rate
   are within 0.001 of `screen_runs/20261120_125444_465319/report.txt`.
 - Clear attack F1 and simulation attack F1 are >= 0.70.
 - Mean inference latency on 100 records is <= 0.70 seconds. Encrypt
   and decrypt are not part of that mean.
+
+`--set 2` and any later explicit set skip the refit check for shapes that
+are not quantized winners in the screen. They still record clear and
+simulation scores. They pass on the F1 floor and the inference budget.
 
 Simulation attack F1 and the benign false-positive rate are printed beside
 the clear score on the same rows, including the signed difference. That
