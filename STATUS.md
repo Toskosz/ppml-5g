@@ -1,6 +1,6 @@
 # PPML-5G experiment status
 
-Updated: 2026-11-22
+Updated: 2026-11-25
 
 ## CIC-UNSW-NB15 feature-set screen
 
@@ -50,15 +50,18 @@ Wall clock 01:03:37–10:42:16 (−03), 9 hours 39 minutes. CPU, 5 bits. 11 of
 the 56 remaining forests passed the 0.70-second inference gate. With the
 5-bit winner run and set 2, all 72 forests now have a 5-bit FHE report.
 
-The next run is set 4 at 8 bits: all 72 forests, the same grid as the
-plaintext screen. Four depth-5 winners already have an 8-bit compile in
-`fhe_runs/20261120_150220_660821/`. This run measures every forest at 8
-bits, including those four again. Compile time and full-test simulation
-stayed flat between 5 and 8 bits, and the 100-record inference phase was
-the part that grew. The 56-model 5-bit run took 9 hours 39 minutes, so
-72 forests at 8 bits is about 14 hours. The report is rewritten after
-each forest. One model failing does not stop the next. Run it on the
-dataset machine from `cicunswnb15-models/`.
+Interrupted set 4: `cicunswnb15-models/fhe_runs/20261122_174542_799875/`.
+Wall clock 17:45:42–20:31:11 (−03). CPU, 8 bits, all 72 forests. 14
+finished, and all 14 failed the 0.70-second inference gate. The log stops
+during compilation of `core+length`, 4 trees, depth 5. There is no
+traceback. That forest's clear fit is in the log (validation attack F1
+0.9296) and is not in the report. The 14 finished scores stand.
+
+Set 5 is the other 58, starting at that unfinished forest and running
+through `core+length+segment+window`, 5 trees, depth 5. The 14 took 2
+hours 45 minutes, so the remainder is about 11 hours. The report is
+rewritten after each forest. One model failing does not stop the next.
+Run it on the dataset machine from `cicunswnb15-models/`.
 
 Set 2, already compiled:
 
@@ -75,10 +78,10 @@ Set 2, already compiled:
 
 ```bash
 cd cicunswnb15-models
-python compile_screen_fhe.py --set 4 --bits 8 --device cpu
+python compile_screen_fhe.py --set 5 --bits 8 --device cpu
 ```
 
-`--set 4` is the current command. `--set 1`, the default, refits each
+`--set 5` is the current command. `--set 1`, the default, refits each
 plaintext winner from the screen above, checks the clear scores against
 that report, compiles the selected bit width, scores FHE simulation on
 the test rows, and times 100 real records.

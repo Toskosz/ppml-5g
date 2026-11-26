@@ -13,12 +13,15 @@ execute the script. The source report is the finished screen:
     python compile_screen_fhe.py --set 2 --bits 5 --device cpu
     python compile_screen_fhe.py --set 3 --bits 5 --device cpu
     python compile_screen_fhe.py --set 4 --bits 5 --device cpu
+    python compile_screen_fhe.py --set 5 --bits 8 --device cpu
     python compile_screen_fhe.py --sim-rows 10000
 
 --set 1, the default, is the plaintext validation winners. Set 2 is the
 best depth-below-5 forest in each feature set. Set 3 is every other
-forest in the 72. Set 4 is all 72. An explicit set needs --bits. Add a
-later tier as the next number in MODEL_SETS.
+forest in the 72. Set 4 is all 72. Set 5 is the 58 forests the interrupted
+8-bit run had not finished, from core+length with 4 trees at depth 5.
+An explicit set needs --bits. Add a later tier as the next number in
+MODEL_SETS.
 
 Each set-1 winner is refit at 8, 7, 6, and 5 bits. Clear validation
 and test scores are compared with that report. The bit width is the
@@ -64,10 +67,13 @@ BIT_WIDTHS = (8, 7, 6, 5)
 # winners in the source report. REMAINING means every forest in the
 # 3/4/5 tree and depth grid that an earlier set did not take. ALL means
 # that whole grid. An explicit tuple is (feature set, trees, depth).
+# ("from", feature set, trees, depth) is that forest and every later one
+# in the grid. Set 3 does not treat that marker as a taken shape.
 # Add a later tier as the next number.
 REMAINING = "remaining"
 ALL = "all"
-MODEL_SETS: dict[int, tuple[str, tuple[tuple[str, int, int], ...] | str | None]] = {
+FROM_SHAPE = "from"
+MODEL_SETS: dict[int, tuple[str, tuple | str | None]] = {
     1: ("validation winners", None),
     2: (
         "best depth below 5",
@@ -84,6 +90,10 @@ MODEL_SETS: dict[int, tuple[str, tuple[tuple[str, int, int], ...] | str | None]]
     ),
     3: ("the other 56 forests", REMAINING),
     4: ("all 72 forests", ALL),
+    5: (
+        "the 58 forests set 4 had not finished",
+        (FROM_SHAPE, "core+length", 4, 5),
+    ),
 }
 TARGET_F1 = 0.70
 MAX_INFERENCE_S = 0.70
@@ -180,6 +190,20 @@ def all_shapes(
     )
 
 
+def shapes_from(
+    start: tuple[str, int, int],
+    trees: tuple[int, ...],
+    depths: tuple[int, ...],
+) -> tuple[tuple[str, int, int], ...]:
+    """Screen-grid forests from `start` through the last one."""
+    grid = all_shapes(trees, depths)
+    try:
+        index = grid.index(start)
+    except ValueError:
+        raise SystemExit(f"{start} is not in the screen grid") from None
+    return grid[index:]
+
+
 def remaining_shapes(
     winners: list[dict],
     trees: tuple[int, ...],
@@ -188,7 +212,7 @@ def remaining_shapes(
     """Forests in the screen grid that no earlier set already names."""
     taken = {(row["feature_set"], int(row["trees"]), int(row["depth"])) for row in winners}
     for _set_id, (_label, shapes) in MODEL_SETS.items():
-        if isinstance(shapes, tuple):
+        if isinstance(shapes, tuple) and shapes and isinstance(shapes[0], tuple):
             taken.update(shapes)
     return tuple(
         (name, n_estimators, depth)
@@ -1003,7 +1027,8 @@ def parse_args() -> argparse.Namespace:
         help=(
             "Which model set to compile. 1 is the validation winners. "
             "Set 2 is the depth-below-5 forests. Set 3 is the other 56. "
-            "Set 4 is all 72. Explicit sets require --bits."
+            "Set 4 is all 72. Set 5 is the 58 forests the interrupted "
+            "8-bit run had not finished. Explicit sets require --bits."
         ),
     )
     parser.add_argument("--only", nargs="+", choices=FEATURE_SETS, default=None)
@@ -1050,6 +1075,11 @@ def main() -> None:
         shapes = all_shapes(screen.TREES, screen.DEPTHS)
         if len(shapes) != 72:
             raise SystemExit(f"--set 4 resolved to {len(shapes)} forests, expected 72")
+    elif isinstance(shapes, tuple) and shapes and shapes[0] == FROM_SHAPE:
+        start = (str(shapes[1]), int(shapes[2]), int(shapes[3]))
+        shapes = shapes_from(start, screen.TREES, screen.DEPTHS)
+        if args.set == 5 and len(shapes) != 58:
+            raise SystemExit(f"--set 5 resolved to {len(shapes)} forests, expected 58")
     if shapes is None:
         selected = [row for row in winners if args.only is None or row["feature_set"] in args.only]
     else:
