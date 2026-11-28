@@ -1,0 +1,580 @@
+CIC-UNSW-NB15 plaintext (clear) inference timing
+seed=0 bits=[5, 8] records=100 warmup=1
+train/validation/test=268749/89583/89583. Same stratified split and 100-record test sample as compile_screen_fhe.py.
+Models are Concrete ML RandomForestClassifier(..., n_bits=b) evaluated with fhe='disable'.
+
+core  trees=3 depth=3 bits=5
+  clear test f1=0.8904 fpr=0.0576 fit=0.324s
+  mean clear inference of 100 records=0.000261s (0.261ms) std=0.000016s min=0.000246s median=0.000257s p95=0.000284s max=0.000362s
+
+core  trees=3 depth=4 bits=5
+  clear test f1=0.8876 fpr=0.0623 fit=0.356s
+  mean clear inference of 100 records=0.000260s (0.260ms) std=0.000017s min=0.000245s median=0.000256s p95=0.000284s max=0.000377s
+
+core  trees=3 depth=5 bits=5
+  clear test f1=0.8963 fpr=0.0567 fit=0.443s
+  mean clear inference of 100 records=0.000263s (0.263ms) std=0.000017s min=0.000248s median=0.000259s p95=0.000289s max=0.000358s
+
+core  trees=4 depth=3 bits=5
+  clear test f1=0.8904 fpr=0.0576 fit=0.302s
+  mean clear inference of 100 records=0.000263s (0.263ms) std=0.000014s min=0.000248s median=0.000259s p95=0.000293s max=0.000342s
+
+core  trees=4 depth=4 bits=5
+  clear test f1=0.8876 fpr=0.0623 fit=0.391s
+  mean clear inference of 100 records=0.000265s (0.265ms) std=0.000017s min=0.000249s median=0.000260s p95=0.000287s max=0.000368s
+
+core  trees=4 depth=5 bits=5
+  clear test f1=0.8952 fpr=0.0574 fit=0.534s
+  mean clear inference of 100 records=0.000264s (0.264ms) std=0.000017s min=0.000249s median=0.000259s p95=0.000288s max=0.000369s
+
+core  trees=5 depth=3 bits=5
+  clear test f1=0.8904 fpr=0.0576 fit=0.386s
+  mean clear inference of 100 records=0.000264s (0.264ms) std=0.000017s min=0.000248s median=0.000259s p95=0.000294s max=0.000366s
+
+core  trees=5 depth=4 bits=5
+  clear test f1=0.8876 fpr=0.0623 fit=0.497s
+  mean clear inference of 100 records=0.000267s (0.267ms) std=0.000020s min=0.000247s median=0.000260s p95=0.000315s max=0.000361s
+
+core  trees=5 depth=5 bits=5
+  clear test f1=0.8961 fpr=0.0567 fit=0.671s
+  mean clear inference of 100 records=0.000273s (0.273ms) std=0.000024s min=0.000251s median=0.000265s p95=0.000326s max=0.000373s
+
+core  trees=3 depth=3 bits=8
+  clear test f1=0.8893 fpr=0.0586 fit=0.294s
+  mean clear inference of 100 records=0.000263s (0.263ms) std=0.000020s min=0.000246s median=0.000256s p95=0.000315s max=0.000356s
+
+core  trees=3 depth=4 bits=8
+  clear test f1=0.8895 fpr=0.0606 fit=0.367s
+  mean clear inference of 100 records=0.000264s (0.264ms) std=0.000024s min=0.000247s median=0.000259s p95=0.000302s max=0.000435s
+
+core  trees=3 depth=5 bits=8
+  clear test f1=0.9048 fpr=0.0502 fit=0.486s
+  mean clear inference of 100 records=0.000272s (0.272ms) std=0.000036s min=0.000246s median=0.000264s p95=0.000318s max=0.000536s
+
+core  trees=4 depth=3 bits=8
+  clear test f1=0.8896 fpr=0.0582 fit=0.343s
+  mean clear inference of 100 records=0.000269s (0.269ms) std=0.000021s min=0.000249s median=0.000265s p95=0.000310s max=0.000384s
+
+core  trees=4 depth=4 bits=8
+  clear test f1=0.8897 fpr=0.0603 fit=0.414s
+  mean clear inference of 100 records=0.000266s (0.266ms) std=0.000023s min=0.000246s median=0.000258s p95=0.000301s max=0.000385s
+
+core  trees=4 depth=5 bits=8
+  clear test f1=0.9053 fpr=0.0497 fit=0.568s
+  mean clear inference of 100 records=0.000269s (0.269ms) std=0.000021s min=0.000249s median=0.000262s p95=0.000310s max=0.000385s
+
+core  trees=5 depth=3 bits=8
+  clear test f1=0.8896 fpr=0.0582 fit=0.419s
+  mean clear inference of 100 records=0.000266s (0.266ms) std=0.000021s min=0.000249s median=0.000260s p95=0.000298s max=0.000392s
+
+core  trees=5 depth=4 bits=8
+  clear test f1=0.9008 fpr=0.0513 fit=0.525s
+  mean clear inference of 100 records=0.000265s (0.265ms) std=0.000020s min=0.000246s median=0.000259s p95=0.000306s max=0.000349s
+
+core  trees=5 depth=5 bits=8
+  clear test f1=0.9056 fpr=0.0494 fit=0.719s
+  mean clear inference of 100 records=0.000264s (0.264ms) std=0.000017s min=0.000248s median=0.000259s p95=0.000284s max=0.000358s
+
+core+length  trees=3 depth=3 bits=5
+  clear test f1=0.8904 fpr=0.0576 fit=0.297s
+  mean clear inference of 100 records=0.000270s (0.270ms) std=0.000017s min=0.000250s median=0.000265s p95=0.000305s max=0.000335s
+
+core+length  trees=3 depth=4 bits=5
+  clear test f1=0.9080 fpr=0.0495 fit=0.374s
+  mean clear inference of 100 records=0.000272s (0.272ms) std=0.000020s min=0.000252s median=0.000266s p95=0.000304s max=0.000367s
+
+core+length  trees=3 depth=5 bits=5
+  clear test f1=0.9207 fpr=0.0424 fit=0.466s
+  mean clear inference of 100 records=0.000373s (0.373ms) std=0.000233s min=0.000255s median=0.000281s p95=0.000650s max=0.002200s
+
+core+length  trees=4 depth=3 bits=5
+  clear test f1=0.8904 fpr=0.0576 fit=0.324s
+  mean clear inference of 100 records=0.000269s (0.269ms) std=0.000017s min=0.000252s median=0.000264s p95=0.000290s max=0.000354s
+
+core+length  trees=4 depth=4 bits=5
+  clear test f1=0.9156 fpr=0.0450 fit=0.411s
+  mean clear inference of 100 records=0.000274s (0.274ms) std=0.000018s min=0.000255s median=0.000270s p95=0.000312s max=0.000361s
+
+core+length  trees=4 depth=5 bits=5
+  clear test f1=0.9207 fpr=0.0424 fit=0.544s
+  mean clear inference of 100 records=0.000275s (0.275ms) std=0.000022s min=0.000255s median=0.000269s p95=0.000321s max=0.000370s
+
+core+length  trees=5 depth=3 bits=5
+  clear test f1=0.8904 fpr=0.0576 fit=0.411s
+  mean clear inference of 100 records=0.000274s (0.274ms) std=0.000020s min=0.000254s median=0.000267s p95=0.000305s max=0.000358s
+
+core+length  trees=5 depth=4 bits=5
+  clear test f1=0.9080 fpr=0.0495 fit=0.525s
+  mean clear inference of 100 records=0.000269s (0.269ms) std=0.000020s min=0.000253s median=0.000262s p95=0.000305s max=0.000379s
+
+core+length  trees=5 depth=5 bits=5
+  clear test f1=0.9207 fpr=0.0424 fit=0.677s
+  mean clear inference of 100 records=0.000269s (0.269ms) std=0.000016s min=0.000255s median=0.000265s p95=0.000293s max=0.000369s
+
+core+length  trees=3 depth=3 bits=8
+  clear test f1=0.8893 fpr=0.0586 fit=0.315s
+  mean clear inference of 100 records=0.000267s (0.267ms) std=0.000015s min=0.000251s median=0.000262s p95=0.000289s max=0.000348s
+
+core+length  trees=3 depth=4 bits=8
+  clear test f1=0.9161 fpr=0.0448 fit=0.408s
+  mean clear inference of 100 records=0.000272s (0.272ms) std=0.000019s min=0.000253s median=0.000267s p95=0.000305s max=0.000372s
+
+core+length  trees=3 depth=5 bits=8
+  clear test f1=0.9312 fpr=0.0359 fit=0.522s
+  mean clear inference of 100 records=0.000281s (0.281ms) std=0.000031s min=0.000256s median=0.000271s p95=0.000332s max=0.000432s
+
+core+length  trees=4 depth=3 bits=8
+  clear test f1=0.8895 fpr=0.0585 fit=0.340s
+  mean clear inference of 100 records=0.000273s (0.273ms) std=0.000022s min=0.000251s median=0.000267s p95=0.000334s max=0.000361s
+
+core+length  trees=4 depth=4 bits=8
+  clear test f1=0.9131 fpr=0.0467 fit=0.448s
+  mean clear inference of 100 records=0.000266s (0.266ms) std=0.000017s min=0.000251s median=0.000263s p95=0.000285s max=0.000386s
+
+core+length  trees=4 depth=5 bits=8
+  clear test f1=0.9288 fpr=0.0375 fit=0.587s
+  mean clear inference of 100 records=0.000271s (0.271ms) std=0.000015s min=0.000255s median=0.000266s p95=0.000301s max=0.000346s
+
+core+length  trees=5 depth=3 bits=8
+  clear test f1=0.8896 fpr=0.0582 fit=0.468s
+  mean clear inference of 100 records=0.000269s (0.269ms) std=0.000015s min=0.000254s median=0.000264s p95=0.000294s max=0.000352s
+
+core+length  trees=5 depth=4 bits=8
+  clear test f1=0.9126 fpr=0.0470 fit=0.590s
+  mean clear inference of 100 records=0.000268s (0.268ms) std=0.000017s min=0.000253s median=0.000262s p95=0.000293s max=0.000387s
+
+core+length  trees=5 depth=5 bits=8
+  clear test f1=0.9277 fpr=0.0382 fit=0.806s
+  mean clear inference of 100 records=0.000269s (0.269ms) std=0.000017s min=0.000254s median=0.000264s p95=0.000308s max=0.000360s
+
+core+segment  trees=3 depth=3 bits=5
+  clear test f1=0.9254 fpr=0.0403 fit=0.289s
+  mean clear inference of 100 records=0.000267s (0.267ms) std=0.000016s min=0.000252s median=0.000263s p95=0.000287s max=0.000359s
+
+core+segment  trees=3 depth=4 bits=5
+  clear test f1=0.9476 fpr=0.0264 fit=0.348s
+  mean clear inference of 100 records=0.000268s (0.268ms) std=0.000019s min=0.000250s median=0.000262s p95=0.000295s max=0.000370s
+
+core+segment  trees=3 depth=5 bits=5
+  clear test f1=0.9485 fpr=0.0265 fit=0.422s
+  mean clear inference of 100 records=0.000268s (0.268ms) std=0.000017s min=0.000253s median=0.000262s p95=0.000297s max=0.000378s
+
+core+segment  trees=4 depth=3 bits=5
+  clear test f1=0.9254 fpr=0.0403 fit=0.325s
+  mean clear inference of 100 records=0.000270s (0.270ms) std=0.000031s min=0.000253s median=0.000263s p95=0.000294s max=0.000523s
+
+core+segment  trees=4 depth=4 bits=5
+  clear test f1=0.9476 fpr=0.0264 fit=0.389s
+  mean clear inference of 100 records=0.000267s (0.267ms) std=0.000017s min=0.000250s median=0.000264s p95=0.000291s max=0.000365s
+
+core+segment  trees=4 depth=5 bits=5
+  clear test f1=0.9484 fpr=0.0265 fit=0.470s
+  mean clear inference of 100 records=0.000268s (0.268ms) std=0.000016s min=0.000254s median=0.000262s p95=0.000291s max=0.000372s
+
+core+segment  trees=5 depth=3 bits=5
+  clear test f1=0.9254 fpr=0.0403 fit=0.401s
+  mean clear inference of 100 records=0.000266s (0.266ms) std=0.000017s min=0.000252s median=0.000262s p95=0.000288s max=0.000362s
+
+core+segment  trees=5 depth=4 bits=5
+  clear test f1=0.9476 fpr=0.0264 fit=0.486s
+  mean clear inference of 100 records=0.000268s (0.268ms) std=0.000017s min=0.000253s median=0.000264s p95=0.000290s max=0.000357s
+
+core+segment  trees=5 depth=5 bits=5
+  clear test f1=0.9484 fpr=0.0265 fit=0.589s
+  mean clear inference of 100 records=0.000267s (0.267ms) std=0.000017s min=0.000252s median=0.000263s p95=0.000285s max=0.000361s
+
+core+segment  trees=3 depth=3 bits=8
+  clear test f1=0.9256 fpr=0.0402 fit=0.299s
+  mean clear inference of 100 records=0.000265s (0.265ms) std=0.000016s min=0.000252s median=0.000261s p95=0.000283s max=0.000363s
+
+core+segment  trees=3 depth=4 bits=8
+  clear test f1=0.9476 fpr=0.0264 fit=0.369s
+  mean clear inference of 100 records=0.000266s (0.266ms) std=0.000016s min=0.000252s median=0.000262s p95=0.000289s max=0.000360s
+
+core+segment  trees=3 depth=5 bits=8
+  clear test f1=0.9484 fpr=0.0265 fit=0.407s
+  mean clear inference of 100 records=0.000398s (0.398ms) std=0.000188s min=0.000252s median=0.000334s p95=0.000799s max=0.001113s
+
+core+segment  trees=4 depth=3 bits=8
+  clear test f1=0.9256 fpr=0.0402 fit=0.329s
+  mean clear inference of 100 records=0.000267s (0.267ms) std=0.000016s min=0.000252s median=0.000263s p95=0.000292s max=0.000367s
+
+core+segment  trees=4 depth=4 bits=8
+  clear test f1=0.9476 fpr=0.0264 fit=0.392s
+  mean clear inference of 100 records=0.000278s (0.278ms) std=0.000081s min=0.000251s median=0.000265s p95=0.000297s max=0.001065s
+
+core+segment  trees=4 depth=5 bits=8
+  clear test f1=0.9484 fpr=0.0265 fit=0.459s
+  mean clear inference of 100 records=0.000267s (0.267ms) std=0.000017s min=0.000251s median=0.000262s p95=0.000292s max=0.000357s
+
+core+segment  trees=5 depth=3 bits=8
+  clear test f1=0.9256 fpr=0.0402 fit=0.422s
+  mean clear inference of 100 records=0.000267s (0.267ms) std=0.000015s min=0.000252s median=0.000263s p95=0.000288s max=0.000362s
+
+core+segment  trees=5 depth=4 bits=8
+  clear test f1=0.9476 fpr=0.0264 fit=0.502s
+  mean clear inference of 100 records=0.000266s (0.266ms) std=0.000018s min=0.000252s median=0.000261s p95=0.000290s max=0.000375s
+
+core+segment  trees=5 depth=5 bits=8
+  clear test f1=0.9484 fpr=0.0265 fit=0.590s
+  mean clear inference of 100 records=0.000267s (0.267ms) std=0.000016s min=0.000253s median=0.000263s p95=0.000288s max=0.000355s
+
+core+window  trees=3 depth=3 bits=5
+  clear test f1=0.9117 fpr=0.0446 fit=0.292s
+  mean clear inference of 100 records=0.000265s (0.265ms) std=0.000018s min=0.000250s median=0.000260s p95=0.000281s max=0.000387s
+
+core+window  trees=3 depth=4 bits=5
+  clear test f1=0.9055 fpr=0.0513 fit=0.364s
+  mean clear inference of 100 records=0.000266s (0.266ms) std=0.000016s min=0.000251s median=0.000262s p95=0.000289s max=0.000361s
+
+core+window  trees=3 depth=5 bits=5
+  clear test f1=0.9399 fpr=0.0312 fit=0.469s
+  mean clear inference of 100 records=0.000268s (0.268ms) std=0.000018s min=0.000253s median=0.000264s p95=0.000296s max=0.000390s
+
+core+window  trees=4 depth=3 bits=5
+  clear test f1=0.9117 fpr=0.0446 fit=0.313s
+  mean clear inference of 100 records=0.000317s (0.317ms) std=0.000071s min=0.000254s median=0.000289s p95=0.000443s max=0.000603s
+
+core+window  trees=4 depth=4 bits=5
+  clear test f1=0.9055 fpr=0.0513 fit=0.409s
+  mean clear inference of 100 records=0.000266s (0.266ms) std=0.000014s min=0.000252s median=0.000263s p95=0.000286s max=0.000344s
+
+core+window  trees=4 depth=5 bits=5
+  clear test f1=0.9399 fpr=0.0312 fit=0.535s
+  mean clear inference of 100 records=0.000269s (0.269ms) std=0.000016s min=0.000255s median=0.000264s p95=0.000292s max=0.000374s
+
+core+window  trees=5 depth=3 bits=5
+  clear test f1=0.9117 fpr=0.0446 fit=0.413s
+  mean clear inference of 100 records=0.000267s (0.267ms) std=0.000015s min=0.000253s median=0.000264s p95=0.000285s max=0.000371s
+
+core+window  trees=5 depth=4 bits=5
+  clear test f1=0.9055 fpr=0.0513 fit=0.535s
+  mean clear inference of 100 records=0.000267s (0.267ms) std=0.000017s min=0.000253s median=0.000263s p95=0.000293s max=0.000371s
+
+core+window  trees=5 depth=5 bits=5
+  clear test f1=0.9397 fpr=0.0312 fit=0.680s
+  mean clear inference of 100 records=0.000272s (0.272ms) std=0.000017s min=0.000258s median=0.000268s p95=0.000293s max=0.000369s
+
+core+window  trees=3 depth=3 bits=8
+  clear test f1=0.9118 fpr=0.0449 fit=0.315s
+  mean clear inference of 100 records=0.000268s (0.268ms) std=0.000017s min=0.000252s median=0.000263s p95=0.000291s max=0.000365s
+
+core+window  trees=3 depth=4 bits=8
+  clear test f1=0.9121 fpr=0.0468 fit=0.397s
+  mean clear inference of 100 records=0.000267s (0.267ms) std=0.000016s min=0.000252s median=0.000263s p95=0.000293s max=0.000356s
+
+core+window  trees=3 depth=5 bits=8
+  clear test f1=0.9457 fpr=0.0276 fit=0.503s
+  mean clear inference of 100 records=0.000270s (0.270ms) std=0.000018s min=0.000254s median=0.000266s p95=0.000290s max=0.000387s
+
+core+window  trees=4 depth=3 bits=8
+  clear test f1=0.9118 fpr=0.0449 fit=0.351s
+  mean clear inference of 100 records=0.000274s (0.274ms) std=0.000028s min=0.000254s median=0.000265s p95=0.000324s max=0.000430s
+
+core+window  trees=4 depth=4 bits=8
+  clear test f1=0.9124 fpr=0.0466 fit=0.444s
+  mean clear inference of 100 records=0.000266s (0.266ms) std=0.000015s min=0.000252s median=0.000262s p95=0.000289s max=0.000357s
+
+core+window  trees=4 depth=5 bits=8
+  clear test f1=0.9457 fpr=0.0276 fit=0.587s
+  mean clear inference of 100 records=0.000272s (0.272ms) std=0.000016s min=0.000256s median=0.000268s p95=0.000296s max=0.000360s
+
+core+window  trees=5 depth=3 bits=8
+  clear test f1=0.9118 fpr=0.0449 fit=0.451s
+  mean clear inference of 100 records=0.000269s (0.269ms) std=0.000014s min=0.000255s median=0.000266s p95=0.000291s max=0.000356s
+
+core+window  trees=5 depth=4 bits=8
+  clear test f1=0.9102 fpr=0.0480 fit=0.579s
+  mean clear inference of 100 records=0.000270s (0.270ms) std=0.000017s min=0.000254s median=0.000265s p95=0.000299s max=0.000375s
+
+core+window  trees=5 depth=5 bits=8
+  clear test f1=0.9455 fpr=0.0276 fit=0.746s
+  mean clear inference of 100 records=0.000272s (0.272ms) std=0.000017s min=0.000257s median=0.000268s p95=0.000302s max=0.000362s
+
+core+length+segment  trees=3 depth=3 bits=5
+  clear test f1=0.9254 fpr=0.0403 fit=0.306s
+  mean clear inference of 100 records=0.000276s (0.276ms) std=0.000018s min=0.000259s median=0.000270s p95=0.000312s max=0.000366s
+
+core+length+segment  trees=3 depth=4 bits=5
+  clear test f1=0.9476 fpr=0.0264 fit=0.355s
+  mean clear inference of 100 records=0.000276s (0.276ms) std=0.000017s min=0.000260s median=0.000272s p95=0.000297s max=0.000391s
+
+core+length+segment  trees=3 depth=5 bits=5
+  clear test f1=0.9472 fpr=0.0273 fit=0.395s
+  mean clear inference of 100 records=0.000273s (0.273ms) std=0.000020s min=0.000259s median=0.000267s p95=0.000297s max=0.000427s
+
+core+length+segment  trees=4 depth=3 bits=5
+  clear test f1=0.9254 fpr=0.0403 fit=0.357s
+  mean clear inference of 100 records=0.000271s (0.271ms) std=0.000017s min=0.000257s median=0.000265s p95=0.000297s max=0.000383s
+
+core+length+segment  trees=4 depth=4 bits=5
+  clear test f1=0.9476 fpr=0.0264 fit=0.402s
+  mean clear inference of 100 records=0.000271s (0.271ms) std=0.000015s min=0.000258s median=0.000267s p95=0.000288s max=0.000369s
+
+core+length+segment  trees=4 depth=5 bits=5
+  clear test f1=0.9471 fpr=0.0273 fit=0.479s
+  mean clear inference of 100 records=0.000273s (0.273ms) std=0.000018s min=0.000258s median=0.000267s p95=0.000294s max=0.000399s
+
+core+length+segment  trees=5 depth=3 bits=5
+  clear test f1=0.9254 fpr=0.0403 fit=0.451s
+  mean clear inference of 100 records=0.000272s (0.272ms) std=0.000017s min=0.000258s median=0.000266s p95=0.000294s max=0.000369s
+
+core+length+segment  trees=5 depth=4 bits=5
+  clear test f1=0.9476 fpr=0.0264 fit=0.507s
+  mean clear inference of 100 records=0.000275s (0.275ms) std=0.000018s min=0.000259s median=0.000269s p95=0.000307s max=0.000390s
+
+core+length+segment  trees=5 depth=5 bits=5
+  clear test f1=0.9471 fpr=0.0273 fit=0.591s
+  mean clear inference of 100 records=0.000274s (0.274ms) std=0.000017s min=0.000260s median=0.000270s p95=0.000305s max=0.000368s
+
+core+length+segment  trees=3 depth=3 bits=8
+  clear test f1=0.9256 fpr=0.0402 fit=0.329s
+  mean clear inference of 100 records=0.000272s (0.272ms) std=0.000018s min=0.000258s median=0.000267s p95=0.000288s max=0.000402s
+
+core+length+segment  trees=3 depth=4 bits=8
+  clear test f1=0.9476 fpr=0.0264 fit=0.366s
+  mean clear inference of 100 records=0.000272s (0.272ms) std=0.000014s min=0.000257s median=0.000269s p95=0.000298s max=0.000350s
+
+core+length+segment  trees=3 depth=5 bits=8
+  clear test f1=0.9472 fpr=0.0272 fit=0.447s
+  mean clear inference of 100 records=0.000274s (0.274ms) std=0.000017s min=0.000259s median=0.000269s p95=0.000303s max=0.000369s
+
+core+length+segment  trees=4 depth=3 bits=8
+  clear test f1=0.9256 fpr=0.0402 fit=0.342s
+  mean clear inference of 100 records=0.000274s (0.274ms) std=0.000020s min=0.000259s median=0.000267s p95=0.000297s max=0.000414s
+
+core+length+segment  trees=4 depth=4 bits=8
+  clear test f1=0.9476 fpr=0.0264 fit=0.427s
+  mean clear inference of 100 records=0.000272s (0.272ms) std=0.000017s min=0.000256s median=0.000267s p95=0.000293s max=0.000387s
+
+core+length+segment  trees=4 depth=5 bits=8
+  clear test f1=0.9472 fpr=0.0272 fit=0.500s
+  mean clear inference of 100 records=0.000277s (0.277ms) std=0.000018s min=0.000261s median=0.000273s p95=0.000311s max=0.000369s
+
+core+length+segment  trees=5 depth=3 bits=8
+  clear test f1=0.9256 fpr=0.0402 fit=0.451s
+  mean clear inference of 100 records=0.000274s (0.274ms) std=0.000018s min=0.000259s median=0.000268s p95=0.000299s max=0.000387s
+
+core+length+segment  trees=5 depth=4 bits=8
+  clear test f1=0.9476 fpr=0.0264 fit=0.607s
+  mean clear inference of 100 records=0.000274s (0.274ms) std=0.000016s min=0.000259s median=0.000269s p95=0.000299s max=0.000370s
+
+core+length+segment  trees=5 depth=5 bits=8
+  clear test f1=0.9472 fpr=0.0272 fit=0.749s
+  mean clear inference of 100 records=0.000277s (0.277ms) std=0.000020s min=0.000260s median=0.000271s p95=0.000308s max=0.000414s
+
+core+length+window  trees=3 depth=3 bits=5
+  clear test f1=0.9117 fpr=0.0446 fit=0.317s
+  mean clear inference of 100 records=0.000281s (0.281ms) std=0.000018s min=0.000260s median=0.000276s p95=0.000314s max=0.000362s
+
+core+length+window  trees=3 depth=4 bits=5
+  clear test f1=0.9142 fpr=0.0460 fit=0.461s
+  mean clear inference of 100 records=0.000282s (0.282ms) std=0.000023s min=0.000258s median=0.000276s p95=0.000330s max=0.000414s
+
+core+length+window  trees=3 depth=5 bits=5
+  clear test f1=0.9450 fpr=0.0285 fit=0.565s
+  mean clear inference of 100 records=0.000274s (0.274ms) std=0.000016s min=0.000258s median=0.000270s p95=0.000298s max=0.000346s
+
+core+length+window  trees=4 depth=3 bits=5
+  clear test f1=0.9117 fpr=0.0446 fit=0.367s
+  mean clear inference of 100 records=0.000271s (0.271ms) std=0.000014s min=0.000257s median=0.000268s p95=0.000288s max=0.000366s
+
+core+length+window  trees=4 depth=4 bits=5
+  clear test f1=0.9142 fpr=0.0460 fit=0.477s
+  mean clear inference of 100 records=0.000275s (0.275ms) std=0.000016s min=0.000260s median=0.000270s p95=0.000302s max=0.000352s
+
+core+length+window  trees=4 depth=5 bits=5
+  clear test f1=0.9451 fpr=0.0284 fit=0.713s
+  mean clear inference of 100 records=0.000276s (0.276ms) std=0.000015s min=0.000262s median=0.000272s p95=0.000300s max=0.000349s
+
+core+length+window  trees=5 depth=3 bits=5
+  clear test f1=0.9117 fpr=0.0446 fit=0.454s
+  mean clear inference of 100 records=0.000295s (0.295ms) std=0.000035s min=0.000262s median=0.000283s p95=0.000379s max=0.000422s
+
+core+length+window  trees=5 depth=4 bits=5
+  clear test f1=0.9142 fpr=0.0460 fit=0.573s
+  mean clear inference of 100 records=0.000279s (0.279ms) std=0.000023s min=0.000260s median=0.000273s p95=0.000329s max=0.000389s
+
+core+length+window  trees=5 depth=5 bits=5
+  clear test f1=0.9451 fpr=0.0284 fit=0.742s
+  mean clear inference of 100 records=0.000284s (0.284ms) std=0.000025s min=0.000262s median=0.000277s p95=0.000329s max=0.000394s
+
+core+length+window  trees=3 depth=3 bits=8
+  clear test f1=0.9118 fpr=0.0449 fit=0.348s
+  mean clear inference of 100 records=0.000273s (0.273ms) std=0.000015s min=0.000258s median=0.000270s p95=0.000301s max=0.000336s
+
+core+length+window  trees=3 depth=4 bits=8
+  clear test f1=0.9143 fpr=0.0460 fit=0.470s
+  mean clear inference of 100 records=0.000274s (0.274ms) std=0.000024s min=0.000258s median=0.000268s p95=0.000301s max=0.000448s
+
+core+length+window  trees=3 depth=5 bits=8
+  clear test f1=0.9467 fpr=0.0275 fit=0.638s
+  mean clear inference of 100 records=0.000276s (0.276ms) std=0.000014s min=0.000260s median=0.000274s p95=0.000296s max=0.000364s
+
+core+length+window  trees=4 depth=3 bits=8
+  clear test f1=0.9118 fpr=0.0449 fit=0.402s
+  mean clear inference of 100 records=0.000287s (0.287ms) std=0.000112s min=0.000260s median=0.000270s p95=0.000307s max=0.001383s
+
+core+length+window  trees=4 depth=4 bits=8
+  clear test f1=0.9147 fpr=0.0457 fit=0.540s
+  mean clear inference of 100 records=0.000277s (0.277ms) std=0.000015s min=0.000261s median=0.000272s p95=0.000308s max=0.000348s
+
+core+length+window  trees=4 depth=5 bits=8
+  clear test f1=0.9468 fpr=0.0274 fit=0.757s
+  mean clear inference of 100 records=0.000276s (0.276ms) std=0.000016s min=0.000261s median=0.000272s p95=0.000296s max=0.000387s
+
+core+length+window  trees=5 depth=3 bits=8
+  clear test f1=0.9118 fpr=0.0449 fit=0.497s
+  mean clear inference of 100 records=0.000277s (0.277ms) std=0.000023s min=0.000260s median=0.000273s p95=0.000314s max=0.000431s
+
+core+length+window  trees=5 depth=4 bits=8
+  clear test f1=0.9147 fpr=0.0457 fit=0.672s
+  mean clear inference of 100 records=0.000275s (0.275ms) std=0.000016s min=0.000259s median=0.000271s p95=0.000305s max=0.000370s
+
+core+length+window  trees=5 depth=5 bits=8
+  clear test f1=0.9468 fpr=0.0274 fit=0.992s
+  mean clear inference of 100 records=0.000276s (0.276ms) std=0.000015s min=0.000262s median=0.000272s p95=0.000300s max=0.000361s
+
+core+segment+window  trees=3 depth=3 bits=5
+  clear test f1=0.9274 fpr=0.0391 fit=0.327s
+  mean clear inference of 100 records=0.000272s (0.272ms) std=0.000015s min=0.000258s median=0.000268s p95=0.000294s max=0.000347s
+
+core+segment+window  trees=3 depth=4 bits=5
+  clear test f1=0.9274 fpr=0.0391 fit=0.394s
+  mean clear inference of 100 records=0.000276s (0.276ms) std=0.000017s min=0.000260s median=0.000271s p95=0.000304s max=0.000371s
+
+core+segment+window  trees=3 depth=5 bits=5
+  clear test f1=0.9479 fpr=0.0268 fit=0.446s
+  mean clear inference of 100 records=0.000274s (0.274ms) std=0.000015s min=0.000259s median=0.000269s p95=0.000302s max=0.000365s
+
+core+segment+window  trees=4 depth=3 bits=5
+  clear test f1=0.9274 fpr=0.0391 fit=0.357s
+  mean clear inference of 100 records=0.000274s (0.274ms) std=0.000017s min=0.000259s median=0.000270s p95=0.000296s max=0.000389s
+
+core+segment+window  trees=4 depth=4 bits=5
+  clear test f1=0.9274 fpr=0.0391 fit=0.442s
+  mean clear inference of 100 records=0.000274s (0.274ms) std=0.000014s min=0.000259s median=0.000269s p95=0.000304s max=0.000345s
+
+core+segment+window  trees=4 depth=5 bits=5
+  clear test f1=0.9479 fpr=0.0268 fit=0.491s
+  mean clear inference of 100 records=0.000278s (0.278ms) std=0.000019s min=0.000259s median=0.000273s p95=0.000321s max=0.000361s
+
+core+segment+window  trees=5 depth=3 bits=5
+  clear test f1=0.9274 fpr=0.0391 fit=0.451s
+  mean clear inference of 100 records=0.000278s (0.278ms) std=0.000021s min=0.000257s median=0.000272s p95=0.000319s max=0.000385s
+
+core+segment+window  trees=5 depth=4 bits=5
+  clear test f1=0.9274 fpr=0.0391 fit=0.505s
+  mean clear inference of 100 records=0.000280s (0.280ms) std=0.000020s min=0.000258s median=0.000273s p95=0.000324s max=0.000373s
+
+core+segment+window  trees=5 depth=5 bits=5
+  clear test f1=0.9479 fpr=0.0268 fit=0.587s
+  mean clear inference of 100 records=0.000274s (0.274ms) std=0.000018s min=0.000260s median=0.000269s p95=0.000300s max=0.000393s
+
+core+segment+window  trees=3 depth=3 bits=8
+  clear test f1=0.9277 fpr=0.0390 fit=0.316s
+  mean clear inference of 100 records=0.000277s (0.277ms) std=0.000020s min=0.000260s median=0.000272s p95=0.000302s max=0.000390s
+
+core+segment+window  trees=3 depth=4 bits=8
+  clear test f1=0.9277 fpr=0.0390 fit=0.365s
+  mean clear inference of 100 records=0.000279s (0.279ms) std=0.000046s min=0.000256s median=0.000269s p95=0.000331s max=0.000686s
+
+core+segment+window  trees=3 depth=5 bits=8
+  clear test f1=0.9480 fpr=0.0267 fit=0.414s
+  mean clear inference of 100 records=0.000286s (0.286ms) std=0.000068s min=0.000258s median=0.000272s p95=0.000324s max=0.000863s
+
+core+segment+window  trees=4 depth=3 bits=8
+  clear test f1=0.9277 fpr=0.0390 fit=0.349s
+  mean clear inference of 100 records=0.000272s (0.272ms) std=0.000015s min=0.000257s median=0.000268s p95=0.000299s max=0.000351s
+
+core+segment+window  trees=4 depth=4 bits=8
+  clear test f1=0.9277 fpr=0.0390 fit=0.426s
+  mean clear inference of 100 records=0.000271s (0.271ms) std=0.000017s min=0.000256s median=0.000267s p95=0.000299s max=0.000388s
+
+core+segment+window  trees=4 depth=5 bits=8
+  clear test f1=0.9480 fpr=0.0267 fit=0.502s
+  mean clear inference of 100 records=0.000375s (0.375ms) std=0.000155s min=0.000259s median=0.000304s p95=0.000738s max=0.001013s
+
+core+segment+window  trees=5 depth=3 bits=8
+  clear test f1=0.9277 fpr=0.0390 fit=0.442s
+  mean clear inference of 100 records=0.000274s (0.274ms) std=0.000017s min=0.000259s median=0.000270s p95=0.000297s max=0.000381s
+
+core+segment+window  trees=5 depth=4 bits=8
+  clear test f1=0.9277 fpr=0.0390 fit=0.544s
+  mean clear inference of 100 records=0.000274s (0.274ms) std=0.000018s min=0.000258s median=0.000270s p95=0.000300s max=0.000405s
+
+core+segment+window  trees=5 depth=5 bits=8
+  clear test f1=0.9481 fpr=0.0267 fit=0.644s
+  mean clear inference of 100 records=0.000275s (0.275ms) std=0.000017s min=0.000259s median=0.000270s p95=0.000301s max=0.000374s
+
+core+length+segment+window  trees=3 depth=3 bits=5
+  clear test f1=0.9274 fpr=0.0391 fit=0.302s
+  mean clear inference of 100 records=0.000277s (0.277ms) std=0.000013s min=0.000265s median=0.000273s p95=0.000299s max=0.000347s
+
+core+length+segment+window  trees=3 depth=4 bits=5
+  clear test f1=0.9274 fpr=0.0391 fit=0.376s
+  mean clear inference of 100 records=0.000277s (0.277ms) std=0.000017s min=0.000262s median=0.000273s p95=0.000301s max=0.000378s
+
+core+length+segment+window  trees=3 depth=5 bits=5
+  clear test f1=0.9478 fpr=0.0268 fit=0.411s
+  mean clear inference of 100 records=0.000278s (0.278ms) std=0.000016s min=0.000265s median=0.000272s p95=0.000300s max=0.000372s
+
+core+length+segment+window  trees=4 depth=3 bits=5
+  clear test f1=0.9274 fpr=0.0391 fit=0.359s
+  mean clear inference of 100 records=0.000277s (0.277ms) std=0.000016s min=0.000263s median=0.000272s p95=0.000297s max=0.000375s
+
+core+length+segment+window  trees=4 depth=4 bits=5
+  clear test f1=0.9274 fpr=0.0391 fit=0.408s
+  mean clear inference of 100 records=0.000277s (0.277ms) std=0.000017s min=0.000262s median=0.000273s p95=0.000301s max=0.000387s
+
+core+length+segment+window  trees=4 depth=5 bits=5
+  clear test f1=0.9479 fpr=0.0268 fit=0.469s
+  mean clear inference of 100 records=0.000280s (0.280ms) std=0.000018s min=0.000265s median=0.000275s p95=0.000306s max=0.000384s
+
+core+length+segment+window  trees=5 depth=3 bits=5
+  clear test f1=0.9274 fpr=0.0391 fit=0.469s
+  mean clear inference of 100 records=0.000276s (0.276ms) std=0.000017s min=0.000262s median=0.000271s p95=0.000293s max=0.000409s
+
+core+length+segment+window  trees=5 depth=4 bits=5
+  clear test f1=0.9274 fpr=0.0391 fit=0.505s
+  mean clear inference of 100 records=0.000277s (0.277ms) std=0.000017s min=0.000261s median=0.000272s p95=0.000298s max=0.000395s
+
+core+length+segment+window  trees=5 depth=5 bits=5
+  clear test f1=0.9479 fpr=0.0268 fit=0.596s
+  mean clear inference of 100 records=0.000358s (0.358ms) std=0.000184s min=0.000264s median=0.000281s p95=0.000807s max=0.001099s
+
+core+length+segment+window  trees=3 depth=3 bits=8
+  clear test f1=0.9277 fpr=0.0390 fit=0.335s
+  mean clear inference of 100 records=0.000280s (0.280ms) std=0.000016s min=0.000264s median=0.000275s p95=0.000309s max=0.000359s
+
+core+length+segment+window  trees=3 depth=4 bits=8
+  clear test f1=0.9277 fpr=0.0390 fit=0.393s
+  mean clear inference of 100 records=0.000282s (0.282ms) std=0.000026s min=0.000262s median=0.000274s p95=0.000333s max=0.000437s
+
+core+length+segment+window  trees=3 depth=5 bits=8
+  clear test f1=0.9481 fpr=0.0267 fit=0.439s
+  mean clear inference of 100 records=0.000278s (0.278ms) std=0.000015s min=0.000263s median=0.000273s p95=0.000302s max=0.000367s
+
+core+length+segment+window  trees=4 depth=3 bits=8
+  clear test f1=0.9277 fpr=0.0390 fit=0.370s
+  mean clear inference of 100 records=0.000276s (0.276ms) std=0.000016s min=0.000263s median=0.000272s p95=0.000297s max=0.000369s
+
+core+length+segment+window  trees=4 depth=4 bits=8
+  clear test f1=0.9277 fpr=0.0390 fit=0.433s
+  mean clear inference of 100 records=0.000278s (0.278ms) std=0.000018s min=0.000261s median=0.000273s p95=0.000311s max=0.000380s
+
+core+length+segment+window  trees=4 depth=5 bits=8
+  clear test f1=0.9481 fpr=0.0267 fit=0.520s
+  mean clear inference of 100 records=0.000279s (0.279ms) std=0.000016s min=0.000265s median=0.000273s p95=0.000297s max=0.000387s
+
+core+length+segment+window  trees=5 depth=3 bits=8
+  clear test f1=0.9277 fpr=0.0390 fit=0.517s
+  mean clear inference of 100 records=0.000277s (0.277ms) std=0.000018s min=0.000263s median=0.000272s p95=0.000301s max=0.000399s
+
+core+length+segment+window  trees=5 depth=4 bits=8
+  clear test f1=0.9277 fpr=0.0390 fit=0.588s
+  mean clear inference of 100 records=0.000284s (0.284ms) std=0.000018s min=0.000265s median=0.000281s p95=0.000319s max=0.000373s
+
+core+length+segment+window  trees=5 depth=5 bits=8
+  clear test f1=0.9481 fpr=0.0267 fit=0.671s
+  mean clear inference of 100 records=0.000282s (0.282ms) std=0.000019s min=0.000266s median=0.000276s p95=0.000324s max=0.000377s
