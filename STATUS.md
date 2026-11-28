@@ -81,6 +81,19 @@ cd cicunswnb15-models
 python compile_screen_fhe.py --set 5 --bits 8 --device cpu
 ```
 
+## CIC-UNSW-NB15 plaintext inference timing
+
+`cicunswnb15-models/time_plaintext_models.py` fits all 144 quantized
+models (72 shapes × 5-bit and 8-bit) at seed 0 and times single-record
+clear inference (`fhe='disable'`) on the same 100 stratified test rows
+used by `compile_screen_fhe.py`. Output is written to
+`cicunswnb15-models/plaintext_runs/<timestamp>/`.
+
+```bash
+cd cicunswnb15-models
+python time_plaintext_models.py
+```
+
 `--set 5` is the current command. `--set 1`, the default, refits each
 plaintext winner from the screen above, checks the clear scores against
 that report, compiles the selected bit width, scores FHE simulation on
